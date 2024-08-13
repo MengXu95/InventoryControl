@@ -1,0 +1,16 @@
+Best individuals from each gen:
+
+Gen: 0
+Individual:
+Tree 0:
+maximum(maximum(multiply('PIP', 'FC1'), minimum('FC1', 'FC2')), multiply(add('PIP', 'HC'), minimum('FOC', 'HC')))
+
+Gen: 1
+Individual:
+Tree 0:
+subtract(multiply(protected_div(add(minimum('PIP', 'FC1'), minimum('FC1', 'PIP')), minimum(subtract('HC', 'PLSC'), add('PIP', 'HC'))), add(add(add('FC1', 'INL'), subtract('FC2', 'FOC')), multiply(add('PIP', 'FC1'), multiply('FC2', 'PLSC')))), add(multiply(subtract(minimum('PIP', 'HC'), protected_div('HC', 'INL')), protected_div(multiply('FC2', 'FC2'), add('FC1', 'FC2'))), add(multiply(multiply(add(subtract('FC2', 'HC'), add('PIP', 'FOC')), 'HC'), minimum('PIP', 'PLSC')), minimum(protected_div('INL', 'FC1'), maximum('FOC', 'INL')))))
+
+Gen: 2
+Individual:
+Tree 0:
+subtract(multiply(protected_div(add(minimum('PIP', 'FC1'), minimum('FC1', 'PIP')), minimum(subtract('HC', 'PLSC'), add('PIP', 'HC'))), add(add(add('FC1', 'INL'), subtract('FC2', 'FOC')), multiply(add('PIP', 'FC1'), multiply('FC2', 'PLSC')))), add(multiply(subtract(minimum('PIP', 'HC'), protected_div('HC', 'INL')), protected_div(multiply('FC2', 'FC2'), add('FC1', 'FC2'))), add(multiply(multiply(add(subtract('FC2', 'HC'), add('PIP', 'FOC')), 'HC'), minimum('PIP', 'PLSC')), minimum(protected_div('INL', 'FC1'), maximum('FOC', 'INL')))))
