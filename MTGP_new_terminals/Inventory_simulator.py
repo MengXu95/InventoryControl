@@ -41,14 +41,14 @@ per_trans_order = 5 # Fixed cost per transshipment (either direction)
 # per_trans_order = 5 # Fixed cost per transshipment (either direction)
 # #########################################################
 
-# Demand forecast function
-# Note that at decision time t, demand for time t has already been realised
+# # Demand forecast function
+# # Note that at decision time t, demand for time t has already been realised
 class RandomDemand:
     def __init__(self, seed):
         self.seed = seed
         np.random.seed(self.seed)
         self.list = np.random.uniform(0, 30000, size=(2, epi_len + 3)) # for Teckwah
-        # todo: modified by mengxu only for the Weckwah that without the second retailer
+        # todo: modified by mengxu only for the Teckwah that without the second retailer
         for i in range(len(self.list[1])):
             self.list[1][i] = 0
         # self.list = np.random.uniform(0, 15, size=(2, epi_len + 3))
@@ -59,7 +59,7 @@ class RandomDemand:
     def reset(self):
         self.seedRotation() # add by xumeng for changing to a new seed
         self.list = np.random.uniform(0, 30000, size=(2, epi_len + 3))# for Teckwah
-        # todo: modified by mengxu only for the Weckwah that without the second retailer
+        # todo: modified by mengxu only for the Teckwah that without the second retailer
         for i in range(len(self.list[1])):
             self.list[1][i] = 0
         # self.list = np.random.uniform(0, 15, size=(2, epi_len + 3))
@@ -78,7 +78,7 @@ class RandomDemand:
                 random_demand = np.random.poisson(self.list[k, i])  # Poisson distribution with forecasted mean
                 demand_hist.append(random_demand)
             demand_hist_list.append(demand_hist)
-        # todo: modified by mengxu only for the Weckwah that without the second retailer
+        # todo: modified by mengxu only for the Teckwah that without the second retailer
         for i in range(len(demand_hist_list[1])):
             demand_hist_list[1][i] = 0
         return demand_hist_list

@@ -14,12 +14,6 @@ from MTGP.Inventory_simulator import *
 
 import numpy as np
 
-
-
-def connectedness(cluster):
-    print(cluster)
-
-
 def init_toolbox(toolbox, pset):
     REP.init_toolbox(toolbox, pset, N_TREES)
     toolbox.register("select", selElitistAndTournament, tournsize=7, elitism=ELITISM)
@@ -35,10 +29,8 @@ def init_stats():
     return stats
 
 def evaluate(individual,seed):
-    # add by mengxu 2022.10.13 to add the training instances ===============================================
     # create the environment instance for simulation
     # Generate forecasts and demand
-    # seed = rd['seed']
     env = InvOptEnv(seed)
     fitness = env.run(individual)
 
@@ -48,7 +40,6 @@ def evaluate(individual,seed):
 
         fitness = fitness + fitness_i
 
-    # spf.job_creator.final_output() #for check
     fitness = fitness/ins_each_gen
     scores = [fitness]
     return scores
@@ -100,15 +91,12 @@ REPPB = 0.05
 ELITISM = 10
 MAX_HEIGHT = 8
 REP = mt  # individual representation {mt (multi-tree) or vt (vector-tree)}
-N_TREES = 1
+N_TREES = 2
 rd = {}
 
 # create the shop floor instance
-ins_each_gen = 10 # added by mengxu followed the advice of Meng 2022.11.01
+ins_each_gen = 10
 def main(dataset_name, seed):
-# if __name__ == "__main__":
-#     dataset_name = str(sys.argv[1])
-#     seed = int(sys.argv[2])
     random.seed(int(seed))
     np.random.seed(int(seed))
     saveFile.clear_individual_each_gen_to_txt(seed, dataset_name)

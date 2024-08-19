@@ -13,19 +13,33 @@ from MTGP.sequencing import *
 from MTGP.routing import *
 
 # np.random.seed(0)
-###############training for Teckwah##########################################
+# ###############training for Teckwah##########################################
+# # Parameters
+# L = 2 # Length of forecast horizon
+# LT = 2 # Lead time
+# epi_len = 64 # Length of one episode
+# ini_inv = [10000,0] # Initial inventory levels
+# holding = [2,0] # Holding costs
+# lost_sales = [50,0] # Per unit lost sales costs
+# capacity = [200000,0] # Inventory capacities
+# fixed_order = [10000,0] # Fixed order costs per order
+# per_trans_item = 0 # Per unit cost for transshipment (either direction)
+# per_trans_order = 5 # Fixed cost per transshipment (either direction)
+# #########################################################
+
+# #########################################################
 # Parameters
 L = 2 # Length of forecast horizon
 LT = 2 # Lead time
-epi_len = 64 # Length of one episode
-ini_inv = [10000,0] # Initial inventory levels
-holding = [2,0] # Holding costs
-lost_sales = [50,0] # Per unit lost sales costs
-capacity = [200000,0] # Inventory capacities
-fixed_order = [10000,0] # Fixed order costs per order
+epi_len = 256 # Length of one episode
+ini_inv = [25,25] # Initial inventory levels
+holding = [2,2] # Holding costs
+lost_sales = [50,50] # Per unit lost sales costs
+capacity = [60,60] # Inventory capacities
+fixed_order = [10,10] # Fixed order costs per order
 per_trans_item = 0 # Per unit cost for transshipment (either direction)
 per_trans_order = 5 # Fixed cost per transshipment (either direction)
-#########################################################
+# #########################################################
 
 # #########################################################
 # # Parameters
@@ -48,7 +62,7 @@ class RandomDemand:
         self.seed = seed
         np.random.seed(self.seed)
         self.list = np.random.uniform(0, 30000, size=(2, epi_len + 3)) # for Teckwah
-        # todo: modified by mengxu only for the Weckwah that without the second retailer
+        # todo: modified by mengxu only for the Teckwah that without the second retailer
         for i in range(len(self.list[1])):
             self.list[1][i] = 0
         # self.list = np.random.uniform(0, 15, size=(2, epi_len + 3))
@@ -59,7 +73,7 @@ class RandomDemand:
     def reset(self):
         self.seedRotation() # add by xumeng for changing to a new seed
         self.list = np.random.uniform(0, 30000, size=(2, epi_len + 3))# for Teckwah
-        # todo: modified by mengxu only for the Weckwah that without the second retailer
+        # todo: modified by mengxu only for the Teckwah that without the second retailer
         for i in range(len(self.list[1])):
             self.list[1][i] = 0
         # self.list = np.random.uniform(0, 15, size=(2, epi_len + 3))
@@ -78,7 +92,7 @@ class RandomDemand:
                 random_demand = np.random.poisson(self.list[k, i])  # Poisson distribution with forecasted mean
                 demand_hist.append(random_demand)
             demand_hist_list.append(demand_hist)
-        # todo: modified by mengxu only for the Weckwah that without the second retailer
+        # todo: modified by mengxu only for the Teckwah that without the second retailer
         for i in range(len(demand_hist_list[1])):
             demand_hist_list[1][i] = 0
         return demand_hist_list
