@@ -76,41 +76,41 @@ def treeNode_R_test(tree, index, data):
                 ref[i] = 1 / (1 + np.exp(-ref[i]))
             return ref
     elif tree[index] == 'INL1':
-        return data[0]
-    elif tree[index] == 'PHC1':
-        return data[1]
-    elif tree[index] == 'PLSC1':
         return data[2]
-    elif tree[index] == 'INC1':
+    elif tree[index] == 'PHC1':
         return data[3]
-    elif tree[index] == 'FOC1':
+    elif tree[index] == 'PLSC1':
         return data[4]
-    elif tree[index] == 'PIP1':
+    elif tree[index] == 'INC1':
         return data[5]
-    elif tree[index] == 'FC11':
+    elif tree[index] == 'FOC1':
         return data[6]
-    elif tree[index] == 'FC12':
+    elif tree[index] == 'PIP1':
         return data[7]
-    elif tree[index] == 'INL2':
+    elif tree[index] == 'FC11':
         return data[8]
-    elif tree[index] == 'PHC2':
+    elif tree[index] == 'FC12':
         return data[9]
-    elif tree[index] == 'PLSC2':
+    elif tree[index] == 'INL2':
         return data[10]
-    elif tree[index] == 'INC2':
+    elif tree[index] == 'PHC2':
         return data[11]
-    elif tree[index] == 'FOC2':
+    elif tree[index] == 'PLSC2':
         return data[12]
-    elif tree[index] == 'PIP2':
+    elif tree[index] == 'INC2':
         return data[13]
-    elif tree[index] == 'FC21':
+    elif tree[index] == 'FOC2':
         return data[14]
-    elif tree[index] == 'FC22':
+    elif tree[index] == 'PIP2':
         return data[15]
-    elif tree[index] == 'PTC':
+    elif tree[index] == 'FC21':
         return data[16]
-    elif tree[index] == 'FTC':
+    elif tree[index] == 'FC22':
         return data[17]
+    elif tree[index] == 'PTC':
+        return data[18]
+    elif tree[index] == 'FTC':
+        return data[19]
 
 
 def GP_evolve_R(data, tree_R): # genetic programming evolved sequencing rule
@@ -144,41 +144,41 @@ def treeNode_R(tree, index, data):
                 return ref
     elif tree[index].arity == 0:
         if tree[index].name == 'INL1':
-            return data[0]
-        elif tree[index].name == 'PHC1':
-            return data[1]
-        elif tree[index].name == 'PLSC1':
             return data[2]
-        elif tree[index].name == 'INC1':
+        elif tree[index].name == 'PHC1':
             return data[3]
-        elif tree[index].name == 'FOC1':
+        elif tree[index].name == 'PLSC1':
             return data[4]
-        elif tree[index].name == 'PIP1':
+        elif tree[index].name == 'INC1':
             return data[5]
-        elif tree[index].name == 'FC11':
+        elif tree[index].name == 'FOC1':
             return data[6]
-        elif tree[index].name == 'FC12':
+        elif tree[index].name == 'PIP1':
             return data[7]
-        elif tree[index].name == 'INL2':
+        elif tree[index].name == 'FC11':
             return data[8]
-        elif tree[index].name == 'PHC2':
+        elif tree[index].name == 'FC12':
             return data[9]
-        elif tree[index].name == 'PLSC2':
+        elif tree[index].name == 'INL2':
             return data[10]
-        elif tree[index].name == 'INC2':
+        elif tree[index].name == 'PHC2':
             return data[11]
-        elif tree[index].name == 'FOC2':
+        elif tree[index].name == 'PLSC2':
             return data[12]
-        elif tree[index].name == 'PIP2':
+        elif tree[index].name == 'INC2':
             return data[13]
-        elif tree[index].name == 'FC21':
+        elif tree[index].name == 'FOC2':
             return data[14]
-        elif tree[index].name == 'FC22':
+        elif tree[index].name == 'PIP2':
             return data[15]
-        elif tree[index].name == 'PTC':
+        elif tree[index].name == 'FC21':
             return data[16]
-        elif tree[index].name == 'FTC':
+        elif tree[index].name == 'FC22':
             return data[17]
+        elif tree[index].name == 'PTC':
+            return data[18]
+        elif tree[index].name == 'FTC':
+            return data[19]
 
 
 def protected_div(left, right):
@@ -190,3 +190,22 @@ def protected_div(left, right):
         elif np.isinf(x) or np.isnan(x):
             x = 1
     return x
+
+
+def safe_multiply(a, b):
+    try:
+        return a * b
+    except OverflowError:
+        return float('inf') if a > 0 and b > 0 else float('-inf')
+
+def safe_subtract(a, b):
+    try:
+        return a - b
+    except OverflowError:
+        return float('inf') if a > b else float('-inf')
+
+def safe_add(a, b):
+    try:
+        return a + b
+    except OverflowError:
+        return float('inf') if a > 0 and b > 0 else float('-inf')

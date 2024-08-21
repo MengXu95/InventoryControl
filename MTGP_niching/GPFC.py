@@ -103,15 +103,14 @@ def GPFC_main(dataset_name, seed):
     pop = toolbox.population(n=POP_SIZE)
     stats = init_stats()
     hof = tools.HallOfFame(1)
-    seedRotate = True # added by mengxu 2022.10.13
     # seedRotate = False # added by mengxu 2022.10.13
     pop, logbook, min_fitness, best_ind_all_gen = ea_simple_elitism.eaSimple(pop, toolbox, CXPB, MUTPB, REPPB, ELITISM, NGEN, seedRotate, rd, stats, halloffame=hof, verbose=True, seed =seed, dataset_name=dataset_name)
     best = hof[0]
     return min_fitness,best, best_ind_all_gen
 
 
-POP_SIZE =30
-NGEN = 5
+POP_SIZE =100
+NGEN = 10
 CXPB = 0.8
 MUTPB = 0.15
 REPPB = 0.05
@@ -121,9 +120,10 @@ REP = mt  # individual representation {mt (multi-tree) or vt (vector-tree)}
 N_TREES = 2
 rd = {}
 DIFF_PSET = True
+seedRotate = True # added by mengxu 2022.10.13
 
 # create the shop floor instance
-ins_each_gen = 10 # added by mengxu followed the advice of Meng 2022.11.01
+ins_each_gen = 2 # added by mengxu followed the advice of Meng 2022.11.01
 def main(dataset_name, seed):
 # if __name__ == "__main__":
 #     dataset_name = str(sys.argv[1])

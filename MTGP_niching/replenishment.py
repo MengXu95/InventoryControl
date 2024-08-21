@@ -23,9 +23,11 @@ def treeNode_S_test(tree, index, data):
     if tree[index] == 'add':
         return treeNode_S_test(tree, index+1, data) + treeNode_S_test(tree, index+2, data)
     elif tree[index] == 'subtract':
-        return treeNode_S_test(tree, index+1, data) - treeNode_S_test(tree, index+2, data)
+        return treeNode_S_test(tree, index + 1, data) - treeNode_S_test(tree, index + 2, data)
+        # return safe_subtract(treeNode_S_test(tree, index+1, data), treeNode_S_test(tree, index+2, data))
     elif tree[index] == 'multiply':
-        return treeNode_S_test(tree, index+1, data) * treeNode_S_test(tree, index+2, data)
+        return treeNode_S_test(tree, index + 1, data) * treeNode_S_test(tree, index + 2, data)
+        # return safe_multiply(treeNode_S_test(tree, index+1, data), treeNode_S_test(tree, index+2, data))
     elif tree[index] == 'protected_div':
         return protected_div(treeNode_S_test(tree, index+1, data), treeNode_S_test(tree, index+2, data))
     elif tree[index] == 'maximum':
@@ -62,7 +64,7 @@ def treeNode_S_test(tree, index, data):
         return data[9]
 
 def GP_evolve_S(data, tree_S): # genetic programming evolved sequencing rule
-    inventory_replenishment = treeNode_S(tree_S, 0, data)  # todo: actually, this should be used for sequencing rule
+    inventory_replenishment = treeNode_S(tree_S, 0, data)
     return inventory_replenishment
 
 def treeNode_S(tree, index, data):
@@ -70,9 +72,11 @@ def treeNode_S(tree, index, data):
         if tree[index].name == 'add':
             return treeNode_S(tree, index+1, data) + treeNode_S(tree, index+2, data)
         elif tree[index].name == 'subtract':
-            return treeNode_S(tree, index+1, data) - treeNode_S(tree, index+2, data)
+            return treeNode_S(tree, index + 1, data) - treeNode_S(tree, index + 2, data)
+            # return safe_subtract(treeNode_S(tree, index+1, data), treeNode_S(tree, index+2, data))
         elif tree[index].name == 'multiply':
-            return treeNode_S(tree, index+1, data) * treeNode_S(tree, index+2, data)
+            return treeNode_S(tree, index + 1, data) * treeNode_S(tree, index + 2, data)
+            # return safe_multiply(treeNode_S(tree, index+1, data), treeNode_S(tree, index+2, data))
         elif tree[index].name == 'protected_div':
             return protected_div(treeNode_S(tree, index+1, data), treeNode_S(tree, index+2, data))
         elif tree[index].name == 'maximum':
@@ -120,3 +124,21 @@ def protected_div(left, right):
         elif np.isinf(x) or np.isnan(x):
             x = 1
     return x
+
+def safe_multiply(a, b):
+    try:
+        return a * b
+    except OverflowError:
+        return float('inf') if a > 0 and b > 0 else float('-inf')
+
+def safe_subtract(a, b):
+    try:
+        return a - b
+    except OverflowError:
+        return float('inf') if a > b else float('-inf')
+
+def safe_add(a, b):
+    try:
+        return a + b
+    except OverflowError:
+        return float('inf') if a > 0 and b > 0 else float('-inf')

@@ -104,6 +104,8 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
     nich.initial_phenoCharacterisation(population[best_index])
     population = nich.clearPopulation(toolbox, population)
 
+    np.random.seed(seed) #add by mengxu to avoid niching make the same seed
+
     # Begin the generational process
     for gen in range(1, ngen + 1):
 
