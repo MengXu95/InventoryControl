@@ -9,37 +9,26 @@ import math
 from datetime import datetime
 from torch.distributions import Categorical
 
-from MTGP_niching.sequencing import *
-from MTGP_niching.routing import *
+from MTGP_niching.replenishment import *
+from MTGP_niching.transshipment import *
 
 # np.random.seed(0)
-###############training for Teckwah##########################################
+###############training##########################################
 # Parameters
 L = 2 # Length of forecast horizon
 LT = 2 # Lead time
+demand_level = 20
 epi_len = 64 # Length of one episode
-ini_inv = [10000,0] # Initial inventory levels
-holding = [2,0] # Holding costs
-lost_sales = [50,0] # Per unit lost sales costs
-capacity = [200000,0] # Inventory capacities
-fixed_order = [10000,0] # Fixed order costs per order
-per_trans_item = 0 # Per unit cost for transshipment (either direction)
-per_trans_order = 5 # Fixed cost per transshipment (either direction)
+N = 2 # Number of sites/retailers
+ini_inv = [100,100] # Initial inventory levels
+holding = [1, 5] # Holding costs
+lost_sales = 2 * holding # Per unit lost sales costs
+capacity = [10000,10000] # Inventory capacities
+fixed_order = [50,50] # Fixed order costs per order
+per_trans_item = 2 # Per unit cost for transshipment (either direction)
+per_trans_order = 20 # Fixed cost per transshipment (either direction)
 #########################################################
 
-# #########################################################
-# # Parameters
-# L = 2 # Length of forecast horizon
-# LT = 2 # Lead time
-# epi_len = 256 # Length of one episode
-# ini_inv = [25,25] # Initial inventory levels
-# holding = [2,2] # Holding costs
-# lost_sales = [50,50] # Per unit lost sales costs
-# capacity = [60,60] # Inventory capacities
-# fixed_order = [10,10] # Fixed order costs per order
-# per_trans_item = 0 # Per unit cost for transshipment (either direction)
-# per_trans_order = 5 # Fixed cost per transshipment (either direction)
-# #########################################################
 
 # Demand forecast function
 # Note that at decision time t, demand for time t has already been realised
@@ -47,22 +36,20 @@ class RandomDemand:
     def __init__(self, seed):
         self.seed = seed
         np.random.seed(self.seed)
-        self.list = np.random.uniform(0, 30000, size=(2, epi_len + 3)) # for Teckwah
-        # todo: modified by mengxu only for the Weckwah that without the second retailer
-        for i in range(len(self.list[1])):
-            self.list[1][i] = 0
-        # self.list = np.random.uniform(0, 15, size=(2, epi_len + 3))
+        self.list = np.random.uniform(0, demand_level, size=(2, epi_len + 3)) # for Teckwah
+        # todo: modified by mengxu only for the Teckwah that without the second retailer
+        # for i in range(len(self.list[1])):
+        #     self.list[1][i] = 0
 
     def seedRotation(self): # add by xumeng for changing to a new seed
         self.seed = self.seed + 1000
         np.random.seed(self.seed)
     def reset(self):
         self.seedRotation() # add by xumeng for changing to a new seed
-        self.list = np.random.uniform(0, 30000, size=(2, epi_len + 3))# for Teckwah
-        # todo: modified by mengxu only for the Weckwah that without the second retailer
-        for i in range(len(self.list[1])):
-            self.list[1][i] = 0
-        # self.list = np.random.uniform(0, 15, size=(2, epi_len + 3))
+        self.list = np.random.uniform(0, demand_level, size=(2, epi_len + 3))# for Teckwah
+        # todo: modified by mengxu only for the Teckwah that without the second retailer
+        # for i in range(len(self.list[1])):
+        #     self.list[1][i] = 0
 
     def f(self, n, t):  # Generate forecasts, f(n,t) corresponds to demand mean for retailer n at time t+1
         if n > 1:
@@ -78,9 +65,9 @@ class RandomDemand:
                 random_demand = np.random.poisson(self.list[k, i])  # Poisson distribution with forecasted mean
                 demand_hist.append(random_demand)
             demand_hist_list.append(demand_hist)
-        # todo: modified by mengxu only for the Weckwah that without the second retailer
-        for i in range(len(demand_hist_list[1])):
-            demand_hist_list[1][i] = 0
+        # todo: modified by mengxu only for the Teckwah that without the second retailer
+        # for i in range(len(demand_hist_list[1])):
+        #     demand_hist_list[1][i] = 0
         return demand_hist_list
 
 
@@ -113,6 +100,8 @@ class Retailer:
         self.capacity = capacity[number]  # Maximum inventory capacity
         self.demand_list = demand_records  # Historical demand records
         self.fixed_order_cost = fixed_order[number]  # Fixed cost for placing an order
+        self.transshipment_cost = per_trans_item
+        self.fixed_order_transshipment_cost = per_trans_order
         self.action = 0  # Order qty
 
     def reset(self, f):
@@ -138,10 +127,40 @@ class InvOptEnv:
             self.retailers.append(Retailer(self.demand_records[i], i, self.rd.f))
         self.n_period = len(self.demand_records[0])
         self.current_period = 1
-        self.state = np.array(
-            [retailer.inv_level for retailer in self.retailers] + [x for retailer in self.retailers for x in
-                                                                   retailer.forecast] + \
-            [x for retailer in self.retailers for x in retailer.pipeline])
+        self.state = [] # include replenishment state of each retailer and transshipment state of each pair of sites
+        state_replenishment = []
+        for retailer in self.retailers:
+            state_replenishment_retailer = np.array([retailer.inv_level, retailer.holding_cost,
+                                            retailer.lost_sales_cost, retailer.capacity,
+                                            retailer.fixed_order_cost, retailer.pipeline[0], #only suitable for LT = 2
+                                            retailer.forecast[0], retailer.forecast[1],
+                                            retailer.transshipment_cost, retailer.fixed_order_transshipment_cost])    #only suitable for LT = 2
+            state_replenishment.append(state_replenishment_retailer)
+        self.state.append(state_replenishment)
+        state_transshipment = []
+        for i in range(len(self.retailers)):
+            retailer_i = self.retailers[i]
+            for j in range(i+1, len(self.retailers)):
+                retailer_j = self.retailers[j]
+                state_transshipment_retailer_pair = np.array([i, j, # store the id, not used for decision, but for know which pair
+                                                    retailer_i.inv_level, retailer_i.holding_cost,
+                                                    retailer_i.lost_sales_cost, retailer_i.capacity,
+                                                    retailer_i.fixed_order_cost, retailer_i.pipeline[0],
+                                                    # only suitable for LT = 2
+                                                    retailer_i.forecast[0], retailer_i.forecast[1],
+                                                    retailer_j.inv_level, retailer_j.holding_cost,
+                                                    retailer_j.lost_sales_cost, retailer_j.capacity,
+                                                    retailer_j.fixed_order_cost, retailer_j.pipeline[0],
+                                                    # only suitable for LT = 2
+                                                    retailer_j.forecast[0], retailer_j.forecast[1],
+                                                    retailer.transshipment_cost, retailer.fixed_order_transshipment_cost])
+                state_transshipment.append(state_transshipment_retailer_pair)
+        self.state.append(state_transshipment)
+        #the following is the original
+        # self.state = np.array(
+        #     [retailer.inv_level for retailer in self.retailers] + [x for retailer in self.retailers for x in
+        #                                                            retailer.forecast] + \
+        #     [x for retailer in self.retailers for x in retailer.pipeline])
 
     def reset(self):  # Resets state of all retailers and DCs by calling their respective reset methods
         self.rd.reset()
@@ -149,10 +168,43 @@ class InvOptEnv:
         for retailer in self.retailers:
             retailer.reset(self.rd.f)
         self.current_period = 1
-        self.state = np.array(
-            [retailer.inv_level for retailer in self.retailers] + [x for retailer in self.retailers for x in
-                                                                   retailer.forecast] + \
-            [x for retailer in self.retailers for x in retailer.pipeline])
+        self.state = []  # include replenishment state of each retailer and transshipment state of each pair of sites
+        state_replenishment = []
+        for retailer in self.retailers:
+            state_replenishment_retailer = np.array([retailer.inv_level, retailer.holding_cost,
+                                                     retailer.lost_sales_cost, retailer.capacity,
+                                                     retailer.fixed_order_cost, retailer.pipeline[0],
+                                                     # only suitable for LT = 2
+                                                     retailer.forecast[0], retailer.forecast[1],
+                                                     retailer.transshipment_cost,
+                                                     retailer.fixed_order_transshipment_cost])  # only suitable for LT = 2
+            state_replenishment.append(state_replenishment_retailer)
+        self.state.append(state_replenishment)
+        state_transshipment = []
+        for i in range(len(self.retailers)):
+            retailer_i = self.retailers[i]
+            for j in range(i + 1, len(self.retailers)):
+                retailer_j = self.retailers[j]
+                state_transshipment_retailer_pair = np.array(
+                    [i, j,  # store the id, not used for decision, but for know which pair
+                     retailer_i.inv_level, retailer_i.holding_cost,
+                     retailer_i.lost_sales_cost, retailer_i.capacity,
+                     retailer_i.fixed_order_cost, retailer_i.pipeline[0],
+                     # only suitable for LT = 2
+                     retailer_i.forecast[0], retailer_i.forecast[1],
+                     retailer_j.inv_level, retailer_j.holding_cost,
+                     retailer_j.lost_sales_cost, retailer_j.capacity,
+                     retailer_j.fixed_order_cost, retailer_j.pipeline[0],
+                     # only suitable for LT = 2
+                     retailer_j.forecast[0], retailer_j.forecast[1],
+                     retailer.transshipment_cost, retailer.fixed_order_transshipment_cost])
+                state_transshipment.append(state_transshipment_retailer_pair)
+        self.state.append(state_transshipment)
+        #the following is the original
+        # self.state = np.array(
+        #     [retailer.inv_level for retailer in self.retailers] + [x for retailer in self.retailers for x in
+        #                                                            retailer.forecast] + \
+        #     [x for retailer in self.retailers for x in retailer.pipeline])
         return self.state
 
     def step(self, action):
@@ -196,10 +248,43 @@ class InvOptEnv:
         # Update inv levels and pipelines
         for retailer, demand in zip(self.retailers, self.demand_records):
             retailer.order_arrival(demand[self.current_period - 2])  # -2 not -1
-        self.state = np.array(
-            [retailer.inv_level for retailer in self.retailers] + [x for retailer in self.retailers for x in
-                                                                   retailer.forecast] + \
-            [x for retailer in self.retailers for x in retailer.pipeline])
+        self.state = []  # include replenishment state of each retailer and transshipment state of each pair of sites
+        state_replenishment = []
+        for retailer in self.retailers:
+            state_replenishment_retailer = np.array([retailer.inv_level, retailer.holding_cost,
+                                                     retailer.lost_sales_cost, retailer.capacity,
+                                                     retailer.fixed_order_cost, retailer.pipeline[0],
+                                                     # only suitable for LT = 2
+                                                     retailer.forecast[0], retailer.forecast[1],
+                                                     retailer.transshipment_cost,
+                                                     retailer.fixed_order_transshipment_cost])  # only suitable for LT = 2
+            state_replenishment.append(state_replenishment_retailer)
+        self.state.append(state_replenishment)
+        state_transshipment = []
+        for i in range(len(self.retailers)):
+            retailer_i = self.retailers[i]
+            for j in range(i + 1, len(self.retailers)):
+                retailer_j = self.retailers[j]
+                state_transshipment_retailer_pair = np.array(
+                    [i, j,  # store the id, not used for decision, but for know which pair
+                     retailer_i.inv_level, retailer_i.holding_cost,
+                     retailer_i.lost_sales_cost, retailer_i.capacity,
+                     retailer_i.fixed_order_cost, retailer_i.pipeline[0],
+                     # only suitable for LT = 2
+                     retailer_i.forecast[0], retailer_i.forecast[1],
+                     retailer_j.inv_level, retailer_j.holding_cost,
+                     retailer_j.lost_sales_cost, retailer_j.capacity,
+                     retailer_j.fixed_order_cost, retailer_j.pipeline[0],
+                     # only suitable for LT = 2
+                     retailer_j.forecast[0], retailer_j.forecast[1],
+                     retailer.transshipment_cost, retailer.fixed_order_transshipment_cost])
+                state_transshipment.append(state_transshipment_retailer_pair)
+        self.state.append(state_transshipment)
+        # the following is the original
+        # self.state = np.array(
+        #     [retailer.inv_level for retailer in self.retailers] + [x for retailer in self.retailers for x in
+        #                                                            retailer.forecast] + \
+        #     [x for retailer in self.retailers for x in retailer.pipeline])
         return self.state, reward, terminate
 
     def step_value(self, action_modified):
@@ -242,10 +327,43 @@ class InvOptEnv:
         # Update inv levels and pipelines
         for retailer, demand in zip(self.retailers, self.demand_records):
             retailer.order_arrival(demand[self.current_period - 2])  # -2 not -1
-        self.state = np.array(
-            [retailer.inv_level for retailer in self.retailers] + [x for retailer in self.retailers for x in
-                                                                   retailer.forecast] + \
-            [x for retailer in self.retailers for x in retailer.pipeline])
+        self.state = []  # include replenishment state of each retailer and transshipment state of each pair of sites
+        state_replenishment = []
+        for retailer in self.retailers:
+            state_replenishment_retailer = np.array([retailer.inv_level, retailer.holding_cost,
+                                                     retailer.lost_sales_cost, retailer.capacity,
+                                                     retailer.fixed_order_cost, retailer.pipeline[0],
+                                                     # only suitable for LT = 2
+                                                     retailer.forecast[0], retailer.forecast[1],
+                                                     retailer.transshipment_cost,
+                                                     retailer.fixed_order_transshipment_cost])  # only suitable for LT = 2
+            state_replenishment.append(state_replenishment_retailer)
+        self.state.append(state_replenishment)
+        state_transshipment = []
+        for i in range(len(self.retailers)):
+            retailer_i = self.retailers[i]
+            for j in range(i + 1, len(self.retailers)):
+                retailer_j = self.retailers[j]
+                state_transshipment_retailer_pair = np.array(
+                    [i, j,  # store the id, not used for decision, but for know which pair
+                     retailer_i.inv_level, retailer_i.holding_cost,
+                     retailer_i.lost_sales_cost, retailer_i.capacity,
+                     retailer_i.fixed_order_cost, retailer_i.pipeline[0],
+                     # only suitable for LT = 2
+                     retailer_i.forecast[0], retailer_i.forecast[1],
+                     retailer_j.inv_level, retailer_j.holding_cost,
+                     retailer_j.lost_sales_cost, retailer_j.capacity,
+                     retailer_j.fixed_order_cost, retailer_j.pipeline[0],
+                     # only suitable for LT = 2
+                     retailer_j.forecast[0], retailer_j.forecast[1],
+                     retailer.transshipment_cost, retailer.fixed_order_transshipment_cost])
+                state_transshipment.append(state_transshipment_retailer_pair)
+        self.state.append(state_transshipment)
+        # the following is the original
+        # self.state = np.array(
+        #     [retailer.inv_level for retailer in self.retailers] + [x for retailer in self.retailers for x in
+        #                                                            retailer.forecast] + \
+        #     [x for retailer in self.retailers for x in retailer.pipeline])
         return self.state, reward, terminate
 
     def run(self, individual): # add by xumeng 2024.8.1
@@ -260,13 +378,10 @@ class InvOptEnv:
             # select action with policy
 
             if len(individual) == 1:
-                site1_candidate = action_lists[1]
-                replenishment_site1 = individual[0]
+                replenishment_policy = individual[0]
             else:
-                site1_candidate = action_lists[1]
-                site2_candidate = action_lists[2]
-                replenishment_site1 = individual[0]
-                replenishment_site2 = individual[1]
+                replenishment_policy = individual[0]
+                transshipment_policy = individual[1]
 
             # ------- strategy 2 ---------------------
             # quantity_site1 = round(GP_evolve_S(state, replenishment_site1))
@@ -312,18 +427,33 @@ class InvOptEnv:
             # ------- strategy 1 ---------------------
             # the action space of this one is the same as jinsheng
             # for the scenario that only consider one site
-            quantity_site1 = GP_evolve_S(state, replenishment_site1)
-
-            index_site1 = 0
-            min_dis = np.Infinity
-            for i in range(len(site1_candidate)):
-                dis = np.abs(quantity_site1 - site1_candidate[i])
-                if dis < min_dis:
-                    index_site1 = i
-                    min_dis = dis
-
-            action_modified = [0, site1_candidate[index_site1], 0]
+            # quantity_site1 = GP_evolve_S(state, replenishment_site1)
+            #
+            # index_site1 = 0
+            # min_dis = np.Infinity
+            # for i in range(len(site1_candidate)):
+            #     dis = np.abs(quantity_site1 - site1_candidate[i])
+            #     if dis < min_dis:
+            #         index_site1 = i
+            #         min_dis = dis
+            #
+            # action_modified = [0, site1_candidate[index_site1], 0]
             # ------- strategy 1 ---------------------
+
+            # ------- strategy 3 ---------------------
+            # the action space of this one is the same as jinsheng
+            # for the scenario that only consider one site
+            action_modified = []
+            # get transshipment state for all pairs of sites/retailers
+            transshipment_state = state[1]
+            replenishment_state = state[0]
+            for each_transshipment_state in transshipment_state:
+                transshipment_quantity = round(GP_evolve_R(each_transshipment_state, transshipment_policy))
+                action_modified.append(transshipment_quantity)
+            for each_replenishment_state in replenishment_state:
+                replenishment_quantity = round(GP_evolve_S(each_replenishment_state, replenishment_policy))
+                action_modified.append(replenishment_quantity)
+            # ------- strategy 3 ---------------------
 
             state, reward, done = self.step_value(action_modified)
 

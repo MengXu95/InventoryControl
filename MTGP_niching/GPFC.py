@@ -24,6 +24,10 @@ def init_toolbox(toolbox, pset):
     REP.init_toolbox(toolbox, pset, N_TREES)
     toolbox.register("select", selElitistAndTournament, tournsize=7, elitism=ELITISM)
 
+def init_toolbox_two_pset(toolbox, pset1, pset2):
+    REP.init_toolbox_two_pset(toolbox, pset1, pset2, N_TREES)
+    toolbox.register("select", selElitistAndTournament, tournsize=7, elitism=ELITISM)
+
 
 def init_stats():
     fitness_stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -71,15 +75,29 @@ def GPFC_main(dataset_name, seed):
     rd['seed'] = seed
     rd['dataset_name'] = dataset_name
     num_features = 0 # the initial number of terminals is 0, then I will add more terminals into the pset
-    pset = gp.PrimitiveSet("MAIN", num_features, prefix="f")
-    pset.context["array"] = np.array
-    REP.init_primitives(pset)
-    weights = (-1.,)
-    creator.create("FitnessMin", base.Fitness, weights=weights)
-    # set up toolbox
-    toolbox = ParallelToolbox()  # base.Toolbox()
-    init_toolbox(toolbox, pset)
-    toolbox.register("evaluate", eval_wrapper)
+    if DIFF_PSET:
+        pset1 = gp.PrimitiveSet("MAIN1", num_features, prefix="f")
+        pset1.context["array"] = np.array
+        REP.init_primitives_replenishment(pset1)
+        pset2 = gp.PrimitiveSet("MAIN2", num_features, prefix="f")
+        pset2.context["array"] = np.array
+        REP.init_primitives_transshipment(pset2)
+        weights = (-1.,)
+        creator.create("FitnessMin", base.Fitness, weights=weights)
+        # set up toolbox
+        toolbox = ParallelToolbox()  # base.Toolbox()
+        init_toolbox_two_pset(toolbox, pset1, pset2)
+        toolbox.register("evaluate", eval_wrapper)
+    else:
+        pset = gp.PrimitiveSet("MAIN", num_features, prefix="f")
+        pset.context["array"] = np.array
+        REP.init_primitives(pset)
+        weights = (-1.,)
+        creator.create("FitnessMin", base.Fitness, weights=weights)
+        # set up toolbox
+        toolbox = ParallelToolbox()  # base.Toolbox()
+        init_toolbox(toolbox, pset)
+        toolbox.register("evaluate", eval_wrapper)
 
     rd['toolbox'] = toolbox
     pop = toolbox.population(n=POP_SIZE)
@@ -92,16 +110,17 @@ def GPFC_main(dataset_name, seed):
     return min_fitness,best, best_ind_all_gen
 
 
-POP_SIZE =1000
-NGEN = 50
+POP_SIZE =30
+NGEN = 5
 CXPB = 0.8
 MUTPB = 0.15
 REPPB = 0.05
 ELITISM = 10
 MAX_HEIGHT = 8
 REP = mt  # individual representation {mt (multi-tree) or vt (vector-tree)}
-N_TREES = 1
+N_TREES = 2
 rd = {}
+DIFF_PSET = True
 
 # create the shop floor instance
 ins_each_gen = 10 # added by mengxu followed the advice of Meng 2022.11.01

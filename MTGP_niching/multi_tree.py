@@ -32,9 +32,56 @@ def init_primitives(pset):
     pset.addTerminal(str('PIP1'))  # add by mengxu for example L = 2
 
 
+def init_primitives_replenishment(pset):
+    # add function
+    pset.addPrimitive(np.add, 2)
+    pset.addPrimitive(np.subtract, 2)
+    pset.addPrimitive(np.multiply, 2)
+    pset.addPrimitive(protected_div, 2)
+    pset.addPrimitive(np.maximum, 2)
+    pset.addPrimitive(np.minimum, 2)
 
+    pset.addTerminal(str('INL'))  # inventory level
+    pset.addTerminal(str('PHC'))  # per unit holding cost
+    pset.addTerminal(str('PLSC'))  # per unit lost sales cost
+    pset.addTerminal(str('INC'))  # inventory capacities
+    pset.addTerminal(str('FOC'))  # Fixed order costs per order
+    pset.addTerminal(str('PIP'))  # pipeline: the previous quantity we ordered and arrived at this time
+    pset.addTerminal(str('FC1'))  # forcast 1 for example L = 2
+    pset.addTerminal(str('FC2'))  # forcast 2 for example L = 2
+    pset.addTerminal(str('PTC'))  # per unit cost transshipment
+    pset.addTerminal(str('FTC'))  # fixed cost per transshipment
 
+def init_primitives_transshipment(pset):
+    # add function
+    pset.addPrimitive(np.add, 2)
+    pset.addPrimitive(np.subtract, 2)
+    pset.addPrimitive(np.multiply, 2)
+    pset.addPrimitive(protected_div, 2)
+    pset.addPrimitive(np.maximum, 2)
+    pset.addPrimitive(np.minimum, 2)
 
+    #site 1 related
+    pset.addTerminal(str('INL1'))  # inventory level
+    pset.addTerminal(str('PHC1'))  # per unit holding cost
+    pset.addTerminal(str('PLSC1'))  # per unit lost sales cost
+    pset.addTerminal(str('INC1'))  # inventory capacities
+    pset.addTerminal(str('FOC1'))  # Fixed order costs per order
+    pset.addTerminal(str('PIP1'))  # pipeline: the previous quantity we ordered and arrived at this time
+    pset.addTerminal(str('FC11'))  # forcast 1 for example L = 2
+    pset.addTerminal(str('FC12'))  # forcast 2 for example L = 2
+    # site 2 related
+    pset.addTerminal(str('INL2'))  # inventory level
+    pset.addTerminal(str('PHC2'))  # per unit holding cost
+    pset.addTerminal(str('PLSC2'))  # per unit lost sales cost
+    pset.addTerminal(str('INC2'))  # inventory capacities
+    pset.addTerminal(str('FOC2'))  # Fixed order costs per order
+    pset.addTerminal(str('PIP2'))  # pipeline: the previous quantity we ordered and arrived at this time
+    pset.addTerminal(str('FC21'))  # forcast 1 for example L = 2
+    pset.addTerminal(str('FC22'))  # forcast 2 for example L = 2
+    #transshipment related
+    pset.addTerminal(str('PTC'))  # per unit cost transshipment
+    pset.addTerminal(str('FTC'))  # fixed cost per transshipment
 
 def lf(x): # add by mengxu 2022.11.08
     return 1 / (1 + np.exp(-x))
@@ -50,12 +97,41 @@ def init_toolbox(toolbox, pset, num_tree):
     toolbox.register("compile", gp.compile, pset=pset)
 
     toolbox.register("expr_mut", gp.genFull, min_=2, max_=8)
-    #toolbox.register("mate", xmate)
-    #toolbox.register("mutate", xmut, expr=toolbox.expr_mut)
 
     toolbox.register("mate",lim_xmate)
     toolbox.register("mutate",lim_xmut,expr=toolbox.expr_mut)
 
+
+def init_toolbox_two_pset(toolbox, pset1, pset2, num_tree=2):
+    # Define the individual type with a list of trees and the appropriate fitness function
+    creator.create("Individual", list, fitness=creator.FitnessMin, pset1=pset1, pset2=pset2)
+
+    # Register the expression generation functions for each pset
+    toolbox.register("expr1", gp.genHalfAndHalf, pset=pset1, min_=1, max_=6)
+    toolbox.register("expr2", gp.genHalfAndHalf, pset=pset2, min_=1, max_=6)
+
+    # Register tree initialization for each pset
+    toolbox.register("tree1", tools.initIterate, gp.PrimitiveTree, toolbox.expr1)
+    toolbox.register("tree2", tools.initIterate, gp.PrimitiveTree, toolbox.expr2)
+
+    # Register individual creation, using both trees
+    def generate_individual():
+        return creator.Individual([toolbox.tree1(), toolbox.tree2()])
+
+    toolbox.register("individual", generate_individual)
+    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+
+    # Register the compile function for each pset
+    toolbox.register("compile1", gp.compile, pset=pset1)
+    toolbox.register("compile2", gp.compile, pset=pset2)
+
+    # Register mutation with the expression function from the first pset
+    toolbox.register("expr_mut1", gp.genFull, pset=pset1, min_=2, max_=8)
+    toolbox.register("expr_mut2", gp.genFull, pset=pset2, min_=2, max_=8)
+
+    # Register mating and mutation functions
+    toolbox.register("mate", lim_xmate)
+    toolbox.register("mutate", lim_xmut, expr1=toolbox.expr_mut1, expr2=toolbox.expr_mut2)
 
 
 def maxheight(v):
@@ -96,16 +172,31 @@ def lim_xmate(ind1, ind2):
     return wrap(xmate, ind1, ind2)
 
 
-def xmut(ind, expr):
+# def xmut(ind, expr):
+#     i1 = random.randrange(len(ind))
+#     indx = gp.mutUniform(ind[i1], expr, pset=ind.pset)
+#     ind[i1] = indx[0]
+#     return ind,
+
+def xmut(ind, expr1, expr2):
+    # Randomly select which tree to mutate (0 for the first tree, 1 for the second tree)
     i1 = random.randrange(len(ind))
-    indx = gp.mutUniform(ind[i1], expr,pset=ind.pset)
+
+    # Select the correct expr and pset based on the tree index
+    if i1 == 0:
+        indx = gp.mutUniform(ind[i1], expr1, pset=ind.pset1)
+    else:
+        indx = gp.mutUniform(ind[i1], expr2, pset=ind.pset2)
+
+    # Replace the mutated tree in the individual
     ind[i1] = indx[0]
+
     return ind,
 
 
-def lim_xmut(ind, expr):
+def lim_xmut(ind, expr1, expr2):
     # have to put expr=expr otherwise it tries to use it as an individual
-    res = wrap(xmut, ind, expr=expr)
+    res = wrap(xmut, ind, expr1=expr1, expr2=expr2)
     # print(res)
     return res
 

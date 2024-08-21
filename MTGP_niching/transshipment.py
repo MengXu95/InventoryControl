@@ -49,34 +49,9 @@ def UT(idx, data, job_pt, job_slack, wc_idx, *args): # lowest utilization rate
     machine_idx = rank[3]
     return machine_idx
 
-def GP_R1(idx, data, job_pt, job_slack, wc_idx, *args): # genetic programming
-    data = np.transpose(data)
-    sec1 = min(2 * data[2] * np.max([data[2]*job_pt/data[1] , job_pt*data[0]*data[0]], axis=0))
-    sec2 = data[2] * job_pt - data[1]
-    sum = sec1 + sec2
-    machine_idx = sum.argmin()
-    return machine_idx
-
-def GP_R2(idx, data, job_pt, job_slack, wc_idx, *args): # genetic programming
-    data = np.transpose(data) #todo: check what's the data here!!!
-    sec1 = data[2]*data[2], (data[2]+job_pt)*data[2]
-    sec2 = np.min([data[1],args[0]/(data[1]*args[0]-1)],axis=0)
-    sec3 = -data[2] * args[0]
-    sec4 = data[2] * job_pt * np.max([data[0], np.min([data[1],job_pt],axis=0)/(args[0])],axis=0)
-    sec5 = np.max([data[2]*data[2], np.ones_like(data[2])*(args[1]-args[0]-1), (data[2]+job_pt)*np.min([data[2],np.ones_like(data[2])*args[1]],axis=0)],axis=0)
-    sum = sec1 - sec2 * np.max([sec3+sec4/sec5],axis=0)
-    machine_idx = sum.argmin()
-    return machine_idx
-
-
-
 def GP_pair_R_test(state, tree_R): # genetic programming rule 1
-    individualvalue = treeNode_R_test(tree_R, 0, state)  # todo: actually, this should be used for sequencing rule
-    return individualvalue
-    # if isinstance(individualvalue, (np.int64, np.float64, float, int)):
-    #     return 0  # todo: need to check if this is right!!! by mengxu 2022.10.15
-    # transshipment = individualvalue.argmin()
-    # return transshipment
+    transshipment = treeNode_R_test(tree_R, 0, state)  # todo: actually, this should be used for sequencing rule
+    return transshipment
 
 
 def treeNode_R_test(tree, index, data):
@@ -102,29 +77,45 @@ def treeNode_R_test(tree, index, data):
             return ref
     elif tree[index] == 'INL1':
         return data[0]
-    elif tree[index] == 'INL2':
+    elif tree[index] == 'PHC1':
         return data[1]
-    elif tree[index] == 'FC11':
+    elif tree[index] == 'PLSC1':
         return data[2]
-    elif tree[index] == 'FC12':
+    elif tree[index] == 'INC1':
         return data[3]
-    elif tree[index] == 'FC21':
+    elif tree[index] == 'FOC1':
         return data[4]
-    elif tree[index] == 'FC22':
-        return data[5]
     elif tree[index] == 'PIP1':
+        return data[5]
+    elif tree[index] == 'FC11':
         return data[6]
-    elif tree[index] == 'PIP2':
+    elif tree[index] == 'FC12':
         return data[7]
+    elif tree[index] == 'INL2':
+        return data[8]
+    elif tree[index] == 'PHC2':
+        return data[9]
+    elif tree[index] == 'PLSC2':
+        return data[10]
+    elif tree[index] == 'INC2':
+        return data[11]
+    elif tree[index] == 'FOC2':
+        return data[12]
+    elif tree[index] == 'PIP2':
+        return data[13]
+    elif tree[index] == 'FC21':
+        return data[14]
+    elif tree[index] == 'FC22':
+        return data[15]
+    elif tree[index] == 'PTC':
+        return data[16]
+    elif tree[index] == 'FTC':
+        return data[17]
 
 
 def GP_evolve_R(data, tree_R): # genetic programming evolved sequencing rule
-    individualvalue = treeNode_R(tree_R, 0, data)  # todo: actually, this should be used for sequencing rule
-    return individualvalue
-    # if isinstance(individualvalue, (np.int64, np.float64, float, int)):
-    #     return 0  # todo: need to check if this is right!!! by mengxu 2022.10.15
-    # inventory_replenishment = individualvalue.argmin()
-    # return inventory_replenishment
+    transshipment = treeNode_R(tree_R, 0, data)  # todo: actually, this should be used for sequencing rule
+    return transshipment
 
 
 def treeNode_R(tree, index, data):
@@ -154,22 +145,40 @@ def treeNode_R(tree, index, data):
     elif tree[index].arity == 0:
         if tree[index].name == 'INL1':
             return data[0]
-        elif tree[index].name == 'INL2':
+        elif tree[index].name == 'PHC1':
             return data[1]
-        elif tree[index].name == 'FC11':
+        elif tree[index].name == 'PLSC1':
             return data[2]
-        elif tree[index].name == 'FC12':
+        elif tree[index].name == 'INC1':
             return data[3]
-        elif tree[index].name == 'FC21':
+        elif tree[index].name == 'FOC1':
             return data[4]
-        elif tree[index].name == 'FC22':
-            return data[5]
         elif tree[index].name == 'PIP1':
+            return data[5]
+        elif tree[index].name == 'FC11':
             return data[6]
-        elif tree[index].name == 'PIP2':
+        elif tree[index].name == 'FC12':
             return data[7]
-
-
+        elif tree[index].name == 'INL2':
+            return data[8]
+        elif tree[index].name == 'PHC2':
+            return data[9]
+        elif tree[index].name == 'PLSC2':
+            return data[10]
+        elif tree[index].name == 'INC2':
+            return data[11]
+        elif tree[index].name == 'FOC2':
+            return data[12]
+        elif tree[index].name == 'PIP2':
+            return data[13]
+        elif tree[index].name == 'FC21':
+            return data[14]
+        elif tree[index].name == 'FC22':
+            return data[15]
+        elif tree[index].name == 'PTC':
+            return data[16]
+        elif tree[index].name == 'FTC':
+            return data[17]
 
 
 def protected_div(left, right):

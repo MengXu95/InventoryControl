@@ -9,8 +9,8 @@ from statistics import mean, stdev
 from datetime import datetime
 from torch.distributions import Categorical
 import MTGP_niching.LoadIndividual as mtload
-from MTGP_niching.sequencing import *
-from MTGP_niching.routing import *
+from MTGP_niching.replenishment import *
+from MTGP_niching.transshipment import *
 
 np.random.seed(0)
 #########################################################

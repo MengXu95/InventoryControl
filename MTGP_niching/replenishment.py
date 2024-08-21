@@ -15,12 +15,8 @@ or choose to use trained parameters for decision-making
 
 
 def GP_pair_S_test(state, tree_S): #data is the state
-    individualvalue = treeNode_S_test(tree_S, 0, state)  # todo: actually, this should be used for sequencing rule
-    return individualvalue
-    # if isinstance(individualvalue, (np.int64, np.float64, float, int)):
-    #     return 0  # todo: need to check if this is right!!! by mengxu 2022.10.15
-    # inventory_replenishment = individualvalue.argmin()
-    # return inventory_replenishment
+    inventory_replenishment = treeNode_S_test(tree_S, 0, state)  # todo: actually, this should be used for sequencing rule
+    return inventory_replenishment
 
 
 def treeNode_S_test(tree, index, data):
@@ -44,32 +40,30 @@ def treeNode_S_test(tree, index, data):
             for i in range(len(ref)):
                 ref[i] = 1 / (1 + np.exp(-ref[i]))
             return ref
-    elif tree[index] == 'INL1':
+    elif tree[index] == 'INL':
         return data[0]
-    elif tree[index] == 'INL2':
+    elif tree[index] == 'PHC':
         return data[1]
-    elif tree[index] == 'FC11':
+    elif tree[index] == 'PLSC':
         return data[2]
-    elif tree[index] == 'FC12':
+    elif tree[index] == 'INC':
         return data[3]
-    elif tree[index] == 'FC21':
+    elif tree[index] == 'FOC':
         return data[4]
-    elif tree[index] == 'FC22':
+    elif tree[index] == 'PIP':
         return data[5]
-    elif tree[index] == 'PIP1':
+    elif tree[index] == 'FC1':
         return data[6]
-    elif tree[index] == 'PIP2':
+    elif tree[index] == 'FC2':
         return data[7]
-
-
+    elif tree[index] == 'PTC':
+        return data[8]
+    elif tree[index] == 'FTC':
+        return data[9]
 
 def GP_evolve_S(data, tree_S): # genetic programming evolved sequencing rule
-    individualvalue = treeNode_S(tree_S, 0, data)  # todo: actually, this should be used for sequencing rule
-    return individualvalue
-    # if isinstance(individualvalue, (np.int64, np.float64, float, int)):
-    #     return 0 #todo: need to check if this is right!!! by mengxu 2022.10.15
-    # inventory_replenishment = individualvalue.argmin()
-    # return inventory_replenishment
+    inventory_replenishment = treeNode_S(tree_S, 0, data)  # todo: actually, this should be used for sequencing rule
+    return inventory_replenishment
 
 def treeNode_S(tree, index, data):
     if tree[index].arity == 2:
@@ -96,24 +90,26 @@ def treeNode_S(tree, index, data):
                     # print(ref[i])
                 return ref
     elif tree[index].arity == 0:
-        if tree[index].name == 'INL1':
+        if tree[index].name == 'INL':
             return data[0]
-        elif tree[index].name == 'INL2':
+        elif tree[index].name == 'PHC':
             return data[1]
-        elif tree[index].name == 'FC11':
+        elif tree[index].name == 'PLSC':
             return data[2]
-        elif tree[index].name == 'FC12':
+        elif tree[index].name == 'INC':
             return data[3]
-        elif tree[index].name == 'FC21':
+        elif tree[index].name == 'FOC':
             return data[4]
-        elif tree[index].name == 'FC22':
+        elif tree[index].name == 'PIP':
             return data[5]
-        elif tree[index].name == 'PIP1':
+        elif tree[index].name == 'FC1':
             return data[6]
-        elif tree[index].name == 'PIP2':
+        elif tree[index].name == 'FC2':
             return data[7]
-
-
+        elif tree[index].name == 'PTC':
+            return data[8]
+        elif tree[index].name == 'FTC':
+            return data[9]
 
 def protected_div(left, right):
     with np.errstate(divide='ignore', invalid='ignore'):

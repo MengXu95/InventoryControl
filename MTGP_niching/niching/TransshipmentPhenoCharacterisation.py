@@ -1,10 +1,10 @@
 import MTGP_niching.niching.PhenoCharacterisation as PhenoCharacterisation
 import numpy as np
 
-import MTGP_niching.replenishment as replenishment
+import MTGP_niching.transshipment as transshipment
 
 
-class ReplenishmentPhenoCharacterisation(PhenoCharacterisation.PhenoCharacterisation):
+class TransshipmentPhenoCharacterisation(PhenoCharacterisation.PhenoCharacterisation):
     def __init__(self, referenceRule, decisionSituations, **kwargs):
         PhenoCharacterisation.PhenoCharacterisation.__init__(self, referenceRule)
         self.decisionSituations = decisionSituations.getData()
@@ -14,15 +14,15 @@ class ReplenishmentPhenoCharacterisation(PhenoCharacterisation.PhenoCharacterisa
     def calcReferenceIndexes(self):
         self.decisions = []
         for i in range(len(self.decisionSituations)):
-            replenishmentDecision = self.decisionSituations[i].clone()
-            replenishment_data = replenishmentDecision.getData()
-            state = replenishment_data[0]
-            for state_retailer in state:
-                quantity = round(replenishment.GP_evolve_S(state_retailer, self.referenceRule))
+            transshipmentDecision = self.decisionSituations[i].clone()
+            transshipment_data = transshipmentDecision.getData()
+            state = transshipment_data[0]
+            for state_retailer_pair in state:
+                quantity = round(transshipment.GP_evolve_R(state_retailer_pair, self.referenceRule))
                 self.decisions.append(quantity)
             # the following is the original with candidate selection
-            # candidate_action = replenishment_data[1]
-            # quantity = replenishment.GP_evolve_S(state, self.referenceRule)
+            # candidate_action = transshipment_data[1]
+            # quantity = transshipment.GP_evolve_R(state, self.referenceRule)
             # index = 0
             # min_dis = np.Infinity
             # for i in range(len(candidate_action)):
@@ -40,15 +40,15 @@ class ReplenishmentPhenoCharacterisation(PhenoCharacterisation.PhenoCharacterisa
         charlist = []
 
         for i in range(len(self.decisionSituations)):
-            replenishmentDecision = self.decisionSituations[i].clone()
-            replenishment_data = replenishmentDecision.getData()
-            state = replenishment_data[0]
-            for state_retailer in state:
-                quantity = round(replenishment.GP_evolve_S(state_retailer, rule))
+            transshipmentDecision = self.decisionSituations[i].clone()
+            transshipment_data = transshipmentDecision.getData()
+            state = transshipment_data[0]
+            for state_retailer_pair in state:
+                quantity = round(transshipment.GP_evolve_R(state_retailer_pair, rule))
                 charlist.append(quantity)
             # the following is the original with candidate selection
-            # candidate_action = replenishment_data[1]
-            # quantity = replenishment.GP_evolve_S(state, rule)
+            # candidate_action = transshipment_data[1]
+            # quantity = transshipment.GP_evolve_R(state, rule)
             # index = 0
             # min_dis = np.Infinity
             # for i in range(len(candidate_action)):
@@ -56,6 +56,7 @@ class ReplenishmentPhenoCharacterisation(PhenoCharacterisation.PhenoCharacterisa
             #     if dis < min_dis:
             #         index = i
             #         min_dis = dis
+            #
             # charlist.append(candidate_action[index])
 
         return charlist
