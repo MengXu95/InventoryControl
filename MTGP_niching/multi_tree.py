@@ -144,8 +144,10 @@ def wrap(func, *args, **kwargs):
     keep_inds = [copy.deepcopy(ind) for ind in args]
     new_inds = list(func(*args, **kwargs))
     for i, ind in enumerate(new_inds):
-        if maxheight(ind) > MAX_HEIGHT:
-            new_inds[i] = random.choice(keep_inds)
+        if maxheight(ind) > MAX_HEIGHT: # original
+            new_inds[i] = (random.choice(keep_inds),)
+        # while maxheight(new_inds) > MAX_HEIGHT: # modified on 2024.8.22
+        #     new_inds[i] = list(func(*args, **kwargs))[i]
     return new_inds
 
 # the following is modified by mengxu

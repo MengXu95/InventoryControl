@@ -104,7 +104,7 @@ def GPFC_main(dataset_name, seed):
     stats = init_stats()
     hof = tools.HallOfFame(1)
     # seedRotate = False # added by mengxu 2022.10.13
-    pop, logbook, min_fitness, best_ind_all_gen = ea_simple_elitism.eaSimple(pop, toolbox, CXPB, MUTPB, REPPB, ELITISM, NGEN, seedRotate, rd, stats, halloffame=hof, verbose=True, seed =seed, dataset_name=dataset_name)
+    pop, logbook, min_fitness, best_ind_all_gen = ea_simple_elitism.eaSimple(pop, toolbox, CXPB, MUTPB, REPPB, ELITISM, NGEN, seedRotate, USE_Niching, rd, stats, halloffame=hof, verbose=True, seed =seed, dataset_name=dataset_name)
     best = hof[0]
     return min_fitness,best, best_ind_all_gen
 
@@ -121,6 +121,7 @@ N_TREES = 2
 rd = {}
 DIFF_PSET = True
 seedRotate = True # added by mengxu 2022.10.13
+USE_Niching = False
 
 # create the shop floor instance
 ins_each_gen = 2 # added by mengxu followed the advice of Meng 2022.11.01

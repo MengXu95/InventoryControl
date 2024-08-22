@@ -53,7 +53,7 @@ def sortPopulation(toolbox, population):
     return populationCopy
 
 
-def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate, rd, stats=None,halloffame=None, verbose=__debug__, seed = __debug__, dataset_name=__debug__):
+def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate, use_niching, rd, stats=None,halloffame=None, verbose=__debug__, seed = __debug__, dataset_name=__debug__):
     # initialise the random seed of each generation
     randomSeed_ngen = []
     for i in range((ngen + 1)):
@@ -100,9 +100,10 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
         print(logbook.stream)
 
     # using niching to clear duplicated individual 2024.8.5
-    nich = niching_clear(0, 1)
-    nich.initial_phenoCharacterisation(population[best_index])
-    population = nich.clearPopulation(toolbox, population)
+    if use_niching:
+        nich = niching_clear(0, 1)
+        nich.initial_phenoCharacterisation(population[best_index])
+        population = nich.clearPopulation(toolbox, population)
 
     np.random.seed(seed) #add by mengxu to avoid niching make the same seed
 
@@ -190,8 +191,9 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
             print(logbook.stream)
 
         # add by mengxu 2024.8.5 for niching---------------------------
-        nich.calculate_phenoCharacterisation(population[best_index])
-        population = nich.clearPopulation(toolbox, population)
+        if use_niching:
+            nich.calculate_phenoCharacterisation(population[best_index])
+            population = nich.clearPopulation(toolbox, population)
         # add by mengxu 2024.8.5 for niching---------------------------
 
         pop_fit = [ind.fitness.values[0] for ind in population]  ######selection from author

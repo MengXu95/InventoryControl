@@ -37,4 +37,3 @@ class ParallelToolbox(base.Toolbox):
         # fitnesses = Pool().map(evaluate, invalid_ind, seeds)
         return fitnesses
 
-
