@@ -84,90 +84,90 @@ class niching_clear:
 
 
     def clearPopulation(self,toolbox,population):
-        if len(population[0]) == 1: # consider only replenishment
-            clearedInds = 0
-            phenotypic_characristics_pop = []
-            sorted_pop = self.sortPopulation(toolbox, population)
-            isCleared_pop = []
-            # calculate the PC of all individuals in population
-            for idx in range(len(sorted_pop)):
-                ind = sorted_pop[idx]
-                replenishment_charList = self.phenotypic_characristics[0].characterise(ind[0])
-                all_charList = []
-                for ref in replenishment_charList:
-                    all_charList.append(ref)
-                phenotypic_characristics_pop.append(all_charList)
-                isCleared_pop.append(False)
+        subpop1 = population[0] # this is for replenishment
+        subpop2 = population[1] # this is for transshipment
 
-            #clear this population
-            for idx in range(len(sorted_pop)):
-                if isCleared_pop[idx]:
+        # clear subpop1
+        clearedInds_subpop1 = 0
+        phenotypic_characristics_pop_subpop1 = []
+        sorted_pop_subpop1 = self.sortPopulation(toolbox, subpop1)
+        isCleared_pop_subpop1 = []
+        # calculate the PC of all individuals in population
+        for idx in range(len(sorted_pop_subpop1)):
+            ind = sorted_pop_subpop1[idx]
+            replenishment_charList = self.phenotypic_characristics[0].characterise(ind)
+            all_charList = []
+            for ref in replenishment_charList:
+                all_charList.append(ref)
+            phenotypic_characristics_pop_subpop1.append(all_charList)
+            isCleared_pop_subpop1.append(False)
+
+        # clear this population
+        for idx in range(len(sorted_pop_subpop1)):
+            if isCleared_pop_subpop1[idx]:
+                continue
+
+            numWinners = 1
+            for idy in range(idx + 1, len(sorted_pop_subpop1)):
+                if isCleared_pop_subpop1[idy]:
                     continue
 
-                numWinners = 1
-                for idy in range(idx+1, len(sorted_pop)):
-                    if isCleared_pop[idy]:
-                        continue
-
-                    distance = self.phenotypic_characristics[0].distance(
-                        phenotypic_characristics_pop[idx], phenotypic_characristics_pop[idy])
-                    if distance > self.radius:
-                        continue
-
-                    if numWinners < self.capacity:
-                        numWinners = numWinners + 1
-                    else:
-                        isCleared_pop[idy] = True
-                        len_fitness_values = len(sorted_pop[idy].fitness.values)
-                        bad_fitness = [np.Infinity for i in range(len_fitness_values)]
-                        sorted_pop[idy].fitness.values = bad_fitness
-                        clearedInds = clearedInds + 1
-            print("Cleared number by niching: " + str(clearedInds))
-        elif len(population[0]) == 2: # consider both replenishment and transshipment
-            clearedInds = 0
-            phenotypic_characristics_pop = []
-            sorted_pop = self.sortPopulation(toolbox, population)
-            isCleared_pop = []
-            # calculate the PC of all individuals in population
-            for idx in range(len(sorted_pop)):
-                ind = sorted_pop[idx]
-                replenishment_charList = self.phenotypic_characristics[0].characterise(ind[0])
-                transshipment_charList = self.phenotypic_characristics[1].characterise(ind[1])
-                all_charList = []
-                for ref in replenishment_charList:
-                    all_charList.append(ref)
-                for ref in transshipment_charList:
-                    all_charList.append(ref)
-                phenotypic_characristics_pop.append(all_charList)
-                isCleared_pop.append(False)
-
-            #clear this population
-            for idx in range(len(sorted_pop)):
-                if isCleared_pop[idx]:
+                distance = self.phenotypic_characristics[0].distance(
+                    phenotypic_characristics_pop_subpop1[idx], phenotypic_characristics_pop_subpop1[idy])
+                if distance > self.radius:
                     continue
 
-                numWinners = 1
-                for idy in range(idx+1, len(sorted_pop)):
-                    if isCleared_pop[idy]:
-                        continue
+                if numWinners < self.capacity:
+                    numWinners = numWinners + 1
+                else:
+                    isCleared_pop_subpop1[idy] = True
+                    len_fitness_values = len(sorted_pop_subpop1[idy].fitness.values)
+                    bad_fitness = [np.Infinity for i in range(len_fitness_values)]
+                    sorted_pop_subpop1[idy].fitness.values = bad_fitness
+                    clearedInds_subpop1 = clearedInds_subpop1 + 1
+        print("Cleared number by niching for subpop1: " + str(clearedInds_subpop1))
 
-                    distance = self.phenotypic_characristics[0].distance(
-                        phenotypic_characristics_pop[idx], phenotypic_characristics_pop[idy])
-                    if distance > self.radius:
-                        continue
+        # clear subpop2
+        clearedInds_subpop2 = 0
+        phenotypic_characristics_pop_subpop2 = []
+        sorted_pop_subpop2 = self.sortPopulation(toolbox, subpop2)
+        isCleared_pop_subpop2 = []
+        # calculate the PC of all individuals in population
+        for idx in range(len(sorted_pop_subpop2)):
+            ind = sorted_pop_subpop2[idx]
+            ransshipment_charListt = self.phenotypic_characristics[1].characterise(ind)
+            all_charList = []
+            for ref in ransshipment_charListt:
+                all_charList.append(ref)
+            phenotypic_characristics_pop_subpop2.append(all_charList)
+            isCleared_pop_subpop2.append(False)
 
-                    if numWinners < self.capacity:
-                        numWinners = numWinners + 1
-                    else:
-                        isCleared_pop[idy] = True
-                        len_fitness_values = len(sorted_pop[idy].fitness.values)
-                        bad_fitness = [np.Infinity for i in range(len_fitness_values)]
-                        sorted_pop[idy].fitness.values = bad_fitness
-                        clearedInds = clearedInds + 1
-            print("Cleared number by niching: " + str(clearedInds))
-        else:
-            print("Error in niching!")
-        return sorted_pop
+        # clear this population
+        for idx in range(len(sorted_pop_subpop2)):
+            if isCleared_pop_subpop2[idx]:
+                continue
+
+            numWinners = 1
+            for idy in range(idx + 1, len(sorted_pop_subpop2)):
+                if isCleared_pop_subpop2[idy]:
+                    continue
+
+                distance = self.phenotypic_characristics[1].distance(
+                    phenotypic_characristics_pop_subpop2[idx], phenotypic_characristics_pop_subpop2[idy])
+                if distance > self.radius:
+                    continue
+
+                if numWinners < self.capacity:
+                    numWinners = numWinners + 1
+                else:
+                    isCleared_pop_subpop2[idy] = True
+                    len_fitness_values = len(sorted_pop_subpop2[idy].fitness.values)
+                    bad_fitness = [np.Infinity for i in range(len_fitness_values)]
+                    sorted_pop_subpop1[idy].fitness.values = bad_fitness
+                    clearedInds_subpop2 = clearedInds_subpop2 + 1
+        print("Cleared number by niching for subpop2: " + str(clearedInds_subpop2))
+        cleared_pop = [sorted_pop_subpop1, sorted_pop_subpop2]
+        return cleared_pop
 
 
     def sortPopulation(self, toolbox, population):

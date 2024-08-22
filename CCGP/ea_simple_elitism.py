@@ -111,7 +111,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
     # using niching to clear duplicated individual 2024.8.5
     if use_niching: #todo: need to modify this for CCGP
         nich = niching_clear(0, 1)
-        nich.initial_phenoCharacterisation(population[best_index])
+        nich.initial_phenoCharacterisation(best_combined_ind)
         population = nich.clearPopulation(toolbox, population)
 
     np.random.seed(seed) #add by mengxu to avoid niching make the same seed
@@ -203,7 +203,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
 
         # add by mengxu 2024.8.5 for niching---------------------------
         if use_niching:
-            nich.calculate_phenoCharacterisation(population[best_index])
+            nich.calculate_phenoCharacterisation(best_combined_ind)
             population = nich.clearPopulation(toolbox, population)
         # add by mengxu 2024.8.5 for niching---------------------------
 
