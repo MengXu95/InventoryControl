@@ -167,7 +167,8 @@ class niching_clear:
                     clearedInds_subpop2 = clearedInds_subpop2 + 1
         print("Cleared number by niching for subpop2: " + str(clearedInds_subpop2))
         cleared_pop = [sorted_pop_subpop1, sorted_pop_subpop2]
-        return cleared_pop
+        PC_pop = [phenotypic_characristics_pop_subpop1, phenotypic_characristics_pop_subpop2]
+        return cleared_pop, PC_pop
 
 
     def sortPopulation(self, toolbox, population):

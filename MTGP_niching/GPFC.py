@@ -22,11 +22,11 @@ def connectedness(cluster):
 
 def init_toolbox(toolbox, pset):
     REP.init_toolbox(toolbox, pset, N_TREES)
-    toolbox.register("select", selElitistAndTournament, tournsize=7, elitism=ELITISM)
+    toolbox.register("select", selElitistAndTournament, tournsize=TOURNSIZE, elitism=ELITISM)
 
 def init_toolbox_two_pset(toolbox, pset1, pset2):
     REP.init_toolbox_two_pset(toolbox, pset1, pset2, N_TREES)
-    toolbox.register("select", selElitistAndTournament, tournsize=7, elitism=ELITISM)
+    toolbox.register("select", selElitistAndTournament, tournsize=TOURNSIZE, elitism=ELITISM)
 
 
 def init_stats():
@@ -109,19 +109,20 @@ def GPFC_main(dataset_name, seed):
     return min_fitness,best, best_ind_all_gen
 
 
-POP_SIZE =100
-NGEN = 10
+POP_SIZE =30
+NGEN = 4
 CXPB = 0.8
 MUTPB = 0.15
 REPPB = 0.05
 ELITISM = 10
+TOURNSIZE = 5
 MAX_HEIGHT = 8
 REP = mt  # individual representation {mt (multi-tree) or vt (vector-tree)}
 N_TREES = 2
 rd = {}
 DIFF_PSET = True
 seedRotate = True # added by mengxu 2022.10.13
-USE_Niching = False
+USE_Niching = True
 
 # create the shop floor instance
 ins_each_gen = 2 # added by mengxu followed the advice of Meng 2022.11.01

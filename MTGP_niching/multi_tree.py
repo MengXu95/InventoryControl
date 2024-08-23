@@ -40,6 +40,8 @@ def init_primitives_replenishment(pset):
     pset.addPrimitive(protected_div, 2)
     pset.addPrimitive(np.maximum, 2)
     pset.addPrimitive(np.minimum, 2)
+    pset.addPrimitive(protected_sqrt, 1)
+    pset.addPrimitive(np.square, 1)
 
     pset.addTerminal(str('INL'))  # inventory level
     pset.addTerminal(str('PHC'))  # per unit holding cost
@@ -60,6 +62,8 @@ def init_primitives_transshipment(pset):
     pset.addPrimitive(protected_div, 2)
     pset.addPrimitive(np.maximum, 2)
     pset.addPrimitive(np.minimum, 2)
+    pset.addPrimitive(protected_sqrt, 1)
+    pset.addPrimitive(np.square, 1)
 
     #site 1 related
     pset.addTerminal(str('INL1'))  # inventory level
@@ -145,7 +149,7 @@ def wrap(func, *args, **kwargs):
     new_inds = list(func(*args, **kwargs))
     for i, ind in enumerate(new_inds):
         if maxheight(ind) > MAX_HEIGHT: # original
-            new_inds[i] = (random.choice(keep_inds),)
+            new_inds[i] = random.choice(keep_inds)
         # while maxheight(new_inds) > MAX_HEIGHT: # modified on 2024.8.22
         #     new_inds[i] = list(func(*args, **kwargs))[i]
     return new_inds
@@ -224,3 +228,10 @@ def protected_div(left, right):
         elif np.isinf(x) or np.isnan(x):
             x = 1
     return x
+
+def protected_sqrt(x):
+    if x > 0:
+        value = np.sqrt(x)
+    else:
+        value = 0.0
+    return value

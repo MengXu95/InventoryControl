@@ -30,6 +30,8 @@ def init_primitives_replenishment(pset):
     pset.addPrimitive(protected_div, 2)
     pset.addPrimitive(np.maximum, 2)
     pset.addPrimitive(np.minimum, 2)
+    pset.addPrimitive(protected_sqrt, 1)
+    pset.addPrimitive(np.square, 1)
 
     pset.addTerminal(str('INL'))  # inventory level
     pset.addTerminal(str('PHC'))  # per unit holding cost
@@ -50,6 +52,8 @@ def init_primitives_transshipment(pset):
     pset.addPrimitive(protected_div, 2)
     pset.addPrimitive(np.maximum, 2)
     pset.addPrimitive(np.minimum, 2)
+    pset.addPrimitive(protected_sqrt, 1)
+    pset.addPrimitive(np.square, 1)
 
     #site 1 related
     pset.addTerminal(str('INL1'))  # inventory level
@@ -229,3 +233,10 @@ def protected_div(left, right):
         elif np.isinf(x) or np.isnan(x):
             x = 1
     return x
+
+def protected_sqrt(x):
+    if x > 0:
+        value = np.sqrt(x)
+    else:
+        value = 0.0
+    return value

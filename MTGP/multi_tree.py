@@ -69,7 +69,7 @@ def wrap(func, *args, **kwargs):
     new_inds = list(func(*args, **kwargs))
     for i, ind in enumerate(new_inds):
         if maxheight(ind) > MAX_HEIGHT: # original
-            new_inds[i] = (random.choice(keep_inds),)
+            new_inds[i] = random.choice(keep_inds)
         # while maxheight(new_inds) > MAX_HEIGHT: # modified on 2024.8.22
         #     new_inds[i] = list(func(*args, **kwargs))[i]
     return new_inds

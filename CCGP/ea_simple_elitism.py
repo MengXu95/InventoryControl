@@ -5,6 +5,7 @@ import numpy as np
 from CCGP import saveFile
 from CCGP.selection import selElitistAndTournament
 from CCGP.niching.niching import niching_clear
+from Utils.PCDiversity import PCDiversityCalculator
 
 def varAnd(population, toolbox, cxpb, mutpb, reppb):
     offspring = [toolbox.clone(ind) for ind in population]
@@ -84,7 +85,6 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
             ind.fitness.values = fit
 
     best_fit = np.inf
-    best_index = -1
     best_combined_ind = []
     for i in range(len(population)):
         subpop = population[i]
@@ -110,9 +110,17 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
 
     # using niching to clear duplicated individual 2024.8.5
     if use_niching: #todo: need to modify this for CCGP
+        PC_diversity_all = []
         nich = niching_clear(0, 1)
         nich.initial_phenoCharacterisation(best_combined_ind)
-        population = nich.clearPopulation(toolbox, population)
+        population, PC_pop = nich.clearPopulation(toolbox, population)
+        # calculate the PC diversity of population
+        calculator_subpop1 = PCDiversityCalculator(PC_pop[0])
+        calculator_subpop2 = PCDiversityCalculator(PC_pop[1])
+        PC_diversity_subpop1 = calculator_subpop1.calculate_diversity()
+        PC_diversity_subpop2 = calculator_subpop2.calculate_diversity()
+        PC_diversity = [PC_diversity_subpop1, PC_diversity_subpop2]
+        PC_diversity_all.append(PC_diversity)
 
     np.random.seed(seed) #add by mengxu to avoid niching make the same seed
 
@@ -204,7 +212,18 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
         # add by mengxu 2024.8.5 for niching---------------------------
         if use_niching:
             nich.calculate_phenoCharacterisation(best_combined_ind)
-            population = nich.clearPopulation(toolbox, population)
+            population, PC_pop = nich.clearPopulation(toolbox, population)
+            # calculate the PC diversity of population
+            calculator_subpop1 = PCDiversityCalculator(PC_pop[0])
+            calculator_subpop2 = PCDiversityCalculator(PC_pop[1])
+            PC_diversity_subpop1 = calculator_subpop1.calculate_diversity()
+            PC_diversity_subpop2 = calculator_subpop2.calculate_diversity()
+            PC_diversity = [PC_diversity_subpop1, PC_diversity_subpop2]
+            PC_diversity_all.append(PC_diversity)
+            # print("PC diversity: " + str(PC_diversity))
+            if gen == ngen:
+                # save the PC diversity to a csv file
+                saveFile.save_PCdiversity_to_csv(seed, dataset_name, PC_diversity_all)
         # add by mengxu 2024.8.5 for niching---------------------------
 
     return population, logbook, min_fitness, best_ind_all_gen

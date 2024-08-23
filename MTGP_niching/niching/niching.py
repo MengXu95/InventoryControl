@@ -167,7 +167,7 @@ class niching_clear:
             print("Cleared number by niching: " + str(clearedInds))
         else:
             print("Error in niching!")
-        return sorted_pop
+        return sorted_pop, phenotypic_characristics_pop
 
 
     def sortPopulation(self, toolbox, population):

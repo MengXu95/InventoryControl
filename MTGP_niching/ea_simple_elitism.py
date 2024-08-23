@@ -5,6 +5,7 @@ import numpy as np
 from MTGP_niching import saveFile
 from MTGP_niching.selection import selElitistAndTournament
 from MTGP_niching.niching.niching import niching_clear
+from Utils.PCDiversity import PCDiversityCalculator
 
 def varAnd(population, toolbox, cxpb, mutpb, reppb):
     offspring = [toolbox.clone(ind) for ind in population]
@@ -101,9 +102,15 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
 
     # using niching to clear duplicated individual 2024.8.5
     if use_niching:
+        PC_diversity_all = []
         nich = niching_clear(0, 1)
         nich.initial_phenoCharacterisation(population[best_index])
-        population = nich.clearPopulation(toolbox, population)
+        population, PC_pop = nich.clearPopulation(toolbox, population)
+        # calculate the PC diversity of population
+        calculator = PCDiversityCalculator(PC_pop)
+        PC_diversity = calculator.calculate_diversity()
+        PC_diversity_all.append(PC_diversity)
+        print("PC diversity: " + str(PC_diversity))
 
     np.random.seed(seed) #add by mengxu to avoid niching make the same seed
 
@@ -117,10 +124,6 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
         # Select the next generation individuals
         sorted_elite = sortPopulation(toolbox, population)[:elitism]  # modified by mengxu 2022.10.29
         # sorted_elite = sorted(population, key=attrgetter("fitness"), reverse=True)[:elitism]
-
-        if gen == 1:
-            ELITISM = 10
-            toolbox.register("select", selElitistAndTournament, tournsize=7, elitism=ELITISM)
 
         offspring = toolbox.select(population, len(population)-elitism)
 
@@ -193,7 +196,15 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
         # add by mengxu 2024.8.5 for niching---------------------------
         if use_niching:
             nich.calculate_phenoCharacterisation(population[best_index])
-            population = nich.clearPopulation(toolbox, population)
+            population, PC_pop = nich.clearPopulation(toolbox, population)
+            # calculate the PC diversity of population
+            calculator = PCDiversityCalculator(PC_pop)
+            PC_diversity = calculator.calculate_diversity()
+            PC_diversity_all.append(PC_diversity)
+            print("PC diversity: " + str(PC_diversity))
+            if gen == ngen:
+                # save the PC diversity to a csv file
+                saveFile.save_PCdiversity_to_csv(seed, dataset_name, PC_diversity_all)
         # add by mengxu 2024.8.5 for niching---------------------------
 
         pop_fit = [ind.fitness.values[0] for ind in population]  ######selection from author

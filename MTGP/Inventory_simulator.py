@@ -170,6 +170,9 @@ class InvOptEnv:
         return self.state
 
     def step(self, action):
+        # Update inv levels and pipelines
+        for retailer, demand in zip(self.retailers, self.demand_records):
+            retailer.order_arrival(demand[self.current_period - 2])  # -2 not -1
         action_modified = action_map[action]
         trans = action_modified[0]  # Transshipment quantity, possibly infeasible
         # Make transshipment quantity feasible
@@ -208,8 +211,8 @@ class InvOptEnv:
         for i, retailer in enumerate(self.retailers):
             retailer.forecast = [self.rd.f(i, k) for k in range(self.current_period, self.current_period + L)]  # No +1
         # Update inv levels and pipelines
-        for retailer, demand in zip(self.retailers, self.demand_records):
-            retailer.order_arrival(demand[self.current_period - 2])  # -2 not -1
+        # for retailer, demand in zip(self.retailers, self.demand_records):
+        #     retailer.order_arrival(demand[self.current_period - 2])  # -2 not -1
         self.state = np.array(
             [retailer.inv_level for retailer in self.retailers] + [x for retailer in self.retailers for x in
                                                                    retailer.forecast] + \
@@ -217,6 +220,9 @@ class InvOptEnv:
         return self.state, reward, terminate
 
     def step_value(self, action_modified):
+        # Update inv levels and pipelines
+        for retailer, demand in zip(self.retailers, self.demand_records):
+            retailer.order_arrival(demand[self.current_period - 2])  # -2 not -1
         trans = action_modified[0]  # Transshipment quantity, possibly infeasible
         # Make transshipment quantity feasible
         if trans > 0 and self.retailers[0].inv_level < trans:
@@ -253,9 +259,7 @@ class InvOptEnv:
         # Update forecasts
         for i, retailer in enumerate(self.retailers):
             retailer.forecast = [self.rd.f(i, k) for k in range(self.current_period, self.current_period + L)]  # No +1
-        # Update inv levels and pipelines
-        for retailer, demand in zip(self.retailers, self.demand_records):
-            retailer.order_arrival(demand[self.current_period - 2])  # -2 not -1
+
         self.state = np.array(
             [retailer.inv_level for retailer in self.retailers] + [x for retailer in self.retailers for x in
                                                                    retailer.forecast] + \

@@ -109,10 +109,6 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
         sorted_elite = sortPopulation(toolbox, population)[:elitism]  # modified by mengxu 2022.10.29
         # sorted_elite = sorted(population, key=attrgetter("fitness"), reverse=True)[:elitism]
 
-        if gen == 1:
-            ELITISM = 10
-            toolbox.register("select", selElitistAndTournament, tournsize=7, elitism=ELITISM)
-
         offspring = toolbox.select(population, len(population)-elitism)
 
         # Vary the pool of individuals

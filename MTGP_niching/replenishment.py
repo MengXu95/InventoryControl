@@ -34,6 +34,10 @@ def treeNode_S_test(tree, index, data):
         return np.maximum(treeNode_S_test(tree, index+1, data), treeNode_S_test(tree, index+2, data))
     elif tree[index] == 'minimum':
         return np.minimum(treeNode_S_test(tree, index+1, data), treeNode_S_test(tree, index+2, data))
+    elif tree[index] == 'protected_sqrt':
+        return protected_sqrt(treeNode_S_test(tree, index+1, data))
+    elif tree[index] == 'square':
+        return np.square(treeNode_S_test(tree, index+1, data))
     elif tree[index] == 'lf': # add by mengxu 2022.11.08
         ref = treeNode_S_test(tree, index+1, data)
         if isinstance(ref, (np.int64, np.float64, float, int)):
@@ -93,6 +97,10 @@ def treeNode_S(tree, index, data):
                     ref[i] = 1 / (1 + np.exp(-ref[i]))
                     # print(ref[i])
                 return ref
+        elif tree[index].name == 'protected_sqrt':
+            return protected_sqrt(treeNode_S(tree, index + 1, data))
+        elif tree[index].name == 'square':
+            return np.square(treeNode_S(tree, index + 1, data))
     elif tree[index].arity == 0:
         if tree[index].name == 'INL':
             return data[0]
@@ -124,6 +132,13 @@ def protected_div(left, right):
         elif np.isinf(x) or np.isnan(x):
             x = 1
     return x
+
+def protected_sqrt(x):
+    if x > 0:
+        value = np.sqrt(x)
+    else:
+        value = 0.0
+    return value
 
 def safe_multiply(a, b):
     try:

@@ -1,7 +1,7 @@
 import pickle
 import numpy as np
 import os
-
+import csv
 
 
 def save_individual(randomSeeds, dataSetName,individuals):
@@ -116,6 +116,33 @@ def save_individual_each_gen_to_txt(randomSeeds, dataSetName, individuals, gen):
 
     return
 
+def save_PCdiversity_to_csv(randomSeeds, dataSetName, PCdiversity):
+    """
+    Save the PC diversity counts to a CSV file. Creates the file if it does not exist.
+
+    :param PCdiversity: A Counter object with the number of occurrences of each unique PC set.
+    :param filename: The name of the CSV file to write.
+    """
+    # Construct the directory and file path
+    directory = f'./CCGP/train/scenario_{dataSetName}/'
+    file_path = os.path.join(directory, f'{randomSeeds}_{dataSetName}_PCdiversity.csv')
+
+    # Create the directory if it does not exist
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    # Write data to the file
+    with open(file_path, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Gen', 'PCdiversity_subpop1', 'PCdiversity_subpop2', 'PCdiversity'])  # Write header
+        # Assuming PCdiversity is a list of values; iterate and write to file
+        for i in range(len(PCdiversity)):
+            diversity = PCdiversity[i]
+            mean_diversity = np.mean(diversity)
+            writer.writerow([i, diversity[0], diversity[1], mean_diversity])
+    print(f"PC diversity data has been saved to {file_path}.")
+
+    return
 
 def save_archive(randomSeeds, dataSetName,individuals):
     # Construct the directory and file path

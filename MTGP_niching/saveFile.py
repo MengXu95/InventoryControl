@@ -1,7 +1,7 @@
 import pickle
 import numpy as np
 import os
-
+import csv
 
 
 def save_individual(randomSeeds, dataSetName,individuals):
@@ -20,6 +20,33 @@ def save_individual(randomSeeds, dataSetName,individuals):
     # with open('./MTGP/train/scenario_' + str(dataSetName) + '/' + str(randomSeeds) + '_' + dataSetName+'.pickle', 'wb') as file:
     #     pickle.dump(individuals, file, protocol=pickle.HIGHEST_PROTOCOL)
     # file.close()
+    return
+
+def save_PCdiversity_to_csv(randomSeeds, dataSetName, PCdiversity):
+    """
+    Save the PC diversity counts to a CSV file. Creates the file if it does not exist.
+
+    :param PCdiversity: A Counter object with the number of occurrences of each unique PC set.
+    :param filename: The name of the CSV file to write.
+    """
+    # Construct the directory and file path
+    directory = f'./MTGP_niching/train/scenario_{dataSetName}/'
+    file_path = os.path.join(directory, f'{randomSeeds}_{dataSetName}_PCdiversity.csv')
+
+    # Create the directory if it does not exist
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    # Write data to the file
+    with open(file_path, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Gen', 'PCdiversity'])  # Write header
+        # Assuming PCdiversity is a list of values; iterate and write to file
+        for i in range(len(PCdiversity)):
+            diversity = PCdiversity[i]
+            writer.writerow([i, diversity])
+    print(f"PC diversity data has been saved to {file_path}.")
+
     return
 
 def save_each_gen_best_individual_meng(randomSeeds, dataSetName, best_ind_all_gen):
