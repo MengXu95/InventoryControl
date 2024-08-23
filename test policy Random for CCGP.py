@@ -8,10 +8,10 @@ import math
 from statistics import mean, stdev
 from datetime import datetime
 from torch.distributions import Categorical
-import CCGP.LoadIndividual as mtload
+import CCGP_niching.LoadIndividual as mtload
 from MTGP_niching.replenishment import *
-from CCGP.transshipment import *
-from CCGP.Inventory_simulator import InvOptEnv
+from CCGP_niching.transshipment import *
+from CCGP_niching.Inventory_simulator import InvOptEnv
 import os
 
 np.random.seed(0)

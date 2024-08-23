@@ -2,10 +2,11 @@ from operator import attrgetter
 import random
 from deap import tools
 import numpy as np
-from CCGP import saveFile
-from CCGP.selection import selElitistAndTournament
-from CCGP.niching.niching import niching_clear
+from CCGP_niching import saveFile
+from CCGP_niching.selection import selElitistAndTournament
+from CCGP_niching.niching.niching import niching_clear
 from Utils.PCDiversity import PCDiversityCalculator
+from Utils.ScenarioDesign import ScenarioDesign
 
 def varAnd(population, toolbox, cxpb, mutpb, reppb):
     offspring = [toolbox.clone(ind) for ind in population]
@@ -65,6 +66,10 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
     # for i in range((ngen+1)*ins_each_gen): # the *ins_each_gen is added by mengxu followed the advice of Meng 2022.11.01
         randomSeed_ngen.append(np.random.randint(2000000000))
 
+    # get parameters for the given dataset/scenario
+    scenarioDesign = ScenarioDesign(dataset_name)
+    parameters = scenarioDesign.get_parameter()
+
     logbook = tools.Logbook()
     logbook.header = ['gen', 'subpop', 'nevals'] + (stats.fields if stats else [])
     min_fitness = []
@@ -77,7 +82,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
 
     rd['seed'] = randomSeed_ngen[0]
 
-    fitnesses = toolbox.multiProcess(toolbox.evaluate, invalid_population, rd['seed'])
+    fitnesses = toolbox.multiProcess(toolbox.evaluate, invalid_population, rd['seed'], parameters)
     for i in range(len(invalid_population)):
         invalid_ind = invalid_population[i]
         fitness_sub = fitnesses[i]
@@ -109,7 +114,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
             print(logbook.stream)
 
     # using niching to clear duplicated individual 2024.8.5
-    if use_niching: #todo: need to modify this for CCGP
+    if use_niching: #todo: need to modify this for CCGP_niching
         PC_diversity_all = []
         nich = niching_clear(0, 1)
         nich.initial_phenoCharacterisation(best_combined_ind)
@@ -170,7 +175,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
             combined_offspring.append(combined_subpop)
 
         # Evaluate the individuals with an invalid fitness
-        fitnesses = toolbox.multiProcess(toolbox.evaluate, combined_offspring, rd['seed'])
+        fitnesses = toolbox.multiProcess(toolbox.evaluate, combined_offspring, rd['seed'], parameters)
         for i in range(len(combined_offspring)):
             invalid_ind = combined_offspring[i]
             fitness_sub = fitnesses[i]

@@ -2,15 +2,15 @@ import simpy
 from deap import base
 from deap import creator
 from deap import gp
-import CCGP.multi_tree as mt
-from CCGP import ea_simple_elitism
-from CCGP.ParallelToolbox import ParallelToolbox
-from CCGP.selection import *
+import CCGP_niching.multi_tree as mt
+from CCGP_niching import ea_simple_elitism
+from CCGP_niching.ParallelToolbox import ParallelToolbox
+from CCGP_niching.selection import *
 import sys
-from CCGP import saveFile
+from CCGP_niching import saveFile
 import time
 import random
-from CCGP.Inventory_simulator import *
+from CCGP_niching.Inventory_simulator import *
 
 import numpy as np
 
@@ -38,12 +38,12 @@ def init_stats():
     stats.register("max", np.max)
     return stats
 
-def evaluate(individual,seed):
+def evaluate(individual,seed,parameters):
     # add by mengxu 2022.10.13 to add the training instances ===============================================
     # create the environment instance for simulation
     # Generate forecasts and demand
     # seed = rd['seed']
-    env = InvOptEnv(seed)
+    env = InvOptEnv(seed,parameters)
     fitness = env.run(individual)
 
     for i in range(ins_each_gen-1):
@@ -127,9 +127,6 @@ USE_Niching = True
 # create the shop floor instance
 ins_each_gen = 2 # added by mengxu followed the advice of Meng 2022.11.01
 def main(dataset_name, seed):
-# if __name__ == "__main__":
-#     dataset_name = str(sys.argv[1])
-#     seed = int(sys.argv[2])
     random.seed(int(seed))
     np.random.seed(int(seed))
     saveFile.clear_individual_each_gen_to_txt(seed, dataset_name)

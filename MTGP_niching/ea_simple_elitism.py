@@ -6,6 +6,7 @@ from MTGP_niching import saveFile
 from MTGP_niching.selection import selElitistAndTournament
 from MTGP_niching.niching.niching import niching_clear
 from Utils.PCDiversity import PCDiversityCalculator
+from Utils.ScenarioDesign import ScenarioDesign
 
 def varAnd(population, toolbox, cxpb, mutpb, reppb):
     offspring = [toolbox.clone(ind) for ind in population]
@@ -61,6 +62,10 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
     # for i in range((ngen+1)*ins_each_gen): # the *ins_each_gen is added by mengxu followed the advice of Meng 2022.11.01
         randomSeed_ngen.append(np.random.randint(2000000000))
 
+    # get parameters for the given dataset/scenario
+    scenarioDesign = ScenarioDesign(dataset_name)
+    parameters = scenarioDesign.get_parameter()
+
     logbook = tools.Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
     min_fitness = []
@@ -70,7 +75,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
 
     rd['seed'] = randomSeed_ngen[0]
 
-    fitnesses = toolbox.multiProcess(toolbox.evaluate, invalid_ind, rd['seed'])
+    fitnesses = toolbox.multiProcess(toolbox.evaluate, invalid_ind, rd['seed'], parameters)
     # fitnesses = toolbox.multiProcess(toolbox.evaluate, invalid_ind)
     # fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
     for ind, fit in zip(invalid_ind, fitnesses):
@@ -143,7 +148,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
         for ind in invalid_elite_ind:
             del ind.fitness.values
 
-        fitnesses_elite = toolbox.multiProcess(toolbox.evaluate, invalid_elite_ind, rd['seed'])
+        fitnesses_elite = toolbox.multiProcess(toolbox.evaluate, invalid_elite_ind, rd['seed'], parameters)
         # fitnesses_elite = toolbox.map(toolbox.evaluate, invalid_elite_ind)
         for ind, fit in zip(invalid_elite_ind, fitnesses_elite):
             ind.fitness.values = fit

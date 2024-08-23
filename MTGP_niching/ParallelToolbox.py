@@ -20,13 +20,13 @@ class ParallelToolbox(base.Toolbox):
         self.__dict__.update(state)
 
     # created by mengxu 2022.11.28 for multiple processing
-    def multiProcess(self, evaluate, invalid_ind, seed_value):
+    def multiProcess(self, evaluate, invalid_ind, seed_value, parameters):
         # Number of CPU cores
         cores = mp.cpu_count()
         # Initialize the Pool with the number of cores
         with mp.Pool(processes=cores) as pool:
             # Create a list of arguments tuples where seed_value is constant
-            args = [(ind, seed_value) for ind in invalid_ind]
+            args = [(ind, seed_value, parameters) for ind in invalid_ind]
 
             # Use starmap to pass multiple arguments to the function
             fitnesses = pool.starmap(evaluate, args)

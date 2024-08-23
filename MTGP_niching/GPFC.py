@@ -38,12 +38,12 @@ def init_stats():
     stats.register("max", np.max)
     return stats
 
-def evaluate(individual,seed):
+def evaluate(individual,seed,parameters):
     # add by mengxu 2022.10.13 to add the training instances ===============================================
     # create the environment instance for simulation
     # Generate forecasts and demand
     # seed = rd['seed']
-    env = InvOptEnv(seed)
+    env = InvOptEnv(seed,parameters)
     fitness = env.run(individual)
 
     for i in range(ins_each_gen-1):

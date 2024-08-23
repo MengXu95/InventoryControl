@@ -1,6 +1,6 @@
 import sys
 import MTGP.GPFC as GPmain
-import CCGP.GPFC as CCGPmain
+import CCGP_niching.GPFC as CCGPmain
 import MTGP_new_terminals.GPFC as GPmain_new_terminals
 import MTGP_niching.GPFC as GPmain_niching
 
@@ -14,8 +14,8 @@ if __name__ == '__main__':
     if algo == 'MTGP':
         print('----------MTGP----------')
         GPmain.main(dataset_name, seed)
-    elif algo == 'CCGP':
-        print('----------CCGP----------')
+    elif algo == 'CCGP_niching':
+        print('----------CCGP_niching----------')
         CCGPmain.main(dataset_name, seed)
     elif algo == 'MTGP_new_terminals':
         print('----------MTGP_new_terminals----------')
