@@ -6,7 +6,7 @@ import csv
 
 def save_individual(randomSeeds, dataSetName,individuals):
     # Construct the directory and file path
-    directory = f'./CCGP/train/scenario_{dataSetName}/'
+    directory = f'./CCGP_niching/train/scenario_{dataSetName}/'
     file_path = os.path.join(directory, f'{randomSeeds}_{dataSetName}.pickle')
 
     # Create the directory if it does not exist
@@ -47,7 +47,7 @@ def save_each_gen_best_individual_meng(randomSeeds, dataSetName, best_ind_all_ge
         individual_dict.__setitem__(gen, individual)
 
     # Construct the directory and file path
-    directory = f'./CCGP/train/scenario_{dataSetName}/'
+    directory = f'./CCGP_niching/train/scenario_{dataSetName}/'
     file_path = os.path.join(directory, f'{randomSeeds}_meng_individual_{dataSetName}.pkl')
 
     # Create the directory if it does not exist
@@ -62,7 +62,7 @@ def save_each_gen_best_individual_meng(randomSeeds, dataSetName, best_ind_all_ge
 
 def save_individual_to_txt(randomSeeds, dataSetName,individuals): # save individual as txt by mengxu
     # Construct the directory and file path
-    directory = f'./CCGP/train/scenario_{dataSetName}/'
+    directory = f'./CCGP_niching/train/scenario_{dataSetName}/'
     file_path = os.path.join(directory, f'{randomSeeds}_{dataSetName}.txt')
 
     # Create the directory if it does not exist
@@ -82,7 +82,7 @@ def save_individual_to_txt(randomSeeds, dataSetName,individuals): # save individ
 
 def clear_individual_each_gen_to_txt(randomSeeds, dataSetName): # save individual as txt by mengxu
     # Construct the directory and file path
-    directory = f'./CCGP/train/scenario_{dataSetName}/'
+    directory = f'./CCGP_niching/train/scenario_{dataSetName}/'
     file_path = os.path.join(directory, f'{randomSeeds}_{dataSetName}_each_gen.txt')
 
     # Create the directory if it does not exist
@@ -97,7 +97,7 @@ def clear_individual_each_gen_to_txt(randomSeeds, dataSetName): # save individua
 
 def save_individual_each_gen_to_txt(randomSeeds, dataSetName, individuals, gen): # save individual as txt by mengxu
     # Construct the directory and file path
-    directory = f'./CCGP/train/scenario_{dataSetName}/'
+    directory = f'./CCGP_niching/train/scenario_{dataSetName}/'
     file_path = os.path.join(directory, f'{randomSeeds}_{dataSetName}_each_gen.txt')
 
     # Create the directory if it does not exist
@@ -124,7 +124,7 @@ def save_PCdiversity_to_csv(randomSeeds, dataSetName, PCdiversity):
     :param filename: The name of the CSV file to write.
     """
     # Construct the directory and file path
-    directory = f'./CCGP/train/scenario_{dataSetName}/'
+    directory = f'./CCGP_niching/train/scenario_{dataSetName}/'
     file_path = os.path.join(directory, f'{randomSeeds}_{dataSetName}_PCdiversity.csv')
 
     # Create the directory if it does not exist
@@ -146,7 +146,7 @@ def save_PCdiversity_to_csv(randomSeeds, dataSetName, PCdiversity):
 
 def save_archive(randomSeeds, dataSetName,individuals):
     # Construct the directory and file path
-    directory = f'./CCGP/train/scenario_{dataSetName}/'
+    directory = f'./CCGP_niching/train/scenario_{dataSetName}/'
     file_path = os.path.join(directory, f'{randomSeeds}_archive{dataSetName}.pickle')
 
     # Create the directory if it does not exist
@@ -161,7 +161,7 @@ def save_archive(randomSeeds, dataSetName,individuals):
 
 def save_pop(randomSeeds, dataSetName,individuals):
     # Construct the directory and file path
-    directory = f'./CCGP/train/scenario_{dataSetName}/'
+    directory = f'./CCGP_niching/train/scenario_{dataSetName}/'
     file_path = os.path.join(directory, f'{randomSeeds}_pop{dataSetName}.pickle')
 
     # Create the directory if it does not exist
@@ -177,7 +177,7 @@ def save_pop(randomSeeds, dataSetName,individuals):
 
 def saveMinFitness(randomSeeds, dataSetName, min_fitness):
     # Construct the directory and file path
-    directory = f'./CCGP/train/scenario_{dataSetName}/'
+    directory = f'./CCGP_niching/train/scenario_{dataSetName}/'
     file_path = os.path.join(directory, f'{randomSeeds}_min_fitness{dataSetName}.npy')
 
     # Create the directory if it does not exist
@@ -191,7 +191,7 @@ def saveMinFitness(randomSeeds, dataSetName, min_fitness):
 
 def saveRunningTime(randomSeeds, dataSetName, running_time):
     # Construct the directory and file path
-    directory = f'./CCGP/train/scenario_{dataSetName}/'
+    directory = f'./CCGP_niching/train/scenario_{dataSetName}/'
     file_path = os.path.join(directory, f'{randomSeeds}_running_time{dataSetName}.npy')
 
     # Create the directory if it does not exist

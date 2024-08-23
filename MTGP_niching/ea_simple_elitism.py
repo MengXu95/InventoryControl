@@ -106,16 +106,15 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
         print(logbook.stream)
 
     # using niching to clear duplicated individual 2024.8.5
-    if use_niching:
-        PC_diversity_all = []
-        nich = niching_clear(0, 1)
-        nich.initial_phenoCharacterisation(population[best_index])
-        population, PC_pop = nich.clearPopulation(toolbox, population)
-        # calculate the PC diversity of population
-        calculator = PCDiversityCalculator(PC_pop)
-        PC_diversity = calculator.calculate_diversity()
-        PC_diversity_all.append(PC_diversity)
-        print("PC diversity: " + str(PC_diversity))
+    PC_diversity_all = []
+    nich = niching_clear(0, 1)
+    nich.initial_phenoCharacterisation(population[best_index])
+    population, PC_pop = nich.clearPopulation(toolbox, population, use_niching)
+    # calculate the PC diversity of population
+    calculator = PCDiversityCalculator(PC_pop)
+    PC_diversity = calculator.calculate_diversity()
+    PC_diversity_all.append(PC_diversity)
+    print("PC diversity: " + str(PC_diversity))
 
     np.random.seed(seed) #add by mengxu to avoid niching make the same seed
 
@@ -160,7 +159,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
             del ind.fitness.values
 
 
-        fitnesses = toolbox.multiProcess(toolbox.evaluate, invalid_ind, rd['seed'])
+        fitnesses = toolbox.multiProcess(toolbox.evaluate, invalid_ind, rd['seed'], parameters)
         # fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
@@ -199,17 +198,16 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
             print(logbook.stream)
 
         # add by mengxu 2024.8.5 for niching---------------------------
-        if use_niching:
-            nich.calculate_phenoCharacterisation(population[best_index])
-            population, PC_pop = nich.clearPopulation(toolbox, population)
-            # calculate the PC diversity of population
-            calculator = PCDiversityCalculator(PC_pop)
-            PC_diversity = calculator.calculate_diversity()
-            PC_diversity_all.append(PC_diversity)
-            print("PC diversity: " + str(PC_diversity))
-            if gen == ngen:
-                # save the PC diversity to a csv file
-                saveFile.save_PCdiversity_to_csv(seed, dataset_name, PC_diversity_all)
+        nich.calculate_phenoCharacterisation(population[best_index])
+        population, PC_pop = nich.clearPopulation(toolbox, population, use_niching)
+        # calculate the PC diversity of population
+        calculator = PCDiversityCalculator(PC_pop)
+        PC_diversity = calculator.calculate_diversity()
+        PC_diversity_all.append(PC_diversity)
+        print("PC diversity: " + str(PC_diversity))
+        if gen == ngen:
+            # save the PC diversity to a csv file
+            saveFile.save_PCdiversity_to_csv(seed, dataset_name, PC_diversity_all)
         # add by mengxu 2024.8.5 for niching---------------------------
 
         pop_fit = [ind.fitness.values[0] for ind in population]  ######selection from author

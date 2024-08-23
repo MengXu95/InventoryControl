@@ -109,8 +109,8 @@ def GPFC_main(dataset_name, seed):
     return min_fitness,best, best_ind_all_gen
 
 
-POP_SIZE =30
-NGEN = 4
+POP_SIZE = 400
+NGEN = 50
 CXPB = 0.8
 MUTPB = 0.15
 REPPB = 0.05
@@ -122,7 +122,7 @@ N_TREES = 2
 rd = {}
 DIFF_PSET = True
 seedRotate = True # added by mengxu 2022.10.13
-USE_Niching = True
+USE_Niching = False
 
 # create the shop floor instance
 ins_each_gen = 2 # added by mengxu followed the advice of Meng 2022.11.01

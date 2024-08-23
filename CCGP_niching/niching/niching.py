@@ -83,7 +83,7 @@ class niching_clear:
             self.phenotypic_characristics[0].setReferenceRule(individual[0])
 
 
-    def clearPopulation(self,toolbox,population):
+    def clearPopulation(self,toolbox,population, Clear = True):
         subpop1 = population[0] # this is for replenishment
         subpop2 = population[1] # this is for transshipment
 
@@ -102,30 +102,31 @@ class niching_clear:
             phenotypic_characristics_pop_subpop1.append(all_charList)
             isCleared_pop_subpop1.append(False)
 
-        # clear this population
-        for idx in range(len(sorted_pop_subpop1)):
-            if isCleared_pop_subpop1[idx]:
-                continue
-
-            numWinners = 1
-            for idy in range(idx + 1, len(sorted_pop_subpop1)):
-                if isCleared_pop_subpop1[idy]:
+        if Clear:
+            # clear this population
+            for idx in range(len(sorted_pop_subpop1)):
+                if isCleared_pop_subpop1[idx]:
                     continue
 
-                distance = self.phenotypic_characristics[0].distance(
-                    phenotypic_characristics_pop_subpop1[idx], phenotypic_characristics_pop_subpop1[idy])
-                if distance > self.radius:
-                    continue
+                numWinners = 1
+                for idy in range(idx + 1, len(sorted_pop_subpop1)):
+                    if isCleared_pop_subpop1[idy]:
+                        continue
 
-                if numWinners < self.capacity:
-                    numWinners = numWinners + 1
-                else:
-                    isCleared_pop_subpop1[idy] = True
-                    len_fitness_values = len(sorted_pop_subpop1[idy].fitness.values)
-                    bad_fitness = [np.Infinity for i in range(len_fitness_values)]
-                    sorted_pop_subpop1[idy].fitness.values = bad_fitness
-                    clearedInds_subpop1 = clearedInds_subpop1 + 1
-        print("Cleared number by niching for subpop1: " + str(clearedInds_subpop1))
+                    distance = self.phenotypic_characristics[0].distance(
+                        phenotypic_characristics_pop_subpop1[idx], phenotypic_characristics_pop_subpop1[idy])
+                    if distance > self.radius:
+                        continue
+
+                    if numWinners < self.capacity:
+                        numWinners = numWinners + 1
+                    else:
+                        isCleared_pop_subpop1[idy] = True
+                        len_fitness_values = len(sorted_pop_subpop1[idy].fitness.values)
+                        bad_fitness = [np.Infinity for i in range(len_fitness_values)]
+                        sorted_pop_subpop1[idy].fitness.values = bad_fitness
+                        clearedInds_subpop1 = clearedInds_subpop1 + 1
+            print("Cleared number by niching for subpop1: " + str(clearedInds_subpop1))
 
         # clear subpop2
         clearedInds_subpop2 = 0
@@ -142,30 +143,31 @@ class niching_clear:
             phenotypic_characristics_pop_subpop2.append(all_charList)
             isCleared_pop_subpop2.append(False)
 
-        # clear this population
-        for idx in range(len(sorted_pop_subpop2)):
-            if isCleared_pop_subpop2[idx]:
-                continue
-
-            numWinners = 1
-            for idy in range(idx + 1, len(sorted_pop_subpop2)):
-                if isCleared_pop_subpop2[idy]:
+        if Clear:
+            # clear this population
+            for idx in range(len(sorted_pop_subpop2)):
+                if isCleared_pop_subpop2[idx]:
                     continue
 
-                distance = self.phenotypic_characristics[1].distance(
-                    phenotypic_characristics_pop_subpop2[idx], phenotypic_characristics_pop_subpop2[idy])
-                if distance > self.radius:
-                    continue
+                numWinners = 1
+                for idy in range(idx + 1, len(sorted_pop_subpop2)):
+                    if isCleared_pop_subpop2[idy]:
+                        continue
 
-                if numWinners < self.capacity:
-                    numWinners = numWinners + 1
-                else:
-                    isCleared_pop_subpop2[idy] = True
-                    len_fitness_values = len(sorted_pop_subpop2[idy].fitness.values)
-                    bad_fitness = [np.Infinity for i in range(len_fitness_values)]
-                    sorted_pop_subpop1[idy].fitness.values = bad_fitness
-                    clearedInds_subpop2 = clearedInds_subpop2 + 1
-        print("Cleared number by niching for subpop2: " + str(clearedInds_subpop2))
+                    distance = self.phenotypic_characristics[1].distance(
+                        phenotypic_characristics_pop_subpop2[idx], phenotypic_characristics_pop_subpop2[idy])
+                    if distance > self.radius:
+                        continue
+
+                    if numWinners < self.capacity:
+                        numWinners = numWinners + 1
+                    else:
+                        isCleared_pop_subpop2[idy] = True
+                        len_fitness_values = len(sorted_pop_subpop2[idy].fitness.values)
+                        bad_fitness = [np.Infinity for i in range(len_fitness_values)]
+                        sorted_pop_subpop1[idy].fitness.values = bad_fitness
+                        clearedInds_subpop2 = clearedInds_subpop2 + 1
+            print("Cleared number by niching for subpop2: " + str(clearedInds_subpop2))
         cleared_pop = [sorted_pop_subpop1, sorted_pop_subpop2]
         PC_pop = [phenotypic_characristics_pop_subpop1, phenotypic_characristics_pop_subpop2]
         return cleared_pop, PC_pop
