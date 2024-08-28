@@ -1,6 +1,7 @@
 import pickle
 import numpy as np
 import sys
+import pandas as pd
 
 
 def load_individual_from_gen(randomSeeds, dataSetName): # save individual as txt by mengxu
@@ -26,3 +27,10 @@ def load_min_fitness(randomSeeds, dataSetName): # save individual as txt by meng
     min_fitness = np.load(folder)
 
     return min_fitness
+
+def load_PC_diversity(randomSeeds, dataSetName): # save individual as txt by mengxu
+    folder = './CCGP_niching/train/scenario_' + str(dataSetName) + '/' +  str(
+        randomSeeds) + '_' + dataSetName + '_PCdiversity.csv'
+    csv_reader = pd.read_csv(folder)
+
+    return csv_reader

@@ -11,6 +11,7 @@ from torch.distributions import Categorical
 
 from MTGP_niching.replenishment import *
 from MTGP_niching.transshipment import *
+import threading
 
 # np.random.seed(0)
 # ###############training##########################################
@@ -106,10 +107,8 @@ class Retailer:
         # Update pipeline
         self.pipeline = np.concatenate((self.pipeline[1:], [self.action]))
 
-
-import numpy as np
-
-
+class TimeoutException(Exception):
+    pass
 class InvOptEnv:
     def __init__(self, seed, parameters):
         """
@@ -187,6 +186,30 @@ class InvOptEnv:
                 ])
                 state_transshipment.append(state_transshipment_retailer_pair)
         self.state.append(state_transshipment)
+
+    def timeout_handler(self):
+        raise TimeoutException("Operation timed out!")
+
+    def run_with_timeout(self, func, timeout, *args, **kwargs):
+        """
+        Runs a function with a specified timeout. If the function takes longer than
+        `timeout` seconds, it will return `np.inf` instead.
+
+        Parameters:
+        - func: The function to run.
+        - timeout: The maximum time in seconds the function is allowed to run.
+        - args, kwargs: Arguments to pass to the function.
+        """
+        timer = threading.Timer(timeout, self.timeout_handler)
+        timer.start()
+        try:
+            result = func(*args, **kwargs)
+        except TimeoutException:
+            print("Function took too long to run!")
+            result = np.nan
+        finally:
+            timer.cancel()  # Cancel the timer if the function completes within the timeout
+        return result
 
     def reset(self):  # Resets state of all retailers and DCs by calling their respective reset methods
         self.rd.reset()
@@ -414,6 +437,8 @@ class InvOptEnv:
         return self.state, reward, terminate
 
     def run(self, individual): # add by xumeng 2024.8.1
+        timer = threading.Timer(5, self.timeout_handler())
+        timer.start()
         # run simulation
         state = self.reset()
         current_ep_reward = 0
@@ -504,7 +529,17 @@ class InvOptEnv:
                 action_modified.append(replenishment_quantity)
             # ------- strategy 3 ---------------------
 
-            state, reward, done = self.step_value(action_modified)
+                # the original
+                # state, reward, done = self.step_value(action_modified)
+
+                # todo: to stop bad run and save training time by mengxu 2024.8.27
+                # todo: error!!!! Need to handle this!!! tomorrow!!!
+                state, reward, done = None, np.nan, False
+                result = self.run_with_timeout(self.step_value, 1, action_modified)
+                if result != np.nan:
+                    state, reward, done = result
+                else:
+                    done = True  # Mark the process as done due to timeout
 
             # print("\nsolution, state, reward: " + str(site1_candidate[index_site1]) + ", " + str(state) + ", " + str(reward))
 
@@ -515,10 +550,12 @@ class InvOptEnv:
             if done:
                 break
 
+        if time_step < max_ep_len:
+            return np.inf
         fitness = -current_ep_reward/max_ep_len
         return fitness
 
-    def run_test(self, individual, GP_states, GP_actions, GP_rewards): # add by xumeng 2024.8.1
+    def run_test(self, individual, GP_states=None, GP_actions=None, GP_rewards=None): # add by xumeng 2024.8.1
         # run simulation
         state = self.reset()
         current_ep_reward = 0
@@ -552,10 +589,25 @@ class InvOptEnv:
                     replenishment_quantity=0
                 action_modified.append(replenishment_quantity)
             # ------- strategy 3 ---------------------
-            GP_states.append(state)
-            state, reward, done = self.step_value(action_modified)
-            GP_actions.append(action_modified)
-            GP_rewards.append(reward)
+            if GP_states is not None:
+                GP_states.append(state)
+            # the original
+            # state, reward, done = self.step_value(action_modified)
+
+            # todo: to stop bad run and save training time by mengxu 2024.8.27
+            # todo: error!!!! Need to handle this!!! tomorrow!!!
+            state, reward, done = None, np.nan, False
+            result = self.run_with_timeout(self.step_value, 1,action_modified)
+            if result != np.nan:
+                state, reward, done = result
+            else:
+                done = True  # Mark the process as done due to timeout
+
+
+            if GP_actions is not None:
+                GP_actions.append(action_modified)
+            if GP_rewards is not None:
+                GP_rewards.append(reward)
             # print("\nsolution, state, reward: " + str(site1_candidate[index_site1]) + ", " + str(state) + ", " + str(reward))
 
             time_step += 1
@@ -564,7 +616,8 @@ class InvOptEnv:
             # break; if the episode is over
             if done:
                 break
-
+        if time_step < max_ep_len:
+            return np.inf
         fitness = -current_ep_reward/max_ep_len
         return fitness
 

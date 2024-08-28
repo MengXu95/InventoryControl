@@ -518,7 +518,7 @@ class InvOptEnv:
         fitness = -current_ep_reward/max_ep_len
         return fitness
 
-    def run_test(self, individual, GP_states, GP_actions, GP_rewards): # add by xumeng 2024.8.1
+    def run_test(self, individual, GP_states=None, GP_actions=None, GP_rewards=None): # add by xumeng 2024.8.1
         # run simulation
         state = self.reset()
         current_ep_reward = 0
@@ -552,10 +552,13 @@ class InvOptEnv:
                     replenishment_quantity=0
                 action_modified.append(replenishment_quantity)
             # ------- strategy 3 ---------------------
-            GP_states.append(state)
+            if GP_states is not None:
+                GP_states.append(state)
             state, reward, done = self.step_value(action_modified)
-            GP_actions.append(action_modified)
-            GP_rewards.append(reward)
+            if GP_actions is not None:
+                GP_actions.append(action_modified)
+            if GP_rewards is not None:
+                GP_rewards.append(reward)
             # print("\nsolution, state, reward: " + str(site1_candidate[index_site1]) + ", " + str(state) + ", " + str(reward))
 
             time_step += 1

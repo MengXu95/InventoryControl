@@ -2,6 +2,7 @@ import pickle
 import numpy as np
 import os
 import csv
+import pandas as pd
 
 
 def save_individual(randomSeeds, dataSetName,individuals):
@@ -200,5 +201,20 @@ def saveRunningTime(randomSeeds, dataSetName, running_time):
 
     # Save the running_time array to the file
     np.save(file_path, running_time)
+
+    return
+
+def save_TestResults_to_csv(randomSeeds, dataSetName, resultsDf):
+
+    # Construct the directory and file path
+    directory = f'./MTGP_niching/train/scenario_{dataSetName}/test/'
+    file_path = os.path.join(directory, f'{randomSeeds}_{dataSetName}_testResults.csv')
+
+    # Create the directory if it does not exist
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    # Save the DataFrame to a CSV file
+    resultsDf.to_csv(file_path, index=False)
 
     return
