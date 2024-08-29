@@ -90,7 +90,7 @@ def init_toolbox(toolbox, pset, num_tree):
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     toolbox.register("compile", gp.compile, pset=pset)
 
-    toolbox.register("expr_mut", gp.genFull, min_=2, max_=8)
+    toolbox.register("expr_mut", gp.genFull, min_=2, max_=4)
 
     toolbox.register("mate",lim_xmate)
     toolbox.register("mutate",lim_xmut,expr=toolbox.expr_mut)
@@ -130,8 +130,8 @@ def init_toolbox_two_pset(toolbox, pset1, pset2):
     toolbox.register("compile2", gp.compile, pset=pset2)
 
     # Register mutation functions for each subpopulation
-    toolbox.register("expr_mut1", gp.genHalfAndHalf, pset=pset1, min_=2, max_=8)
-    toolbox.register("expr_mut2", gp.genHalfAndHalf, pset=pset2, min_=2, max_=8)
+    toolbox.register("expr_mut1", gp.genHalfAndHalf, pset=pset1, min_=2, max_=4)
+    toolbox.register("expr_mut2", gp.genHalfAndHalf, pset=pset2, min_=2, max_=4)
 
     # Register mating and mutation functions, specific to the subpopulation
     toolbox.register("mate1", gp.cxOnePoint)

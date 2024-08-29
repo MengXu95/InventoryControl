@@ -247,7 +247,7 @@ class InvOptEnv:
                      retailer_j.fixed_order_cost, retailer_j.pipeline[0],
                      # only suitable for LT = 2
                      retailer_j.forecast[0], retailer_j.forecast[1],
-                     retailer.transshipment_cost, retailer.fixed_order_transshipment_cost])
+                     retailer_j.transshipment_cost, retailer_j.fixed_order_transshipment_cost])
                 state_transshipment.append(state_transshipment_retailer_pair)
         self.state.append(state_transshipment)
         #the following is the original
@@ -332,9 +332,10 @@ class InvOptEnv:
                          retailer_j.fixed_order_cost, retailer_j.pipeline[0],
                          # only suitable for LT = 2
                          retailer_j.forecast[0], retailer_j.forecast[1],
-                         retailer.transshipment_cost, retailer.fixed_order_transshipment_cost])
+                         retailer_j.transshipment_cost, retailer_j.fixed_order_transshipment_cost])
                     state_transshipment.append(state_transshipment_retailer_pair)
             self.state.append(state_transshipment)
+            return self.state, reward, terminate
             # the following is the original
             # self.state = np.array(
             #     [retailer.inv_level for retailer in self.retailers] + [x for retailer in self.retailers for x in
@@ -431,11 +432,12 @@ class InvOptEnv:
                          retailer_j.fixed_order_cost, retailer_j.pipeline[0],
                          # only suitable for LT = 2
                          retailer_j.forecast[0], retailer_j.forecast[1],
-                         retailer.transshipment_cost, retailer.fixed_order_transshipment_cost])
+                         retailer_j.transshipment_cost, retailer_j.fixed_order_transshipment_cost])
                     state_transshipment.append(state_transshipment_retailer_pair)
             self.state.append(state_transshipment)
+            return self.state, reward, terminate
 
-        return self.state, reward, terminate
+
 
     def run(self, individual): # add by xumeng 2024.8.1
         # run simulation
@@ -523,21 +525,21 @@ class InvOptEnv:
                 action_modified.append(transshipment_quantity)
             for each_replenishment_state in replenishment_state:
                 replenishment_quantity = round(GP_evolve_S(each_replenishment_state, replenishment_policy), 2)
-                if replenishment_quantity<0:
-                    replenishment_quantity=0
+                if replenishment_quantity < 0:
+                    replenishment_quantity = 0
                 action_modified.append(replenishment_quantity)
             # ------- strategy 3 ---------------------
 
             # original
-            # state, reward, done = self.step_value(action_modified)
+            state, reward, done = self.step_value(action_modified)
 
             # todo: to stop bad run and save training time by mengxu 2024.8.27
-            state, reward, done = None, np.nan, False
-            result = self.run_with_timeout(self.step_value, 0.01, action_modified)
-            if result != np.nan:
-                state, reward, done = result
-            else:
-                done = True  # Mark the process as done due to timeout
+            # state, reward, done = None, np.nan, False
+            # result = self.run_with_timeout(self.step_value, 0.01, action_modified)
+            # if result != np.nan:
+            #     state, reward, done = result
+            # else:
+            #     done = True  # Mark the process as done due to timeout
 
             # print("\nsolution, state, reward: " + str(site1_candidate[index_site1]) + ", " + str(state) + ", " + str(reward))
 
@@ -589,14 +591,14 @@ class InvOptEnv:
                 GP_states.append(state)
 
             # the original
-            # state, reward, done = self.step_value(action_modified)
+            state, reward, done = self.step_value(action_modified)
             # todo: to stop bad run and save training time by mengxu 2024.8.27
-            state, reward, done = None, np.nan, False
-            result = self.run_with_timeout(self.step_value, 0.01, action_modified)
-            if result != np.nan:
-                state, reward, done = result
-            else:
-                done = True  # Mark the process as done due to timeout
+            # state, reward, done = None, np.nan, False
+            # result = self.run_with_timeout(self.step_value, 0.01, action_modified)
+            # if result != np.nan:
+            #     state, reward, done = result
+            # else:
+            #     done = True  # Mark the process as done due to timeout
 
             if GP_actions is not None:
                 GP_actions.append(action_modified)

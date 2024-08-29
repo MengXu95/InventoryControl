@@ -9,9 +9,10 @@ import math
 from datetime import datetime
 from torch.distributions import Categorical
 
-from MTGP_niching.replenishment import *
-from MTGP_niching.transshipment import *
+from CCGP_niching.replenishment import *
+from CCGP_niching.transshipment import *
 import threading
+import time
 
 # np.random.seed(0)
 # ###############training##########################################
@@ -246,7 +247,7 @@ class InvOptEnv:
                      retailer_j.fixed_order_cost, retailer_j.pipeline[0],
                      # only suitable for LT = 2
                      retailer_j.forecast[0], retailer_j.forecast[1],
-                     retailer.transshipment_cost, retailer.fixed_order_transshipment_cost])
+                     retailer_j.transshipment_cost, retailer_j.fixed_order_transshipment_cost])
                 state_transshipment.append(state_transshipment_retailer_pair)
         self.state.append(state_transshipment)
         #the following is the original
@@ -331,9 +332,10 @@ class InvOptEnv:
                          retailer_j.fixed_order_cost, retailer_j.pipeline[0],
                          # only suitable for LT = 2
                          retailer_j.forecast[0], retailer_j.forecast[1],
-                         retailer.transshipment_cost, retailer.fixed_order_transshipment_cost])
+                         retailer_j.transshipment_cost, retailer_j.fixed_order_transshipment_cost])
                     state_transshipment.append(state_transshipment_retailer_pair)
             self.state.append(state_transshipment)
+            return self.state, reward, terminate
             # the following is the original
             # self.state = np.array(
             #     [retailer.inv_level for retailer in self.retailers] + [x for retailer in self.retailers for x in
@@ -430,15 +432,12 @@ class InvOptEnv:
                          retailer_j.fixed_order_cost, retailer_j.pipeline[0],
                          # only suitable for LT = 2
                          retailer_j.forecast[0], retailer_j.forecast[1],
-                         retailer.transshipment_cost, retailer.fixed_order_transshipment_cost])
+                         retailer_j.transshipment_cost, retailer_j.fixed_order_transshipment_cost])
                     state_transshipment.append(state_transshipment_retailer_pair)
             self.state.append(state_transshipment)
-
-        return self.state, reward, terminate
+            return self.state, reward, terminate
 
     def run(self, individual): # add by xumeng 2024.8.1
-        timer = threading.Timer(5, self.timeout_handler())
-        timer.start()
         # run simulation
         state = self.reset()
         current_ep_reward = 0
@@ -455,63 +454,6 @@ class InvOptEnv:
                 replenishment_policy = individual[0]
                 transshipment_policy = individual[1]
 
-            # ------- strategy 2 ---------------------
-            # quantity_site1 = round(GP_evolve_S(state, replenishment_site1))
-            # quantity_site2 = round(GP_evolve_R(state, replenishment_site2))
-            #
-            # if quantity_site1 < site1_candidate[0]:
-            #     quantity_site1 = site1_candidate[0]
-            # if quantity_site1 > site1_candidate[len(site1_candidate)-1]:
-            #     quantity_site1 = site1_candidate[len(site1_candidate)-1]
-            #
-            # if quantity_site2 < site2_candidate[0]:
-            #     quantity_site2 = site2_candidate[0]
-            # if quantity_site2 > site2_candidate[len(site2_candidate)-1]:
-            #     quantity_site2 = site2_candidate[len(site2_candidate)-1]
-            #
-            # action_modified = [0, quantity_site1, quantity_site2]
-            # ------- strategy 2 ---------------------
-
-            # # ------- strategy 1 ---------------------
-            # # the action space of this one is the same as jinsheng
-            # quantity_site1 = GP_evolve_S(state, replenishment_site1)
-            # quantity_site2 = GP_evolve_R(state, replenishment_site2)
-            #
-            # index_site1 = 0
-            # min_dis = np.Infinity
-            # for i in range(1,len(site1_candidate)):
-            #     dis = np.abs(quantity_site1-site1_candidate[i])
-            #     if dis < min_dis:
-            #         index_site1 = i
-            #         min_dis = dis
-            #
-            # index_site2 = 0
-            # min_dis = np.Infinity
-            # for i in range(1,len(site2_candidate)):
-            #     dis = np.abs(quantity_site2-site2_candidate[i])
-            #     if dis < min_dis:
-            #         index_site2 = i
-            #         min_dis = dis
-            #
-            # action_modified = [0, site1_candidate[index_site1], site2_candidate[index_site2]]
-            # # ------- strategy 1 ---------------------
-
-            # ------- strategy 1 ---------------------
-            # the action space of this one is the same as jinsheng
-            # for the scenario that only consider one site
-            # quantity_site1 = GP_evolve_S(state, replenishment_site1)
-            #
-            # index_site1 = 0
-            # min_dis = np.Infinity
-            # for i in range(len(site1_candidate)):
-            #     dis = np.abs(quantity_site1 - site1_candidate[i])
-            #     if dis < min_dis:
-            #         index_site1 = i
-            #         min_dis = dis
-            #
-            # action_modified = [0, site1_candidate[index_site1], 0]
-            # ------- strategy 1 ---------------------
-
             # ------- strategy 3 ---------------------
             # the action space of this one is the same as jinsheng
             # for the scenario that only consider one site
@@ -519,6 +461,7 @@ class InvOptEnv:
             # get transshipment state for all pairs of sites/retailers
             transshipment_state = state[1]
             replenishment_state = state[0]
+
             for each_transshipment_state in transshipment_state:
                 transshipment_quantity = round(GP_evolve_R(each_transshipment_state, transshipment_policy), 2)
                 action_modified.append(transshipment_quantity)
@@ -529,17 +472,17 @@ class InvOptEnv:
                 action_modified.append(replenishment_quantity)
             # ------- strategy 3 ---------------------
 
-                # the original
-                # state, reward, done = self.step_value(action_modified)
+            # the original
+            state, reward, done = self.step_value(action_modified)
+            # it is weird why this function can take so long to run???? 2024.8.29
 
-                # todo: to stop bad run and save training time by mengxu 2024.8.27
-                # todo: error!!!! Need to handle this!!! tomorrow!!!
-                state, reward, done = None, np.nan, False
-                result = self.run_with_timeout(self.step_value, 1, action_modified)
-                if result != np.nan:
-                    state, reward, done = result
-                else:
-                    done = True  # Mark the process as done due to timeout
+            # todo: to stop bad run and save training time by mengxu 2024.8.27
+            # state, reward, done = None, np.nan, False
+            # result = self.run_with_timeout(self.step_value, 1, action_modified)
+            # if result != np.nan:
+            #     state, reward, done = result
+            # else:
+            #     done = True  # Mark the process as done due to timeout
 
             # print("\nsolution, state, reward: " + str(site1_candidate[index_site1]) + ", " + str(state) + ", " + str(reward))
 
@@ -580,6 +523,7 @@ class InvOptEnv:
             # get transshipment state for all pairs of sites/retailers
             transshipment_state = state[1]
             replenishment_state = state[0]
+            start = time.time()
             for each_transshipment_state in transshipment_state:
                 transshipment_quantity = round(GP_pair_R_test(each_transshipment_state, transshipment_policy),2)
                 action_modified.append(transshipment_quantity)
@@ -588,20 +532,22 @@ class InvOptEnv:
                 if replenishment_quantity<0:
                     replenishment_quantity=0
                 action_modified.append(replenishment_quantity)
+            end = time.time()
+            running_time = end - start
+            print("time:" + str(running_time))
             # ------- strategy 3 ---------------------
             if GP_states is not None:
                 GP_states.append(state)
             # the original
-            # state, reward, done = self.step_value(action_modified)
+            state, reward, done = self.step_value(action_modified)
 
             # todo: to stop bad run and save training time by mengxu 2024.8.27
-            state, reward, done = None, np.nan, False
-            result = self.run_with_timeout(self.step_value, 0.01,action_modified)
-            if result != np.nan:
-                state, reward, done = result
-            else:
-                done = True  # Mark the process as done due to timeout
-
+            # state, reward, done = None, np.nan, False
+            # result = self.run_with_timeout(self.step_value, 0.01,action_modified)
+            # if result != np.nan:
+            #     state, reward, done = result
+            # else:
+            #     done = True  # Mark the process as done due to timeout
 
             if GP_actions is not None:
                 GP_actions.append(action_modified)

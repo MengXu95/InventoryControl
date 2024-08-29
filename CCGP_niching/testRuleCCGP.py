@@ -7,8 +7,8 @@ from datetime import datetime
 from torch.distributions import Categorical
 import CCGP_niching.LoadIndividual as mtload
 import CCGP_niching.saveFile as mtsave
-from MTGP_niching.replenishment import *
-from MTGP_niching.transshipment import *
+from CCGP_niching.replenishment import *
+from CCGP_niching.transshipment import *
 from CCGP_niching.Inventory_simulator import InvOptEnv
 import os
 from Utils.ScenarioDesign import ScenarioDesign

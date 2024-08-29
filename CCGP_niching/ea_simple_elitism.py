@@ -212,7 +212,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
         min_fitness.append(best_fit)
         best_ind_all_gen.append(best_combined_ind)  # add by mengxu
         p_one = best_combined_ind
-        saveFile.save_individual_each_gen_to_txt(seed, dataset_name, p_one, 0)
+        saveFile.save_individual_each_gen_to_txt(seed, dataset_name, p_one, gen)
 
         # add by mengxu 2024.8.5 for niching---------------------------
         nich.calculate_phenoCharacterisation(best_combined_ind)

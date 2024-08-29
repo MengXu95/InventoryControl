@@ -130,8 +130,8 @@ def init_toolbox_two_pset(toolbox, pset1, pset2, num_tree=2):
     toolbox.register("compile2", gp.compile, pset=pset2)
 
     # Register mutation with the expression function from the first pset
-    toolbox.register("expr_mut1", gp.genHalfAndHalf, pset=pset1, min_=2, max_=8)
-    toolbox.register("expr_mut2", gp.genHalfAndHalf, pset=pset2, min_=2, max_=8)
+    toolbox.register("expr_mut1", gp.genHalfAndHalf, pset=pset1, min_=2, max_=4)
+    toolbox.register("expr_mut2", gp.genHalfAndHalf, pset=pset2, min_=2, max_=4)
 
     # Register mating and mutation functions
     toolbox.register("mate", lim_xmate)

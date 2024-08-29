@@ -46,9 +46,9 @@ class ScenarioDesign():
         ini_inv = [10] * num_retailer  # Initial inventory levels
         lost_sales = [b * h for h in holding]  # Per unit lost sales costs
         capacity = [5 * demand_level] * num_retailer  # Inventory capacities
-        fixed_order = [10] * num_retailer  # Fixed order costs per order
-        per_trans_item = 5  # Per unit cost for transshipment (either direction)
-        per_trans_order = 20  # Fixed cost per transshipment (either direction)
+        fixed_order = [20] * num_retailer  # Fixed order costs per order
+        per_trans_item = 1  # Per unit cost for transshipment (either direction)
+        per_trans_order = 10  # Fixed cost per transshipment (either direction)
 
         # Returning as a dictionary
         return {
