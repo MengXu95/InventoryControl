@@ -581,10 +581,10 @@ class InvOptEnv:
             transshipment_state = state[1]
             replenishment_state = state[0]
             for each_transshipment_state in transshipment_state:
-                transshipment_quantity = round(GP_pair_R_test(each_transshipment_state, transshipment_policy))
+                transshipment_quantity = round(GP_pair_R_test(each_transshipment_state, transshipment_policy),2)
                 action_modified.append(transshipment_quantity)
             for each_replenishment_state in replenishment_state:
-                replenishment_quantity = round(GP_pair_S_test(each_replenishment_state, replenishment_policy))
+                replenishment_quantity = round(GP_pair_S_test(each_replenishment_state, replenishment_policy),2)
                 if replenishment_quantity<0:
                     replenishment_quantity=0
                 action_modified.append(replenishment_quantity)
@@ -595,9 +595,8 @@ class InvOptEnv:
             # state, reward, done = self.step_value(action_modified)
 
             # todo: to stop bad run and save training time by mengxu 2024.8.27
-            # todo: error!!!! Need to handle this!!! tomorrow!!!
             state, reward, done = None, np.nan, False
-            result = self.run_with_timeout(self.step_value, 1,action_modified)
+            result = self.run_with_timeout(self.step_value, 0.01,action_modified)
             if result != np.nan:
                 state, reward, done = result
             else:
