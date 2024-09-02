@@ -1,7 +1,7 @@
-import MTGP_niching.niching.PhenoCharacterisation as PhenoCharacterisation
+import CCGP_niching.niching.PhenoCharacterisation as PhenoCharacterisation
 import numpy as np
 
-import MTGP_niching.replenishment as replenishment
+import CCGP_niching.replenishment as replenishment
 
 
 class ReplenishmentPhenoCharacterisation(PhenoCharacterisation.PhenoCharacterisation):
@@ -18,7 +18,7 @@ class ReplenishmentPhenoCharacterisation(PhenoCharacterisation.PhenoCharacterisa
             replenishment_data = replenishmentDecision.getData()
             state = replenishment_data[0]
             for state_retailer in state:
-                quantity = round(replenishment.GP_evolve_S(state_retailer, self.referenceRule))
+                quantity = round(replenishment.GP_evolve_S(state_retailer, self.referenceRule),2)
                 self.decisions.append(quantity)
             # the following is the original with candidate selection
             # candidate_action = replenishment_data[1]
@@ -44,7 +44,7 @@ class ReplenishmentPhenoCharacterisation(PhenoCharacterisation.PhenoCharacterisa
             replenishment_data = replenishmentDecision.getData()
             state = replenishment_data[0]
             for state_retailer in state:
-                quantity = round(replenishment.GP_evolve_S(state_retailer, rule))
+                quantity = round(replenishment.GP_evolve_S(state_retailer, rule),2)
                 charlist.append(quantity)
             # the following is the original with candidate selection
             # candidate_action = replenishment_data[1]

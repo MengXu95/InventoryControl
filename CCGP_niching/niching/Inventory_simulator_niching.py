@@ -9,10 +9,10 @@ import math
 from datetime import datetime
 from torch.distributions import Categorical
 
-from MTGP_niching.replenishment import *
-from MTGP_niching.transshipment import *
-import MTGP_niching.niching.ReplenishmentDecisionSituation as ReplenishmentDecisionSituation
-import MTGP_niching.niching.TransshipmentDecisionSituation as TransshipmentDecisionSituation
+from CCGP_niching.replenishment import *
+from CCGP_niching.transshipment import *
+import CCGP_niching.niching.ReplenishmentDecisionSituation as ReplenishmentDecisionSituation
+import CCGP_niching.niching.TransshipmentDecisionSituation as TransshipmentDecisionSituation
 
 # np.random.seed(0)
 ###############training##########################################

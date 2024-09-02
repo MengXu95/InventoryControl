@@ -18,7 +18,7 @@ class TransshipmentPhenoCharacterisation(PhenoCharacterisation.PhenoCharacterisa
             transshipment_data = transshipmentDecision.getData()
             state = transshipment_data[0]
             for state_retailer_pair in state:
-                quantity = round(transshipment.GP_evolve_R(state_retailer_pair, self.referenceRule))
+                quantity = round(transshipment.GP_evolve_R(state_retailer_pair, self.referenceRule),2)
                 self.decisions.append(quantity)
             # the following is the original with candidate selection
             # candidate_action = transshipment_data[1]
@@ -44,7 +44,7 @@ class TransshipmentPhenoCharacterisation(PhenoCharacterisation.PhenoCharacterisa
             transshipment_data = transshipmentDecision.getData()
             state = transshipment_data[0]
             for state_retailer_pair in state:
-                quantity = round(transshipment.GP_evolve_R(state_retailer_pair, rule))
+                quantity = round(transshipment.GP_evolve_R(state_retailer_pair, rule),2)
                 charlist.append(quantity)
             # the following is the original with candidate selection
             # candidate_action = transshipment_data[1]

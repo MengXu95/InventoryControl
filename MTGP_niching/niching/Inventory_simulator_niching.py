@@ -595,8 +595,8 @@ class InvOptEnv:
 
 
             # ------- strategy 2 ---------------------
-            # quantity_site1 = round(GP_evolve_S(state, replenishment_site1))
-            # quantity_site2 = round(GP_evolve_R(state, replenishment_site2))
+            # quantity_site1 = round(GP_evolve_S(state, replenishment_site1),2)
+            # quantity_site2 = round(GP_evolve_R(state, replenishment_site2),2)
             #
             # if quantity_site1 < site1_candidate[0]:
             #     quantity_site1 = site1_candidate[0]
@@ -643,10 +643,10 @@ class InvOptEnv:
             transshipment_state = state[1]
             replenishment_state = state[0]
             for each_transshipment_state in transshipment_state:
-                transshipment_quantity = round(GP_evolve_R(each_transshipment_state, transshipment_policy))
+                transshipment_quantity = round(GP_evolve_R(each_transshipment_state, transshipment_policy),2)
                 action_modified.append(transshipment_quantity)
             for each_replenishment_state in replenishment_state:
-                replenishment_quantity = round(GP_evolve_S(each_replenishment_state, replenishment_policy))
+                replenishment_quantity = round(GP_evolve_S(each_replenishment_state, replenishment_policy),2)
                 action_modified.append(replenishment_quantity)
             # ------- strategy 3 ---------------------
 

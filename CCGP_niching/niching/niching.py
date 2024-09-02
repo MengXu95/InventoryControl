@@ -1,9 +1,9 @@
-import MTGP_niching.niching.PhenoCharacterisation as PhenoCharacterisation
+import CCGP_niching.niching.PhenoCharacterisation as PhenoCharacterisation
 import numpy as np
-import MTGP_niching.replenishment as sequencing
-import MTGP_niching.niching.ReplenishmentPhenoCharacterisation as ReplenishmentPhenoCharacterisation
-import MTGP_niching.niching.TransshipmentPhenoCharacterisation as TransshipmentPhenoCharacterisation
-from MTGP_niching.niching.Inventory_simulator_niching import *
+import CCGP_niching.replenishment as sequencing
+import CCGP_niching.niching.ReplenishmentPhenoCharacterisation as ReplenishmentPhenoCharacterisation
+import CCGP_niching.niching.TransshipmentPhenoCharacterisation as TransshipmentPhenoCharacterisation
+from CCGP_niching.niching.Inventory_simulator_niching import *
 
 class simulator_niching:
     def __init__(self, num_decision_points, individual, **kwargs):

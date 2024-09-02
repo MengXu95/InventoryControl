@@ -1,4 +1,4 @@
-import MTGP_niching.niching.DecisionSituation as DecisionSituation
+import CCGP_niching.niching.DecisionSituation as DecisionSituation
 
 class TransshipmentDecisionSituation(DecisionSituation.DecisionSituation):
     def __init__(self, data, **kwargs):
