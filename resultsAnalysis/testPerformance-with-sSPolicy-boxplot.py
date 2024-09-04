@@ -5,7 +5,7 @@ import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
 # Algorithms and their associated colors
-algorithms = ["CCGP", "MTGP", "NichMTGP"]
+algorithms = ["sSPolicy", "CCGP", "MTGP", "NichMTGP"]
 colors = {
     "CCGP": "blue",
     "sSPolicy": "orange",
@@ -43,11 +43,17 @@ data = {scenario: [] for scenario in scenarios}
 for algo, folder in folders.items():
     for scenario in scenarios:
         for run in range(1, runs + 1):
-            file_path = os.path.join(folder, f'scenario_{scenario}/test/{run}_{scenario}_testResults.csv')
-            df = pd.read_csv(file_path)
-            gen = len(df['TestFitness'])
-            result = df['TestFitness'][gen - 1]
-            data[scenario].append({'Algorithm': algo, 'Run': run, 'TestFitness': result})
+            if algo == 'sSPolicy':
+                file_path = os.path.join(folder, f'scenario_{scenario}/{run}_{scenario}_sSPolicy_test_results.csv')
+                df = pd.read_csv(file_path)
+                result = df['TestFitness'].iloc[0]
+                data[scenario].append({'Algorithm': algo, 'Run': run, 'TestFitness': result})
+            else:
+                file_path = os.path.join(folder, f'scenario_{scenario}/test/{run}_{scenario}_testResults.csv')
+                df = pd.read_csv(file_path)
+                gen = len(df['TestFitness'])
+                result = df['TestFitness'][gen - 1]
+                data[scenario].append({'Algorithm': algo, 'Run': run, 'TestFitness': result})
 
 for scenario in data:
     test_fitness_values = [entry['TestFitness'] for entry in data[scenario]]

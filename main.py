@@ -3,6 +3,8 @@ import CCGP_niching.GPFC as CCGPmain_niching
 import MTGP_niching.GPFC as GPmain_niching
 import MTGP_niching.testRuleMTGP as testRuleMTGP
 import CCGP_niching.testRuleCCGP as testRuleCCGP
+import sSPolicy.trainRulesSPolicy as trainRulesSPolicy
+import sSPolicy.testRulesSPolicy as testRulesSPolicy
 
 sys.path
 
@@ -23,3 +25,6 @@ if __name__ == '__main__':
     elif algo == 'testRuleCCGP':
         print('----------testRuleCCGP----------')
         testRuleCCGP.main(dataset_name, seed)
+    elif algo == 'trainRulesSPolicy':
+        print('----------trainRulesSPolicy----------')
+        trainRulesSPolicy.main(dataset_name, seed)
