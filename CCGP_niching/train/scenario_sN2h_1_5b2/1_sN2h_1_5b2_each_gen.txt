@@ -1,0 +1,36 @@
+Best individuals from each gen:
+
+Gen: 0
+Individual:
+Tree 0:
+subtract('FC2', square(protected_div('INL', protected_sqrt('INL'))))
+Tree 1:
+subtract('INL2', 'PLSC2')
+
+Gen: 0
+Individual:
+Tree 0:
+subtract('FC2', square(protected_div('INL', protected_sqrt('INL'))))
+Tree 1:
+subtract('INL2', 'PLSC2')
+
+Gen: 1
+Individual:
+Tree 0:
+subtract('FC2', square(protected_div('INL', protected_sqrt('INL'))))
+Tree 1:
+subtract(protected_sqrt(maximum('PHC1', 'PHC2')), 'FC21')
+
+Gen: 2
+Individual:
+Tree 0:
+subtract('FC2', square(protected_div('INL', protected_sqrt(protected_sqrt('PTC')))))
+Tree 1:
+subtract(subtract('FOC1', 'PHC2'), 'FC22')
+
+Gen: 3
+Individual:
+Tree 0:
+subtract('FC2', square(protected_div('INL', protected_sqrt('INL'))))
+Tree 1:
+subtract(subtract('FOC2', protected_sqrt('FTC')), 'FC22')

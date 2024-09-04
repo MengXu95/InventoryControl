@@ -134,8 +134,8 @@ def init_toolbox_two_pset(toolbox, pset1, pset2):
     toolbox.register("expr_mut2", gp.genHalfAndHalf, pset=pset2, min_=2, max_=4)
 
     # Register mating and mutation functions, specific to the subpopulation
-    toolbox.register("mate1", gp.cxOnePoint)
-    toolbox.register("mate2", gp.cxOnePoint)
+    toolbox.register("mate1", lim_xmate)
+    toolbox.register("mate2", lim_xmate)
     toolbox.register("mutate1", lim_xmut, expr=toolbox.expr_mut1)
     toolbox.register("mutate2", lim_xmut, expr=toolbox.expr_mut2)
 
@@ -162,7 +162,8 @@ def init_toolbox_two_pset(toolbox, pset1, pset2):
 
 
 def maxheight(v):
-    return max(i.height for i in v)
+    return v.height # this is for single-tree
+    # return max(i.height for i in v) # this is for multi-tree
 
 
 # stolen from gp.py....because you can't pickle decorated functions.
@@ -170,23 +171,17 @@ def wrap(func, *args, **kwargs):
     MAX_HEIGHT = 8 #todo: only for test, need to be the same with original GPFC.py
     keep_inds = [copy.deepcopy(ind) for ind in args]
     new_inds = list(func(*args, **kwargs))
-    if maxheight(new_inds) > MAX_HEIGHT:  # original
-        new_inds = (random.choice(keep_inds),)
+    for i, ind in enumerate(new_inds):
+        if maxheight(ind) > MAX_HEIGHT:  # original
+            new_inds[i] = random.choice(keep_inds)
     # while maxheight(new_inds) > MAX_HEIGHT: # modified by mengxu 2024.8.24
     #     new_inds = list(func(*args, **kwargs))
     return new_inds
 
 # the following is modified by mengxu
 def xmate(ind1, ind2):
-    i1 = random.randrange(len(ind1))
-    # i2 = random.randrange(len(ind2))
     #todo: I think this is not same with my MTGP, as only the same type of tree can be used to do crossover
-    ind1[i1], ind2[i1] = gp.cxOnePoint(ind1[i1], ind2[i1])
-
-    #exchange the other tree
-    if len(ind1) == 2:
-        i2 = 1 - i1 # only for individual with two tree
-        ind1[i2], ind2[i2] = ind2[i2], ind1[i2]
+    ind1, ind2 = gp.cxOnePoint(ind1, ind2)
     return ind1, ind2
 
 # def xmate(ind1, ind2):

@@ -643,10 +643,10 @@ class InvOptEnv:
             transshipment_state = state[1]
             replenishment_state = state[0]
             for each_transshipment_state in transshipment_state:
-                transshipment_quantity = round(GP_evolve_R(each_transshipment_state, transshipment_policy))
+                transshipment_quantity = round(GP_evolve_R(each_transshipment_state, transshipment_policy),2)
                 action_modified.append(transshipment_quantity)
             for each_replenishment_state in replenishment_state:
-                replenishment_quantity = round(GP_evolve_S(each_replenishment_state, replenishment_policy))
+                replenishment_quantity = round(GP_evolve_S(each_replenishment_state, replenishment_policy),2)
                 action_modified.append(replenishment_quantity)
             # ------- strategy 3 ---------------------
 

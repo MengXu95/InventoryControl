@@ -15,11 +15,24 @@ colors = {
 workdir = "C:/Users/I3Nexus/Desktop/PaperInventoryManagement/Results/"
 folders = {algo: os.path.join(workdir, algo, "train") for algo in algorithms}
 
-# List of scenarios
-scenarios = ["sN2h_1_5b2", "sN2h_1_5b3", "sN2h_5_10b5", "sN2h_5_10b10",
-             "sN2h_10_50b2", "sN2h_10_50b3", "sN2h_50_100b5", "sN2h_100_100b10",
-             "sN3h_5_10_50b5", "sN3h_5_5_50b10", "sN3h_10_50_50b2",
-             "sN3h_10_50_100b3", "sN3h_50_50_50b5", "sN3h_50_50_100b10"]
+# List of small scenarios
+scenarios = ["sN2h_1_5b2", "sN2h_1_10b3", "sN2h_5_10b5", "sN2h_5_50b10",
+             "sN2h_10_50b2", "sN2h_10_100b3", "sN2h_50_100b5", "sN2h_100_100b10",
+             "sN3h_1_5_10b2", "sN3h_1_5_50b3", "sN3h_5_10_50b5", "sN3h_5_5_50b10",
+             "sN3h_10_50_50b2", "sN3h_10_50_100b3", "sN3h_50_50_50b5", "sN3h_50_50_100b10"]
+scenarios_type = 'small'
+# List of medium scenarios
+# scenarios = ["mN2h_1_5b2", "mN2h_1_10b3", "mN2h_5_10b5", "mN2h_5_50b10",
+#              "mN2h_10_50b2", "mN2h_10_100b3", "mN2h_50_100b5", "mN2h_100_100b10",
+#              "mN3h_1_5_10b2", "mN3h_1_5_50b3", "mN3h_5_10_50b5", "mN3h_5_5_50b10",
+#              "mN3h_10_50_50b2", "mN3h_10_50_100b3", "mN3h_50_50_50b5", "mN3h_50_50_100b10"]
+# scenarios_type = 'medium'
+# List of large scenarios
+scenarios = ["lN2h_1_5b2", "lN2h_1_10b3", "lN2h_5_10b5", "lN2h_5_50b10",
+             "lN2h_10_50b2", "lN2h_10_100b3", "lN2h_50_100b5", "lN2h_100_100b10",
+             "lN3h_1_5_10b2", "lN3h_1_5_50b3", "lN3h_5_10_50b5", "lN3h_5_5_50b10",
+             "lN3h_10_50_50b2", "lN3h_10_50_100b3", "lN3h_50_50_50b5", "lN3h_50_50_100b10"]
+scenarios_type = 'large'
 
 runs = 30
 
@@ -77,6 +90,13 @@ for i, scenario in enumerate(scenarios):
                 marker_color=colors[algo],
                 boxmean=True
             ),
+            # go.Violin(
+            #     y=algo_data['TestFitness'],
+            #     name=algo,
+            #     marker_color=colors[algo],
+            #     box_visible=True,  # Show box inside the violin plot
+            #     meanline_visible=True
+            # ),
             row=row, col=col
         )
 
@@ -93,93 +113,9 @@ fig.update_layout(
 )
 
 # Save the figure as a PDF
-fig.write_image(workdir + "test_fitness_comparison.pdf")
+fig.write_image(workdir + "test_fitness_comparison_" + scenarios_type + ".pdf")
 
 # Show the figure
 fig.show()
 
 
-
-# import os
-# import pandas as pd
-# import matplotlib.pyplot as plt
-# import seaborn as sns
-# import numpy as np
-#
-# algorithms = ["ResultsCCGP", "ResultsNichCCGP", "ResultsMTGP", "ResultsNichMTGP"]
-# workdir = "C:/Users/I3Nexus/Desktop/PaperInventoryManagement/"
-# # Set the paths to the folders containing the CSV files for each algorithm
-# folders = {}
-# for algo in algorithms:
-#     path = workdir + algo + "/train/"
-#     folders[algo] = path
-#
-#
-# # List of scenarios (assuming they are named consistently across all folders)
-# scenarios = ["sN2h_1_5b2", "sN2h_1_5b3", "sN2h_5_10b5", "sN2h_5_10b10",
-#              "sN2h_10_50b2", "sN2h_10_50b3", "sN2h_50_100b5", "sN2h_100_100b10",
-#              "sN3h_5_10_50b5", "sN3h_5_5_50b10",
-#              "sN3h_10_50_100b3", "sN3h_50_50_50b5", "sN3h_50_50_100b10"
-#              ]
-#
-# # scenarios = ["sN2h_1_5b2", "sN2h_1_5b3", "sN2h_5_10b5", "sN2h_5_10b10",
-# #              "sN2h_10_50b2", "sN2h_10_50b3", "sN2h_50_100b5", "sN2h_100_100b10",
-# #              "sN3h_1_5_10b2", "sN3h_1_5_50b3", "sN3h_5_10_50b5", "sN3h_5_5_50b10",
-# #              "sN3h_10_50_50b2", "sN3h_10_50_100b3", "sN3h_50_50_50b5", "sN3h_50_50_100b10"]
-# runs = 30
-#
-# # Initialize a dictionary to hold data for all algorithms and scenarios
-# data = {scenario: [] for scenario in scenarios}
-#
-# # Read the CSV files and store the data
-# for algo, folder in folders.items():
-#     for scenario in scenarios:
-#         for run in range(1,runs+1):
-#             file_path = os.path.join(folder, f'scenario_{scenario}/test/{run}_{scenario}_testResults.csv')
-#             # print(file_path)
-#             df = pd.read_csv(file_path)
-#
-#             gen = len(df['TestFitness'])
-#             # Assume that the result is in a column named 'Result'
-#             result = df['TestFitness'][gen-1]
-#             data[scenario].append({'Algorithm': algo, 'Run': run, 'TestFitness': result})
-#
-# for scenario in data:
-#     # Extract all TestFitness values for this scenario
-#     test_fitness_values = [entry['TestFitness'] for entry in data[scenario]]
-#
-#     # Determine the worst value (assuming higher values are worse; change as necessary)
-#     worst_value = max(test_fitness_values) if len(test_fitness_values) > 0 else np.nan
-#
-#     # Replace NaN with the worst value
-#     for entry in data[scenario]:
-#         if np.isnan(entry['TestFitness']):
-#             entry['TestFitness'] = worst_value
-#
-#     test_fitness_values = [entry['TestFitness'] for entry in data[scenario]]
-#
-#     # Calculate the median value
-#     median_value = np.median(test_fitness_values)
-#
-#     # Replace worst value with the median_value * 3
-#     for entry in data[scenario]:
-#         if entry['TestFitness'] > median_value * 1.5:
-#             entry['TestFitness'] = median_value * 1.5
-#
-#
-# # Convert the data into a pandas DataFrame
-# df_all = pd.concat([pd.DataFrame(data[scenario]) for scenario in scenarios])
-#
-# # Create a boxplot figure with subplots for each scenario
-# fig, axes = plt.subplots(4, 4, figsize=(20, 20))
-# axes = axes.flatten()
-#
-# for i, scenario in enumerate(scenarios):
-#     sns.boxplot(x='Algorithm', y='TestFitness', data=pd.DataFrame(data[scenario]), ax=axes[i])
-#     axes[i].set_title(scenario)
-#     axes[i].set_xlabel('')
-#     axes[i].set_ylabel('Test Performance')
-#
-# # Adjust layout to prevent overlap
-# plt.tight_layout()
-# plt.show()

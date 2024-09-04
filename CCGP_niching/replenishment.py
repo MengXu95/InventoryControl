@@ -143,12 +143,22 @@ def protected_sqrt(x):
         value = 0.0
     return value
 
-def safe_multiply(a, b):
-    with np.errstate(over='ignore', invalid='ignore'):  # Suppress overflow warnings
-        value = np.multiply(a, b)
-        if np.isinf(value) or np.isnan(value):
-            value = np.inf  # Set overflowed or invalid results to infinity
-    return value
+
+def safe_multiply(val1, val2):
+    try:
+        # Ensure the values are floats
+        val1 = float(val1)
+        val2 = float(val2)
+
+        # Check for infinity or NaN
+        if np.isinf(val1) or np.isnan(val1) or np.isinf(val2) or np.isnan(val2):
+            return np.inf  # or some safe value
+
+        return val1 * val2
+    except (ValueError, TypeError):
+        # Handle cases where conversion to float fails
+        return np.inf  # or some default safe value
+
 
 def safe_subtract(a, b):
     with np.errstate(over='ignore', invalid='ignore'):  # Suppress overflow warnings
@@ -157,6 +167,7 @@ def safe_subtract(a, b):
             value = np.inf  # Set overflowed or invalid results to infinity
     return value
 
+
 def safe_add(a, b):
     with np.errstate(over='ignore', invalid='ignore'):  # Suppress overflow warnings
         value = np.add(a, b)
@@ -164,10 +175,15 @@ def safe_add(a, b):
             value = np.inf  # Set overflowed or invalid results to infinity
     return value
 
+
 def safe_square(a):
     with np.errstate(over='ignore', invalid='ignore'):  # Suppress overflow warnings
-        value = np.square(a)
-        if np.isinf(value) or np.isnan(value):
-            value = np.inf  # Set overflowed or invalid results to infinity
+        try:
+            a = float(a)
+            if np.isinf(a) or np.isnan(a):
+                return np.inf
+            return np.square(a)
+        except (ValueError, TypeError):
+            # Handle cases where conversion to float fails
+            return np.inf  # or some default safe value
     return value
-

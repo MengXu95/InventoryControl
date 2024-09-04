@@ -17,6 +17,8 @@ class PhenoCharacterisation:
         distance = 0.0
         for i in range(len(charList1)):
             diff = charList1[i] - charList2[i]
+            if abs(diff) > 1e8:
+                return np.inf
             distance += diff * diff
         return np.sqrt(distance)
 
