@@ -1,8 +1,10 @@
 import sys
 import CCGP_niching.GPFC as CCGPmain_niching
 import MTGP_niching.GPFC as GPmain_niching
+import DRL.DRL_main as DRL_main
 import MTGP_niching.testRuleMTGP as testRuleMTGP
 import CCGP_niching.testRuleCCGP as testRuleCCGP
+import DRL.testRuleDRL as testRuleDRL
 import sSPolicy.trainRulesSPolicy as trainRulesSPolicy
 import sSPolicy.testRulesSPolicy as testRulesSPolicy
 
@@ -19,12 +21,18 @@ if __name__ == '__main__':
     elif algo == 'MTGP_niching':
         print('----------MTGP_niching----------')
         GPmain_niching.main(dataset_name, seed)
+    elif algo == 'DRL':
+        print('----------DRL----------')
+        DRL_main.main(dataset_name, seed)
     elif algo == 'testRuleMTGP':
         print('----------testRuleMTGP----------')
         testRuleMTGP.main(dataset_name, seed)
     elif algo == 'testRuleCCGP':
         print('----------testRuleCCGP----------')
         testRuleCCGP.main(dataset_name, seed)
+    elif algo == 'testRuleDRL':
+        print('----------testRuleDRL----------')
+        testRuleDRL.main(dataset_name, seed)
     elif algo == 'trainRulesSPolicy':
-        print('----------trainRulesSPolicy----------')
+        print('----------trainAndTestRulesSPolicy----------')
         trainRulesSPolicy.main(dataset_name, seed)
