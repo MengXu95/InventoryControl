@@ -1,0 +1,358 @@
+Best individuals from each gen:
+
+Gen: 0
+Individual:
+Tree 0:
+subtract('FC2', 'INL')
+Tree 1:
+minimum(maximum(protected_sqrt('FOC1'), protected_div('FTC', 'FOC2')), 'FOC2')
+
+Gen: 1
+Individual:
+Tree 0:
+subtract('FC2', 'INL')
+Tree 1:
+minimum(maximum(protected_sqrt('FOC1'), protected_div('FTC', 'FOC2')), 'FOC2')
+
+Gen: 2
+Individual:
+Tree 0:
+subtract('FC2', 'FOC')
+Tree 1:
+maximum('PLSC1', protected_sqrt('FC11'))
+
+Gen: 3
+Individual:
+Tree 0:
+subtract('FC2', 'FTC')
+Tree 1:
+subtract('FC12', 'PHC1')
+
+Gen: 4
+Individual:
+Tree 0:
+subtract('FC2', minimum('PIP', 'FTC'))
+Tree 1:
+multiply('FOC2', 'FTC')
+
+Gen: 5
+Individual:
+Tree 0:
+subtract('FC2', minimum('PIP', 'FTC'))
+Tree 1:
+multiply('FOC2', 'FTC')
+
+Gen: 6
+Individual:
+Tree 0:
+subtract('FC2', 'INL')
+Tree 1:
+multiply(protected_div(subtract(subtract(protected_sqrt('FOC1'), maximum('PTC', 'FC11')), protected_div('FC11', maximum('FC12', protected_sqrt('INL2')))), 'INL2'), 'FTC')
+
+Gen: 7
+Individual:
+Tree 0:
+maximum('INL', protected_div(square(subtract('FC2', 'INL')), 'FTC'))
+Tree 1:
+subtract('FOC2', 'PLSC2')
+
+Gen: 8
+Individual:
+Tree 0:
+subtract('FC2', minimum('INC', 'FTC'))
+Tree 1:
+subtract(protected_div(protected_sqrt('FC11'), 'PLSC2'), 'INC2')
+
+Gen: 9
+Individual:
+Tree 0:
+subtract('FC2', 'FTC')
+Tree 1:
+subtract(protected_div('PHC2', 'INL2'), maximum(add('PHC1', 'INC2'), maximum(square('INC1'), 'FC22')))
+
+Gen: 10
+Individual:
+Tree 0:
+protected_sqrt(square(subtract('FC2', 'INL')))
+Tree 1:
+subtract(subtract(multiply('FOC2', 'PLSC2'), minimum(minimum('INC1', 'FC21'), protected_div('INC2', 'FC11'))), 'INC2')
+
+Gen: 11
+Individual:
+Tree 0:
+maximum('FTC', protected_div(square(subtract('FC2', 'INL')), 'INL'))
+Tree 1:
+subtract('FTC', 'INL2')
+
+Gen: 12
+Individual:
+Tree 0:
+subtract('FC2', 'INL')
+Tree 1:
+subtract(subtract(multiply('FOC2', 'PLSC2'), minimum('FOC2', protected_div('INL2', 'FC11'))), 'INC2')
+
+Gen: 13
+Individual:
+Tree 0:
+subtract('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), square('PLSC'))), add(add(minimum('INL', 'PLSC'), maximum('FTC', 'PIP')), protected_sqrt(multiply('FC1', 'FTC')))))
+Tree 1:
+subtract(protected_div('FTC', 'PHC1'), 'INC2')
+
+Gen: 14
+Individual:
+Tree 0:
+subtract('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), 'FC2')), add(add(minimum('INL', 'PLSC'), maximum('FTC', 'PIP')), protected_sqrt(multiply('FC1', 'FTC')))))
+Tree 1:
+multiply(protected_div(subtract(subtract(protected_sqrt('FOC1'), maximum(protected_div('FTC', 'PLSC2'), 'FC11')), protected_div('FC11', maximum('PTC', protected_sqrt('FTC')))), 'INL2'), 'FTC')
+
+Gen: 15
+Individual:
+Tree 0:
+subtract('FC2', 'INL')
+Tree 1:
+multiply('FOC2', multiply(add(subtract(subtract('FOC2', 'PTC'), protected_sqrt('PTC')), protected_div(protected_div('PIP1', 'INL2'), subtract('FOC1', 'PHC2'))), maximum('PLSC1', 'PHC2')))
+
+Gen: 16
+Individual:
+Tree 0:
+subtract('FC2', minimum('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), square('PLSC'))), add(add(minimum('INL', 'PLSC'), maximum('FTC', 'PIP')), protected_sqrt(multiply('FC1', 'FTC'))))))
+Tree 1:
+subtract(protected_div(protected_sqrt('FC11'), 'INL2'), square(multiply(square(square(protected_div('FC12', 'PIP2'))), protected_div('FTC', 'PHC1'))))
+
+Gen: 17
+Individual:
+Tree 0:
+subtract('FC2', minimum('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), square('PLSC'))), 'FC2')))
+Tree 1:
+subtract(protected_div(maximum('PLSC1', 'FOC1'), 'FC22'), 'FOC2')
+
+Gen: 18
+Individual:
+Tree 0:
+maximum('FTC', protected_div(square(subtract('FC2', 'INL')), protected_div('FC2', protected_div(protected_div('INL', 'PLSC'), minimum('INL', 'PHC')))))
+Tree 1:
+subtract(protected_div('FOC1', maximum(minimum(square(maximum(square('INL1'), protected_sqrt('INC2'))), add(subtract('PLSC2', 'FOC2'), protected_sqrt(add('PHC2', 'FC21')))), 'PHC2')), 'PLSC2')
+
+Gen: 19
+Individual:
+Tree 0:
+subtract('FC2', minimum('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), square('PLSC'))), add(add(minimum('INL', 'INL'), maximum('FTC', 'PIP')), protected_sqrt(multiply('FC1', 'FTC'))))))
+Tree 1:
+subtract(protected_div(maximum('INL2', 'FOC1'), 'FTC'), 'FOC2')
+
+Gen: 20
+Individual:
+Tree 0:
+subtract('FC2', minimum('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), square('PLSC'))), add(add(minimum('INL', 'PLSC'), maximum('FTC', 'PIP')), protected_sqrt(multiply('FC1', 'FTC'))))))
+Tree 1:
+subtract(protected_div('PLSC2', protected_div(maximum('PLSC1', 'FOC1'), 'FOC2')), 'INC2')
+
+Gen: 21
+Individual:
+Tree 0:
+minimum(subtract('FC2', minimum('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), square('PLSC'))), add(add(minimum('INL', 'PLSC'), maximum('FTC', 'PIP')), protected_sqrt(multiply('FC1', 'FTC')))))), minimum('FC2', 'INL'))
+Tree 1:
+subtract(protected_div('FC11', 'PHC2'), 'PLSC2')
+
+Gen: 22
+Individual:
+Tree 0:
+subtract('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), square(add(add(minimum('INL', 'PLSC'), maximum('FTC', 'PIP')), 'INL')))), add(add(minimum('FTC', 'PLSC'), maximum('FTC', 'PIP')), protected_sqrt(multiply('FC1', subtract(protected_sqrt('PTC'), add('PIP', 'FOC')))))))
+Tree 1:
+subtract('FOC1', 'PLSC2')
+
+Gen: 23
+Individual:
+Tree 0:
+subtract('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), 'INL')), add(add(minimum('FTC', 'PLSC'), maximum('FTC', 'PIP')), protected_sqrt(multiply('FC1', 'INL')))))
+Tree 1:
+subtract(protected_div(maximum('INL2', 'FOC1'), 'FTC'), protected_div(protected_div(multiply(add('INL2', 'FC22'), 'FOC1'), protected_sqrt('PLSC1')), 'INC2'))
+
+Gen: 24
+Individual:
+Tree 0:
+subtract('FC2', minimum('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), multiply('FC1', 'INL'))), add(add(minimum('FTC', 'PLSC'), maximum('FTC', 'PIP')), subtract('FC2', minimum('FC2', 'INL'))))))
+Tree 1:
+subtract(protected_div('FOC1', subtract('FOC1', 'INL2')), subtract('PLSC2', 'FOC2'))
+
+Gen: 25
+Individual:
+Tree 0:
+subtract('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), square(square(add('PIP', protected_div('FOC', 'FC2')))))), add('FC2', protected_sqrt(multiply('FC1', 'INL')))))
+Tree 1:
+subtract(protected_div('FOC1', maximum('PLSC1', 'INL2')), minimum(minimum('PLSC2', 'FOC1'), add('FC22', 'PIP2')))
+
+Gen: 26
+Individual:
+Tree 0:
+subtract('FC2', minimum('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), multiply('FC1', 'FC2'))), add(add(minimum('FTC', 'PLSC'), maximum('FTC', 'PIP')), subtract('FC2', minimum('FC2', 'INL'))))))
+Tree 1:
+subtract(protected_div(protected_div('PLSC2', protected_div(minimum('PIP1', 'PLSC2'), multiply('FC21', 'PLSC1'))), subtract(subtract(protected_sqrt('FOC1'), maximum('PTC', protected_sqrt(protected_div(square('PHC2'), 'FC22')))), protected_div('FC11', maximum('INL1', protected_sqrt(subtract('FC12', protected_div('INC2', 'PLSC2'))))))), multiply(multiply('PLSC2', 'FC21'), 'INC2'))
+
+Gen: 27
+Individual:
+Tree 0:
+subtract('FC2', minimum('PIP', minimum(protected_div('INL', add(protected_sqrt('PTC'), square('PLSC'))), minimum(protected_div('INL', add(protected_sqrt('PTC'), square('PLSC'))), protected_div('INL', add(protected_sqrt('PTC'), square('PLSC')))))))
+Tree 1:
+subtract(protected_div(maximum('INL2', 'FOC1'), 'FTC'), protected_div(protected_div('FC21', protected_div(protected_sqrt(protected_div(protected_sqrt('FC11'), 'PHC2')), 'INL2')), 'INC2'))
+
+Gen: 28
+Individual:
+Tree 0:
+subtract('FC2', minimum('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), subtract('FC2', subtract('FC2', 'INL')))), add(add(minimum('INL', 'PTC'), maximum('FTC', 'PIP')), 'INL'))))
+Tree 1:
+subtract(protected_div('FOC1', subtract(protected_sqrt('FTC'), maximum('FC12', subtract('PHC1', 'FC12')))), 'PLSC2')
+
+Gen: 29
+Individual:
+Tree 0:
+subtract('FC2', minimum('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), square('PLSC'))), add(add(minimum('INL', 'PLSC'), maximum('INL', 'PIP')), protected_sqrt(protected_sqrt('PTC'))))))
+Tree 1:
+subtract(protected_div(maximum('INL2', 'FOC1'), 'FTC'), protected_div(protected_div('FC21', protected_div(protected_sqrt(protected_div(protected_sqrt('FC11'), 'FOC1')), 'INL2')), 'INC2'))
+
+Gen: 30
+Individual:
+Tree 0:
+subtract('FC2', minimum(protected_div('INL', add(protected_sqrt(protected_sqrt('PTC')), square(square(add('PIP', protected_div('FOC', 'FC2')))))), add('FC2', protected_sqrt(multiply('INL', 'INL')))))
+Tree 1:
+subtract(protected_div('FOC1', subtract('FOC1', protected_div('FC11', maximum(protected_div(add('INL2', 'FC21'), 'INC2'), protected_sqrt(subtract('FC12', protected_div('INC2', 'PLSC2'))))))), multiply(multiply('PLSC2', 'FC21'), 'INC2'))
+
+Gen: 31
+Individual:
+Tree 0:
+minimum(subtract('FC2', minimum('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), 'PLSC')), 'INL'))), minimum('FC2', 'INL'))
+Tree 1:
+subtract(protected_div('PLSC2', protected_div(maximum('PLSC1', 'FOC1'), 'FTC')), protected_div(minimum('PIP1', 'PLSC2'), multiply('PHC2', protected_div(protected_sqrt('PIP2'), 'INL2'))))
+
+Gen: 32
+Individual:
+Tree 0:
+subtract('FC2', minimum('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), square('PLSC'))), square(multiply(maximum('FC1', 'PTC'), protected_div('PIP', 'FC2'))))))
+Tree 1:
+subtract(protected_div('INL2', subtract('FOC1', 'PLSC1')), protected_div('FOC1', subtract(add(minimum('FOC1', 'PLSC2'), maximum('FC11', 'FOC1')), 'FC12')))
+
+Gen: 33
+Individual:
+Tree 0:
+subtract('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), 'INL')), add(add(minimum('INL', 'PLSC'), maximum('FTC', 'PIP')), protected_sqrt(multiply(minimum('FC2', 'INL'), 'INL')))))
+Tree 1:
+subtract(protected_div(maximum('INL2', 'FOC1'), 'FTC'), protected_div(square(square(protected_sqrt('FC21'))), 'INC2'))
+
+Gen: 34
+Individual:
+Tree 0:
+subtract('FC2', minimum(minimum(protected_div('INL', add(protected_sqrt('PTC'), maximum(subtract('PHC', 'FTC'), subtract(protected_sqrt('INL'), 'FOC')))), add(add(minimum('INL', 'PLSC'), maximum('FTC', 'PIP')), protected_sqrt(multiply(protected_sqrt('PTC'), 'INL')))), minimum(protected_div('INL', add(protected_sqrt('PTC'), subtract('FC2', subtract('FC2', 'INL')))), 'PLSC')))
+Tree 1:
+subtract(protected_div('FOC1', subtract('FOC1', protected_div('FC11', maximum(protected_div(protected_div('PHC2', maximum('INL2', 'FTC')), 'INC2'), protected_sqrt(subtract('FC12', protected_div('INC2', 'PLSC2'))))))), multiply(multiply('PLSC2', 'FC21'), 'INC2'))
+
+Gen: 35
+Individual:
+Tree 0:
+minimum(subtract('FC2', minimum('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), square('FC2'))), add(subtract(square('FOC'), multiply('FC1', 'PHC')), protected_sqrt(multiply('FC1', 'FTC')))))), minimum('INL', 'FC2'))
+Tree 1:
+subtract(protected_div('FOC1', 'FC22'), 'FC22')
+
+Gen: 36
+Individual:
+Tree 0:
+subtract('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), 'INL')), add(add(minimum('FTC', 'PLSC'), maximum('FTC', 'PIP')), protected_sqrt(add(add('FOC', 'FOC'), protected_div('INL', add('PLSC', square('PLSC'))))))))
+Tree 1:
+subtract(protected_div('FOC1', subtract('FOC1', protected_div('FC11', maximum(protected_div(protected_div('PHC2', maximum('FOC1', 'FTC')), 'INC2'), protected_sqrt(subtract('FC12', protected_div('INC2', 'PLSC2'))))))), multiply(multiply('PLSC2', 'FC21'), 'INC2'))
+
+Gen: 37
+Individual:
+Tree 0:
+subtract('FC2', minimum('FC1', minimum(protected_div('INL', add(protected_sqrt('PTC'), 'INL')), minimum(protected_div('INL', 'FC2'), protected_div('INL', add(add(protected_sqrt('PTC'), square('PLSC')), square('PLSC')))))))
+Tree 1:
+subtract(protected_div('FOC1', subtract(protected_sqrt(subtract(add('INL2', 'PIP1'), 'PLSC2')), protected_div('FC11', maximum('INL1', protected_sqrt(subtract(protected_sqrt('PTC'), protected_div('INC2', 'PLSC2'))))))), square(protected_div(protected_div(square('PIP2'), 'PLSC2'), maximum(multiply('INL2', protected_sqrt('FC12')), protected_sqrt('PHC2')))))
+
+Gen: 38
+Individual:
+Tree 0:
+minimum(subtract('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), 'PHC')), add(add('INL', maximum('FTC', 'PIP')), protected_sqrt('PTC')))), minimum(protected_div('INL', add(protected_sqrt('PTC'), square('PLSC'))), protected_div('INL', add(protected_sqrt('PTC'), square('PLSC')))))
+Tree 1:
+subtract(protected_div('FOC1', 'PHC2'), 'PLSC2')
+
+Gen: 39
+Individual:
+Tree 0:
+minimum(subtract('FC2', minimum('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), square('INL'))), add(subtract(square('FOC'), multiply('FC1', 'PHC')), protected_sqrt(multiply('FC1', square('PLSC'))))))), minimum(maximum(add(subtract(square('FOC'), multiply('FC1', 'PHC')), subtract('PIP', 'PIP')), 'PIP'), 'INL'))
+Tree 1:
+subtract(protected_div('FOC1', subtract('FOC1', protected_div(maximum(protected_div('INL1', 'PHC2'), protected_sqrt('FC12')), maximum(protected_div(protected_div('PHC2', maximum('PLSC2', 'FTC')), 'INC2'), protected_sqrt(subtract('FC12', protected_div('INC2', 'PLSC2'))))))), multiply(multiply(multiply(multiply('FC21', 'FC21'), 'INC2'), 'FC21'), 'INC2'))
+
+Gen: 40
+Individual:
+Tree 0:
+subtract('FC2', minimum('FC2', minimum(protected_div('INL', add(protected_sqrt(protected_sqrt('PTC')), square('FTC'))), add(protected_div(add(maximum('PHC', 'FC2'), square('PLSC')), minimum('FC2', 'INL')), protected_sqrt(multiply('PTC', 'FTC'))))))
+Tree 1:
+subtract(protected_div('FOC1', square(protected_div('PLSC2', 'FOC1'))), 'INC2')
+
+Gen: 41
+Individual:
+Tree 0:
+subtract('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), 'INL')), add(maximum('FTC', 'PIP'), subtract(square('FC2'), protected_sqrt('PHC')))))
+Tree 1:
+subtract(protected_div('FOC1', subtract('FOC1', protected_div('FC11', 'FC21'))), multiply(multiply('PLSC2', 'FC21'), 'PLSC2'))
+
+Gen: 42
+Individual:
+Tree 0:
+subtract('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), 'INL')), minimum(add(protected_div(add(maximum('PHC', 'FC2'), protected_sqrt('FC1')), minimum('FC2', 'INL')), protected_sqrt('PTC')), add(add(minimum(square(square('PLSC')), 'PLSC'), maximum('INL', 'PIP')), protected_sqrt(protected_sqrt('PTC'))))))
+Tree 1:
+subtract(protected_div('FOC2', 'PHC1'), 'PLSC2')
+
+Gen: 43
+Individual:
+Tree 0:
+subtract('FC2', minimum('INL', add(add('INL', 'FC2'), subtract(add('PIP', maximum('PLSC', 'PIP')), protected_sqrt('PHC')))))
+Tree 1:
+subtract(protected_div('FOC1', maximum(add(subtract(protected_sqrt(square('FOC2')), maximum('PTC', subtract('PHC1', 'FC12'))), protected_div(square('FOC1'), maximum(protected_div('FOC1', multiply('PLSC2', 'PHC1')), protected_sqrt('FC12')))), 'INC2')), 'PLSC2')
+
+Gen: 44
+Individual:
+Tree 0:
+subtract('FC2', minimum('INL', add(minimum('FTC', 'PLSC'), subtract(add('PIP', maximum('PLSC', 'PIP')), protected_sqrt('PHC')))))
+Tree 1:
+subtract(protected_div('FOC1', subtract('PLSC2', protected_div(square('FOC1'), maximum(add('FC12', 'FC11'), maximum('PLSC2', 'INC2'))))), 'FOC1')
+
+Gen: 45
+Individual:
+Tree 0:
+minimum(subtract('FC2', minimum('FC2', minimum('INL', 'PIP'))), 'INL')
+Tree 1:
+subtract(protected_div('FOC1', protected_sqrt(subtract(add('INL2', 'PIP1'), 'PIP2'))), protected_div('FC11', maximum('PLSC2', protected_sqrt(subtract('FC12', protected_div('INC2', 'PLSC2'))))))
+
+Gen: 46
+Individual:
+Tree 0:
+minimum(subtract('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), add(protected_sqrt(protected_sqrt('PTC')), multiply('INC', 'PIP')))), add(add('INL', protected_sqrt('PTC')), protected_sqrt(protected_sqrt('PTC'))))), add(protected_sqrt('PTC'), subtract('FC2', subtract('PLSC', 'FC2'))))
+Tree 1:
+subtract(protected_div('FC22', 'FOC1'), 'PLSC2')
+
+Gen: 47
+Individual:
+Tree 0:
+minimum(subtract('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), 'FC2')), add(add('INL', maximum('FTC', 'PIP')), protected_sqrt('PTC')))), minimum(protected_div('INL', add(protected_sqrt('PLSC'), square('PLSC'))), protected_div('INL', add(minimum(square('INL'), multiply(protected_sqrt('PTC'), 'PHC')), square('PTC')))))
+Tree 1:
+subtract(protected_div('FOC1', subtract('FOC1', protected_div('FC11', subtract(protected_div('FOC1', 'FC12'), 'INC2')))), 'INC2')
+
+Gen: 48
+Individual:
+Tree 0:
+subtract('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), protected_sqrt('PTC'))), add(protected_sqrt('PTC'), add(minimum('FTC', 'PLSC'), 'PIP'))))
+Tree 1:
+subtract(protected_div('FOC1', protected_sqrt(multiply(protected_div('FC21', 'FC12'), 'INL2'))), 'PLSC1')
+
+Gen: 49
+Individual:
+Tree 0:
+subtract('FC2', minimum(protected_div('INL', add(protected_sqrt('PTC'), protected_sqrt('PTC'))), add(multiply('INC', 'PIP'), protected_sqrt(multiply(add(maximum('INL', 'PIP'), 'FTC'), 'FC1')))))
+Tree 1:
+subtract(subtract(protected_sqrt(subtract(add('INL2', 'PIP1'), 'FOC1')), protected_div('INL2', 'PLSC2')), multiply(multiply(protected_div('FOC1', subtract('PLSC2', protected_div(square('FOC1'), 'FC11'))), 'FC21'), 'INC2'))
+
+Gen: 50
+Individual:
+Tree 0:
+minimum(subtract('FC2', minimum('FC1', minimum(protected_div('INL', add(protected_sqrt('PTC'), add('PIP', maximum('PLSC', 'PIP')))), 'INL'))), protected_sqrt('PTC'))
+Tree 1:
+subtract(protected_div(multiply('PLSC2', protected_sqrt('PHC2')), subtract('FOC1', protected_div('FC11', multiply('PLSC2', 'FC21')))), multiply('FC21', subtract(add('INL2', 'PIP1'), 'FC11')))

@@ -16,10 +16,7 @@ workdir = "C:/Users/I3Nexus/Desktop/PaperInventoryManagement/Results/"
 folders = {algo: os.path.join(workdir, algo, "train") for algo in algorithms}
 
 # List of scenarios
-scenarios = ["sN2h_1_5b2", "sN2h_1_10b3", "sN2h_5_10b5", "sN2h_5_50b10",
-             "sN2h_10_50b2", "sN2h_10_100b3", "sN2h_50_100b5", "sN2h_100_100b10",
-             "sN3h_1_5_10b2", "sN3h_1_5_50b3", "sN3h_5_10_50b5", "sN3h_5_5_50b10",
-             "sN3h_10_50_50b2", "sN3h_10_50_100b3", "sN3h_50_50_50b5", "sN3h_50_50_100b10"]
+scenarios = ["sN2h_1_10b3", "mN2h_1_10b3", "lN2h_1_10b3"]
 
 runs = 30
 
@@ -52,7 +49,7 @@ for scenario in data:
 
 # Create subplots for each scenario with reduced spacing
 fig = make_subplots(
-    rows=4, cols=4, subplot_titles=scenarios, shared_yaxes=False,
+    rows=1, cols=3, subplot_titles=scenarios, shared_yaxes=False,
     horizontal_spacing=0.05,  # Reduced horizontal spacing
     vertical_spacing=0.05      # Reduced vertical spacing
 )
@@ -65,6 +62,8 @@ for i, scenario in enumerate(scenarios):
 
     # Calculate mean TestFitness across all runs for each generation
     mean_test_fitness = scenario_data.groupby(['Gen', 'Algorithm'])['TraRuleSize'].mean().reset_index()
+
+    print("Transshipment rule size across generations: " + str(mean_test_fitness))
 
     for algo in algorithms:
         algo_data = mean_test_fitness[mean_test_fitness['Algorithm'] == algo]
@@ -82,20 +81,20 @@ for i, scenario in enumerate(scenarios):
 
 # Update overall layout to place the legend at the bottom
 fig.update_layout(
-    height=1200, width=1200,
+    height=300, width=800,
     margin=dict(l=20, r=20, t=20, b=20),
-    font=dict(size=13),
+    font=dict(size=18),
     legend=dict(
         orientation="h",
         x=0.5,
-        y=-0.03,  # Place legend below the plot
+        y=-0.12,  # Place legend below the plot
         xanchor="center",
         yanchor="top"
     )
 )
 
 # Save the figure as a PDF
-fig.write_image(workdir + "TraRuleSize_convergence_curves.pdf")
+fig.write_image(workdir + "TraRuleSize_convergence_curves.png")
 
 # Show the figure
 fig.show()

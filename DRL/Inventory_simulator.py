@@ -296,7 +296,7 @@ class InvOptEnv:
             self.state = np.array(state_replenishment + [self.retailers[0].transshipment_cost,self.retailers[0].fixed_order_transshipment_cost])
             return self.state, reward, terminate
 
-    def run_test(self, ppo_agent, action_map, GP_states=None, GP_actions=None, GP_rewards=None):  # add by xumeng 2024.8.1
+    def run_test(self, ppo_agent, action_map, states=None, actions=None, rewards=None):  # add by xumeng 2024.8.1
         # run simulation
         state = self.reset()
         current_ep_reward = 0
@@ -318,15 +318,15 @@ class InvOptEnv:
             running_time = end - start
             # print("time:" + str(running_time))
             # ------- strategy 3 ---------------------
-            if GP_states is not None:
-                GP_states.append(state)
+            if states is not None:
+                states.append(state)
             # the original
             state, reward, done = self.step(action_map, action)
 
-            if GP_actions is not None:
-                GP_actions.append(action_modified)
-            if GP_rewards is not None:
-                GP_rewards.append(reward)
+            if actions is not None:
+                actions.append(action_modified)
+            if rewards is not None:
+                rewards.append(reward)
             # print("\nsolution, state, reward: " + str(site1_candidate[index_site1]) + ", " + str(state) + ", " + str(reward))
 
             time_step += 1

@@ -1,85 +1,50 @@
 import sys
-import MTGP.LoadIndividual as mtload
+import MTGP_niching.LoadIndividual as mtload
 import pygraphviz as pgv
 from deap import gp
 import pickle
 import matplotlib.pyplot as plt
 import networkx as nx
 
+
 def graph(expr):
-    """Construct the graph of a tree expression. The tree expression must be
+    """
+    Construct the graph of a tree expression. The tree expression must be
     valid. It returns in order a node list, an edge list, and a dictionary of
-    the per node labels. The node are represented by numbers, the edges are
+    the per node labels. The nodes are represented by numbers, the edges are
     tuples connecting two nodes (number), and the labels are values of a
     dictionary for which keys are the node numbers.
 
     :param expr: A tree expression to convert into a graph.
     :returns: A node list, an edge list, and a dictionary of labels.
-
-    The returned objects can be used directly to populate a
-    `pygraphviz <http://networkx.lanl.gov/pygraphviz/>`_ graph::
-
-        import pygraphviz as pgv
-
-        # [...] Execution of code that produce a tree expression
-
-        nodes, edges, labels = graph(expr)
-
-        g = pgv.AGraph()
-        g.add_nodes_from(nodes)
-        g.add_edges_from(edges)
-        g.layout(prog="dot")
-
-        for i in nodes:
-            n = g.get_node(i)
-            n.attr["label"] = labels[i]
-
-        g.draw("tree.pdf")
-
-    or a `NetworX <http://networkx.github.com/>`_ graph::
-
-        import matplotlib.pyplot as plt
-        import networkx as nx
-
-        # [...] Execution of code that produce a tree expression
-
-        nodes, edges, labels = graph(expr)
-
-        g = nx.Graph()
-        g.add_nodes_from(nodes)
-        g.add_edges_from(edges)
-        pos = nx.graphviz_layout(g, prog="dot")
-
-        nx.draw_networkx_nodes(g, pos)
-        nx.draw_networkx_edges(g, pos)
-        nx.draw_networkx_labels(g, pos, labels)
-        plt.show()
-
-
-    .. note::
-
-       We encourage you to use `pygraphviz
-       <http://networkx.lanl.gov/pygraphviz/>`_ as the nodes might be plotted
-       out of order when using `NetworX <http://networkx.github.com/>`_.
     """
     nodes = list(range(len(expr)))
-    edges = list()
-    labels = dict()
+    edges = []
+    labels = {}
 
     stack = []
     for i, node in enumerate(expr):
         if stack:
             edges.append((stack[-1][0], i))
             stack[-1][1] -= 1
-        labels[i] = transferToFunction(node) if isFunction(node) else node
-        if isFunction(node):
+
+        # Transfer to appropriate function or label
+        labels[i] = transferToFunction(node) if (isFunction1(node) or isFunction2(node)) else node
+
+        # Handling both 1-input and 2-input functions
+        if isFunction2(node):
             stack.append([i, 2])
+        elif isFunction1(node):
+            stack.append([i, 1])
         else:
             stack.append([i, 0])
+
+        # Pop the stack when no more children are needed
         while stack and stack[-1][1] == 0:
             stack.pop()
 
     return nodes, edges, labels
+
 
 def transferToFunction(node):
     if node == 'add':
@@ -94,64 +59,77 @@ def transferToFunction(node):
         return 'max'
     elif node == 'minimum':
         return 'min'
+    elif node == 'protected_sqrt':
+        return 'sqrt'
+    elif node == 'square':
+        return '^2'
     else:
-        return False
+        return node
 
-def isFunction(node):
-    if node == 'add':
-        return True
-    elif node == 'subtract':
-        return True
-    elif node == 'multiply':
-        return True
-    elif node == 'protected_div':
-        return True
-    elif node == 'maximum':
-        return True
-    elif node == 'minimum':
-        return True
-    else:
-        return False
+
+def isFunction2(node):
+    # Functions that take 2 inputs
+    return node in ['add', 'subtract', 'multiply', 'protected_div', 'maximum', 'minimum',
+                    '+', '-', '*', '/', 'max', 'min']
+
+
+def isFunction1(node):
+    # Functions that take 1 input
+    return node in ['protected_sqrt', 'square', 'sqrt', '^2']
+
 
 if __name__ == "__main__":
-#     dataSetName = str(sys.argv[1])
-#     seedOfRun = int(sys.argv[2])
-    dataSetName = 'sN2h_1_5b2'
-    seedOfRun = 0
+    dataSetName = 'lN2h_1_5b2'
+    seedOfRun = 4
 
-    # MTGP rule test, test the best rule obtained from all the generations
-    # dict_best_MTGP_individuals = mtload.load_individual_from_gen(seedOfRun, dataSetName)
+    # Load the best individual from all generations
     with open('../MTGP_niching/train/scenario_' + str(dataSetName) + '/' + str(
-        seedOfRun) + '_meng_individual_' + dataSetName + '.pkl',
-          "rb") as fileName_individual:
+            seedOfRun) + '_meng_individual_' + dataSetName + '.pkl', "rb") as fileName_individual:
         dict_best_MTGP_individuals = pickle.load(fileName_individual)
 
-    individual = dict_best_MTGP_individuals.get(38)
+    individual = dict_best_MTGP_individuals.get(len(dict_best_MTGP_individuals) - 1)
     replenishment_rule_tree = individual[0]
     transshipment_rule_tree = individual[1]
 
-    # sequencing tree
+
+    # Define a function to beautify the graph with different colors for leaf and non-leaf nodes
+    def beautify_graph(nodes, edges, labels, file_name):
+        g = pgv.AGraph(directed=True)  # Set directed=True to handle tree layout properly
+        g.add_nodes_from(nodes)
+        g.add_edges_from(edges)
+
+        # Apply beautification
+        for i in nodes:
+            n = g.get_node(i)
+
+            # Check if the node is a leaf or non-leaf (function node)
+            if isFunction1(labels[i]) or isFunction2(labels[i]):
+                # Non-leaf node (function)
+                n.attr["shape"] = "box"
+                n.attr["style"] = "rounded, filled"
+                n.attr["fillcolor"] = "#C6E9F4"  # Light blue for non-leaf nodes
+            else:
+                # Leaf node (terminal)
+                n.attr["shape"] = "box"
+                n.attr["style"] = "rounded, filled"
+                n.attr["fillcolor"] = "#FFEBAD"  # Gold color for leaf nodes
+
+            n.attr["fontname"] = "Arial"
+            n.attr["label"] = labels[i]  # Add labels to nodes
+
+        # Edge beautification
+        for edge in edges:
+            e = g.get_edge(edge[0], edge[1])
+            e.attr["color"] = "black"  # Grey color for edges
+
+        g.layout(prog="dot")  # Use the dot layout for better tree structure
+        g.draw(file_name)
+
+
+    # Plot replenishment tree
     nodes, edges, labels = graph(replenishment_rule_tree)
-    g = pgv.AGraph()
-    g.add_nodes_from(nodes)
-    g.add_edges_from(edges)
-    g.layout(prog="dot")
+    beautify_graph(nodes, edges, labels, dataSetName + "_" + str(seedOfRun) + "_replenishment_tree.png")
 
-    for i in nodes:
-        n = g.get_node(i)
-        n.attr["label"] = labels[i]
-
-    g.draw(dataSetName + "_" + str(seedOfRun) + "_replenishment_tree.pdf")
-
-    # routing tree
+    # Plot transshipment tree
     nodes, edges, labels = graph(transshipment_rule_tree)
-    g = pgv.AGraph()
-    g.add_nodes_from(nodes)
-    g.add_edges_from(edges)
-    g.layout(prog="dot")
-
-    for i in nodes:
-        n = g.get_node(i)
-        n.attr["label"] = labels[i]
-
-    g.draw(dataSetName + "_" + str(seedOfRun) + "_transshipment_tree.pdf")
+    beautify_graph(nodes, edges, labels, dataSetName + "_" + str(seedOfRun) + "_transshipment_tree.png")

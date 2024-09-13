@@ -59,22 +59,39 @@ def main(dataset_name, run):
     # Load PPO policy
     ppo_agent = PPO(state_dim, action_dim, lr_actor, lr_critic, gamma, K_epochs, eps_clip, device)
     directory = f'./DRL/train/scenario_{dataset_name}/'
-    file_path = os.path.join(directory, f'{run}_{dataset_name}_policy_final.pt')
+    file_path = os.path.join(directory, f'{run}_{dataset_name}_policy_best_so_far.pt')
+    # file_path = os.path.join(directory, f'{run}_{dataset_name}_policy_final.pt')
     ppo_agent.policy.load_state_dict(torch.load(file_path))
+    # ppo_agent.policy.load_state_dict(torch.load(file_path, map_location=torch.device('cpu')))
 
     replenishment_rule_size = []
     transshipment_rule_size = []
     test_fitness = []
+    mean_invlvls_DRL = []
+    mean_fill_DRL = []
     PC_diversity = []
 
     fitness = 0
+    invlvls_DRL = []
+    fill_DRL = []
+    DRL_states = []
+    DRL_actions = []
+    DRL_rewards = []
     for _ in range(num_instances):
         env = InvOptEnv(seed, parameters)
         seed = seed + seed_rotation
-        reward_total = env.run_test(ppo_agent,action_map)
+        reward_total = env.run_test(ppo_agent,action_map,states=DRL_states,actions=DRL_actions,rewards=DRL_rewards)
         fitness += reward_total
     fitness = fitness/num_instances
     test_fitness.append(fitness)
+    if parameters['num_retailer'] == 2:
+        invlvls_DRL.append(mean([x[0] + x[8] for x in DRL_states]))
+        fill_DRL.append(mean([int(x[0] >= 0) + int(x[8] >= 0) for x in DRL_states]))
+    elif parameters['num_retailer'] == 3:
+        invlvls_DRL.append(mean([x[0] + x[8] + x[16] for x in DRL_states]))
+        fill_DRL.append(mean([int(x[0] >= 0) + int(x[8] >= 0) + int(x[16] >= 0) for x in DRL_states]))
+    mean_invlvls_DRL.append(mean(invlvls_DRL))
+    mean_fill_DRL.append(mean(fill_DRL))
 
     replenishment_rule_size.append(256)
     transshipment_rule_size.append(256)
@@ -88,6 +105,8 @@ def main(dataset_name, run):
         'RepRuleSize': [x for x in replenishment_rule_size],
         'TraRuleSize': [x for x in transshipment_rule_size],
         'TestFitness': [x for x in test_fitness],
+        'InveLevel': [x for x in mean_invlvls_DRL],
+        'Fill': [x for x in mean_fill_DRL],
         'PCDiversity': [x for x in PC_diversity],
         })
 

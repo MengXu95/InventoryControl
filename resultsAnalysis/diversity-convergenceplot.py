@@ -1,3 +1,4 @@
+import math
 import os
 import pandas as pd
 import numpy as np
@@ -16,10 +17,11 @@ workdir = "C:/Users/I3Nexus/Desktop/PaperInventoryManagement/Results/"
 folders = {algo: os.path.join(workdir, algo, "train") for algo in algorithms}
 
 # List of scenarios
-scenarios = ["sN2h_1_5b2", "sN2h_1_10b3", "sN2h_5_10b5", "sN2h_5_50b10",
-             "sN2h_10_50b2", "sN2h_10_100b3", "sN2h_50_100b5", "sN2h_100_100b10",
-             "sN3h_1_5_10b2", "sN3h_1_5_50b3", "sN3h_5_10_50b5", "sN3h_5_5_50b10",
-             "sN3h_10_50_50b2", "sN3h_10_50_100b3", "sN3h_50_50_50b5", "sN3h_50_50_100b10"]
+# scenarios = ["sN2h_1_5b2", "sN2h_1_10b3", "sN2h_5_10b5", "sN2h_5_50b10",
+#              "sN2h_10_50b2", "sN2h_10_100b3", "sN2h_50_100b5", "sN2h_100_100b10",
+#              "sN3h_1_5_10b2", "sN3h_1_5_50b3", "sN3h_5_10_50b5", "sN3h_5_5_50b10",
+#              "sN3h_10_50_50b2", "sN3h_10_50_100b3", "sN3h_50_50_50b5", "sN3h_50_50_100b10"]
+scenarios = ["sN2h_5_50b10", "mN2h_5_50b10", "lN2h_5_50b10"]
 
 runs = 30
 
@@ -51,8 +53,20 @@ for scenario in data:
 
 
 # Create subplots for each scenario with reduced spacing
+# fig = make_subplots(
+#     rows=4, cols=4, subplot_titles=scenarios, shared_yaxes=False,
+#     horizontal_spacing=0.05,  # Reduced horizontal spacing
+#     vertical_spacing=0.05      # Reduced vertical spacing
+# )
+# Calculate number of rows and columns
+num_scenarios = len(scenarios)
+row = math.ceil(num_scenarios / 4)  # Ceiling to ensure enough rows for all scenarios
+col = min(num_scenarios, 4)  # Max of 4 columns or fewer for the last row
+width_each = 280
+height_each = 300
+
 fig = make_subplots(
-    rows=4, cols=4, subplot_titles=scenarios, shared_yaxes=False,
+    rows=row, cols=col, subplot_titles=scenarios, shared_yaxes=False,
     horizontal_spacing=0.05,  # Reduced horizontal spacing
     vertical_spacing=0.05      # Reduced vertical spacing
 )
@@ -82,20 +96,20 @@ for i, scenario in enumerate(scenarios):
 
 # Update overall layout to place the legend at the bottom
 fig.update_layout(
-    height=1200, width=1200,
+    height=row*height_each, width=col*width_each,
     margin=dict(l=20, r=20, t=20, b=20),
-    font=dict(size=13),
+    font=dict(size=18),
     legend=dict(
         orientation="h",
         x=0.5,
-        y=-0.03,  # Place legend below the plot
+        y=-0.12,  # Place legend below the plot
         xanchor="center",
         yanchor="top"
     )
 )
 
 # Save the figure as a PDF
-fig.write_image(workdir + "PCDiversity_convergence_curves.pdf")
+fig.write_image(workdir + "PCDiversity_convergence_curves.png", engine="kaleido")
 
 # Show the figure
 fig.show()
