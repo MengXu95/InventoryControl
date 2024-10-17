@@ -172,9 +172,9 @@ class InvOptEnv:
             # Update forecasts
             forecast1_all = []
             forecast2_all = []
-            for current_period in range(len(self.demand_records[0])-3):
-                forecast1 = [self.demand_records[0, k] for k in range(current_period, current_period + self.L)]
-                forecast2 = [self.demand_records[1, k] for k in range(current_period, current_period + self.L)]
+            for current_period in range(len(self.demand_records[0])):
+                forecast1 = [self.demand_records[0, current_period]]
+                forecast2 = [self.demand_records[1, current_period]]
                 forecast1_all = forecast1_all + forecast1
                 forecast2_all = forecast2_all + forecast2
             forecast = np.array([forecast1_all, forecast2_all])

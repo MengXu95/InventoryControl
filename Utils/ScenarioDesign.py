@@ -23,10 +23,10 @@ class ScenarioDesign():
             epi_len = 64  # Length of one episode (default)
             demand_level = 30000
             num_retailer = 2
-            ini_inv = [10000] * 2  # Initial inventory levels
+            ini_inv = [500] * 2  # Initial inventory levels
             holding = [2, 10]  # Holding costs
             lost_sales = [50, 100]  # Per unit lost sales costs
-            capacity = [200000, 200000]  # Inventory capacities
+            capacity = [50000, 50000]  # Inventory capacities
             fixed_order = [1000, 800]  # Fixed order costs per order
             per_trans_item = 1  # Per unit cost for transshipment (either direction)
             per_trans_order = 10  # Fixed cost per transshipment (either direction)
@@ -53,8 +53,8 @@ class ScenarioDesign():
             np.random.seed(seed)
             # for i in range(10): # get 10 instances
             # demand_hist_list = test_demand.iloc[2 * k: 2 * k + 2, 1:].to_numpy()
-            k_1 = np.random.randint(10)
-            k_2 = np.random.randint(10)
+            k_1 = np.random.randint(7)
+            k_2 = np.random.randint(7)
             # print("K_1" + str(k_1))
             # print("K_2" + str(k_2))
             demand_hist_list_site1 = test_demand.iloc[k_1, 1:].to_numpy()
@@ -65,12 +65,12 @@ class ScenarioDesign():
             L = 2  # Length of forecast horizon (default)
             LT = 2
             demand_level = None
-            epi_len = len(demand_hist_list)  # Length of one episode (default)
+            epi_len = 64  # Length of one episode (default)
             num_retailer = 2
-            ini_inv = [10000] * 2  # Initial inventory levels
+            ini_inv = [500] * 2  # Initial inventory levels
             holding = [2, 10]  # Holding costs
             lost_sales = [50, 100]  # Per unit lost sales costs
-            capacity = [200000, 200000]  # Inventory capacities
+            capacity = [50000, 50000]  # Inventory capacities
             fixed_order = [1000, 800]  # Fixed order costs per order
             per_trans_item = 1  # Per unit cost for transshipment (either direction)
             per_trans_order = 10  # Fixed cost per transshipment (either direction)
