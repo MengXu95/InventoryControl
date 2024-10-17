@@ -16,7 +16,10 @@ def main(dataset_name, run_seed):
     scenarioDesign = ScenarioDesign(dataset_name)
     parameters = scenarioDesign.get_parameter()
 
-    demand_level = float(parameters['demand_level'])
+    if dataset_name == "teckwah_training":
+        demand_level = float(30000)
+    else:
+        demand_level = float(parameters['demand_level'])
     interval = demand_level/10
     candidate_sS = []
     value = 0
@@ -32,7 +35,7 @@ def main(dataset_name, run_seed):
             all_combination.append([candidate_sS[i], candidate_sS[j]]) #transportation quantity always be 0
 
     # random try to get the best combination of sS Policy
-    pop_size = 1
+    pop_size = 400
     num_ins = 2
     gens = 50
     try_times = pop_size
@@ -72,17 +75,21 @@ def main(dataset_name, run_seed):
 
     print('Best sSPolicy: ' + str(best_sSPolicy))
     print('\nBegin test sSPolicy: ')
-    num_instances = 50
+    num_instances = 20
     seed = 888
     seed_rotation = 88
 
+    test_fitness_each_instance = []
     test_fitness = []
     fitness = 0
-    for _ in range(num_instances):
+    for ins in range(num_instances):
+        if dataset_name == "teckwah_training":
+            parameters = scenarioDesign.get_parameter(seed=ins)
         env = InvOptEnv(seed, parameters)
         seed = seed + seed_rotation
         reward_total = env.run_sSPolicy(best_sSPolicy)
         fitness += reward_total
+        test_fitness_each_instance.append(reward_total)
     fitness = fitness/num_instances
     test_fitness.append(fitness)
     print('Test results: ' + str(test_fitness))
@@ -103,6 +110,21 @@ def main(dataset_name, run_seed):
     if not os.path.exists(directory):
         os.makedirs(directory)
     sS_df.to_csv(file_path, index=False)
+
+
+    # save the test results df
+    if dataset_name == "teckwah_training":
+        # to output the results of final gen and each instance
+        df_final = pd.DataFrame({
+            'Run': [run_seed for x in range(len(test_fitness_each_instance))],
+            'TestFitness': [x for x in test_fitness_each_instance],
+        })
+        directory = f'./sSPolicy/train/scenario_{dataset_name}/'
+        file_path = os.path.join(directory, f'{run_seed}_{dataset_name}_sSPolicy_test_results_each_instance.csv')
+        # Create the directory if it does not exist
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        df_final.to_csv(file_path, index=False)
 
     return best_sSPolicy, fitness
 

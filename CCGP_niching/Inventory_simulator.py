@@ -9,10 +9,9 @@ import math
 from datetime import datetime
 from torch.distributions import Categorical
 
-from CCGP_niching.replenishment import *
-from CCGP_niching.transshipment import *
+from MTGP_niching.replenishment import *
+from MTGP_niching.transshipment import *
 import threading
-import time
 
 # np.random.seed(0)
 # ###############training##########################################
@@ -75,6 +74,32 @@ class RandomDemand:
         #     demand_hist_list[1][i] = 0
         return demand_hist_list
 
+class TeckwahDemand:
+    def __init__(self, seed, demand_hist_list, forcast, num_retailer, epi_len):
+        self.seed = seed
+        np.random.seed(self.seed)
+        self.num_retailer = num_retailer
+        self.epi_len = epi_len
+        self.demand_hist_list = demand_hist_list
+        self.list = forcast
+        # for i in range(len(self.list[1])):
+        #     self.list[1][i] = 0
+
+    def seedRotation(self): # add by xumeng for changing to a new seed
+        self.seed = self.seed + 1000
+        np.random.seed(self.seed)
+    def reset(self):
+        self.seedRotation() # add by xumeng for changing to a new seed
+
+    def f(self, n, t):  # Generate forecasts, f(n,t) corresponds to demand mean for retailer n at time t+1
+        if n >= self.num_retailer:
+            raise ValueError("Invalid retailer number")
+        return self.list[n, t]
+
+    # Function to generate demand history for the two retailers, of length epi_len+1
+    def gen_demand(self):
+        return self.demand_hist_list
+
 
 class Retailer:
     def __init__(self, demand_records, number, f,
@@ -110,6 +135,7 @@ class Retailer:
 
 class TimeoutException(Exception):
     pass
+
 class InvOptEnv:
     def __init__(self, seed, parameters):
         """
@@ -135,14 +161,27 @@ class InvOptEnv:
         self.num_retailer = parameters['num_retailer']
         self.ini_inv = parameters['ini_inv']
         self.holding = parameters['holding']
-        self.lost_sales = 2 * self.holding
-        self.capacity = [5 * self.demand_level] * self.num_retailer
+        self.lost_sales = parameters['lost_sales']
+        self.capacity = parameters['capacity']
         self.fixed_order = parameters['fixed_order']
         self.per_trans_item = parameters['per_trans_item']
         self.per_trans_order = parameters['per_trans_order']
 
-        self.rd = RandomDemand(seed, self.demand_level, self.num_retailer, self.epi_len)
-        self.demand_records = self.rd.gen_demand()
+        if self.demand_level == None:#use teckwah dataset
+            self.demand_records = parameters['demand_test']
+            # Update forecasts
+            forecast1_all = []
+            forecast2_all = []
+            for current_period in range(len(self.demand_records[0])-3):
+                forecast1 = [self.demand_records[0, k] for k in range(current_period, current_period + self.L)]
+                forecast2 = [self.demand_records[1, k] for k in range(current_period, current_period + self.L)]
+                forecast1_all = forecast1_all + forecast1
+                forecast2_all = forecast2_all + forecast2
+            forecast = np.array([forecast1_all, forecast2_all])
+            self.rd = TeckwahDemand(seed, self.demand_records, forecast, self.num_retailer, self.epi_len)
+        else:
+            self.rd = RandomDemand(seed, self.demand_level, self.num_retailer, self.epi_len)
+            self.demand_records = self.rd.gen_demand()
         self.n_retailers = self.num_retailer
         self.retailers = []
         for i in range(self.n_retailers):
@@ -437,6 +476,8 @@ class InvOptEnv:
             self.state.append(state_transshipment)
             return self.state, reward, terminate
 
+
+
     def run(self, individual): # add by xumeng 2024.8.1
         # run simulation
         state = self.reset()
@@ -454,6 +495,63 @@ class InvOptEnv:
                 replenishment_policy = individual[0]
                 transshipment_policy = individual[1]
 
+            # ------- strategy 2 ---------------------
+            # quantity_site1 = round(GP_evolve_S(state, replenishment_site1))
+            # quantity_site2 = round(GP_evolve_R(state, replenishment_site2))
+            #
+            # if quantity_site1 < site1_candidate[0]:
+            #     quantity_site1 = site1_candidate[0]
+            # if quantity_site1 > site1_candidate[len(site1_candidate)-1]:
+            #     quantity_site1 = site1_candidate[len(site1_candidate)-1]
+            #
+            # if quantity_site2 < site2_candidate[0]:
+            #     quantity_site2 = site2_candidate[0]
+            # if quantity_site2 > site2_candidate[len(site2_candidate)-1]:
+            #     quantity_site2 = site2_candidate[len(site2_candidate)-1]
+            #
+            # action_modified = [0, quantity_site1, quantity_site2]
+            # ------- strategy 2 ---------------------
+
+            # # ------- strategy 1 ---------------------
+            # # the action space of this one is the same as jinsheng
+            # quantity_site1 = GP_evolve_S(state, replenishment_site1)
+            # quantity_site2 = GP_evolve_R(state, replenishment_site2)
+            #
+            # index_site1 = 0
+            # min_dis = np.Infinity
+            # for i in range(1,len(site1_candidate)):
+            #     dis = np.abs(quantity_site1-site1_candidate[i])
+            #     if dis < min_dis:
+            #         index_site1 = i
+            #         min_dis = dis
+            #
+            # index_site2 = 0
+            # min_dis = np.Infinity
+            # for i in range(1,len(site2_candidate)):
+            #     dis = np.abs(quantity_site2-site2_candidate[i])
+            #     if dis < min_dis:
+            #         index_site2 = i
+            #         min_dis = dis
+            #
+            # action_modified = [0, site1_candidate[index_site1], site2_candidate[index_site2]]
+            # # ------- strategy 1 ---------------------
+
+            # ------- strategy 1 ---------------------
+            # the action space of this one is the same as jinsheng
+            # for the scenario that only consider one site
+            # quantity_site1 = GP_evolve_S(state, replenishment_site1)
+            #
+            # index_site1 = 0
+            # min_dis = np.Infinity
+            # for i in range(len(site1_candidate)):
+            #     dis = np.abs(quantity_site1 - site1_candidate[i])
+            #     if dis < min_dis:
+            #         index_site1 = i
+            #         min_dis = dis
+            #
+            # action_modified = [0, site1_candidate[index_site1], 0]
+            # ------- strategy 1 ---------------------
+
             # ------- strategy 3 ---------------------
             # the action space of this one is the same as jinsheng
             # for the scenario that only consider one site
@@ -461,24 +559,22 @@ class InvOptEnv:
             # get transshipment state for all pairs of sites/retailers
             transshipment_state = state[1]
             replenishment_state = state[0]
-
             for each_transshipment_state in transshipment_state:
                 transshipment_quantity = round(GP_evolve_R(each_transshipment_state, transshipment_policy), 2)
                 action_modified.append(transshipment_quantity)
             for each_replenishment_state in replenishment_state:
                 replenishment_quantity = round(GP_evolve_S(each_replenishment_state, replenishment_policy), 2)
-                if replenishment_quantity<0:
-                    replenishment_quantity=0
+                if replenishment_quantity < 0:
+                    replenishment_quantity = 0
                 action_modified.append(replenishment_quantity)
             # ------- strategy 3 ---------------------
 
-            # the original
+            # original
             state, reward, done = self.step_value(action_modified)
-            # it is weird why this function can take so long to run???? 2024.8.29
 
             # todo: to stop bad run and save training time by mengxu 2024.8.27
             # state, reward, done = None, np.nan, False
-            # result = self.run_with_timeout(self.step_value, 1, action_modified)
+            # result = self.run_with_timeout(self.step_value, 0.01, action_modified)
             # if result != np.nan:
             #     state, reward, done = result
             # else:
@@ -493,12 +589,10 @@ class InvOptEnv:
             if done:
                 break
 
-        if time_step < max_ep_len:
-            return np.inf
         fitness = -current_ep_reward/max_ep_len
         return fitness
 
-    def run_test(self, individual, GP_states=None, GP_actions=None, GP_rewards=None): # add by xumeng 2024.8.1
+    def run_test(self, individual, states=None, actions=None, rewards=None): # add by xumeng 2024.8.1
         # run simulation
         state = self.reset()
         current_ep_reward = 0
@@ -523,7 +617,6 @@ class InvOptEnv:
             # get transshipment state for all pairs of sites/retailers
             transshipment_state = state[1]
             replenishment_state = state[0]
-            start = time.time()
             for each_transshipment_state in transshipment_state:
                 transshipment_quantity = round(GP_pair_R_test(each_transshipment_state, transshipment_policy),2)
                 action_modified.append(transshipment_quantity)
@@ -532,27 +625,24 @@ class InvOptEnv:
                 if replenishment_quantity<0:
                     replenishment_quantity=0
                 action_modified.append(replenishment_quantity)
-            end = time.time()
-            running_time = end - start
-            print("time:" + str(running_time))
             # ------- strategy 3 ---------------------
-            if GP_states is not None:
-                GP_states.append(state)
+            if states is not None:
+                states.append(state)
+
             # the original
             state, reward, done = self.step_value(action_modified)
-
             # todo: to stop bad run and save training time by mengxu 2024.8.27
             # state, reward, done = None, np.nan, False
-            # result = self.run_with_timeout(self.step_value, 0.01,action_modified)
+            # result = self.run_with_timeout(self.step_value, 0.01, action_modified)
             # if result != np.nan:
             #     state, reward, done = result
             # else:
             #     done = True  # Mark the process as done due to timeout
 
-            if GP_actions is not None:
-                GP_actions.append(action_modified)
-            if GP_rewards is not None:
-                GP_rewards.append(reward)
+            if actions is not None:
+                actions.append(action_modified)
+            if rewards is not None:
+                rewards.append(reward)
             # print("\nsolution, state, reward: " + str(site1_candidate[index_site1]) + ", " + str(state) + ", " + str(reward))
 
             time_step += 1
@@ -561,8 +651,7 @@ class InvOptEnv:
             # break; if the episode is over
             if done:
                 break
-        if time_step < max_ep_len:
-            return np.inf
+
         fitness = -current_ep_reward/max_ep_len
         return fitness
 

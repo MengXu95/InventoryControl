@@ -8,6 +8,8 @@ def load_individual_from_gen(randomSeeds, dataSetName): # save individual as txt
     # with open('./MTGP/train/scenario_' + str(dataSetName) + '/' + str(
     #         randomSeeds) + '_meng_individual_' + dataSetName + '.pkl',
     #           "rb") as fileName_individual:
+    if dataSetName == "teckwah_test":
+        dataSetName = "teckwah_training"
     with open(sys.path[0] + '/MTGP_niching/train/scenario_' + str(dataSetName) + '/' + str(randomSeeds) + '_meng_individual_' + dataSetName + '.pkl',
             "rb") as fileName_individual:
         dict = pickle.load(fileName_individual)
@@ -29,6 +31,8 @@ def load_min_fitness(randomSeeds, dataSetName): # save individual as txt by meng
     return min_fitness
 
 def load_PC_diversity(randomSeeds, dataSetName): # save individual as txt by mengxu
+    if dataSetName == "teckwah_test":
+        dataSetName = "teckwah_training"
     folder = './MTGP_niching/train/scenario_' + str(dataSetName) + '/' +  str(
         randomSeeds) + '_' + dataSetName + '_PCdiversity.csv'
     csv_reader = pd.read_csv(folder)

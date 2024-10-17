@@ -74,6 +74,32 @@ class RandomDemand:
         #     demand_hist_list[1][i] = 0
         return demand_hist_list
 
+class TeckwahDemand:
+    def __init__(self, seed, demand_hist_list, forcast, num_retailer, epi_len):
+        self.seed = seed
+        np.random.seed(self.seed)
+        self.num_retailer = num_retailer
+        self.epi_len = epi_len
+        self.demand_hist_list = demand_hist_list
+        self.list = forcast
+        # for i in range(len(self.list[1])):
+        #     self.list[1][i] = 0
+
+    def seedRotation(self): # add by xumeng for changing to a new seed
+        self.seed = self.seed + 1000
+        np.random.seed(self.seed)
+    def reset(self):
+        self.seedRotation() # add by xumeng for changing to a new seed
+
+    def f(self, n, t):  # Generate forecasts, f(n,t) corresponds to demand mean for retailer n at time t+1
+        if n >= self.num_retailer:
+            raise ValueError("Invalid retailer number")
+        return self.list[n, t]
+
+    # Function to generate demand history for the two retailers, of length epi_len+1
+    def gen_demand(self):
+        return self.demand_hist_list
+
 
 class Retailer:
     def __init__(self, demand_records, number, f,
@@ -135,14 +161,27 @@ class InvOptEnv:
         self.num_retailer = parameters['num_retailer']
         self.ini_inv = parameters['ini_inv']
         self.holding = parameters['holding']
-        self.lost_sales = 2 * self.holding
-        self.capacity = [5 * self.demand_level] * self.num_retailer
+        self.lost_sales = parameters['lost_sales']
+        self.capacity = parameters['capacity']
         self.fixed_order = parameters['fixed_order']
         self.per_trans_item = parameters['per_trans_item']
         self.per_trans_order = parameters['per_trans_order']
 
-        self.rd = RandomDemand(seed, self.demand_level, self.num_retailer, self.epi_len)
-        self.demand_records = self.rd.gen_demand()
+        if self.demand_level == None:#use teckwah dataset
+            self.demand_records = parameters['demand_test']
+            # Update forecasts
+            forecast1_all = []
+            forecast2_all = []
+            for current_period in range(len(self.demand_records[0])-3):
+                forecast1 = [self.demand_records[0, k] for k in range(current_period, current_period + self.L)]
+                forecast2 = [self.demand_records[1, k] for k in range(current_period, current_period + self.L)]
+                forecast1_all = forecast1_all + forecast1
+                forecast2_all = forecast2_all + forecast2
+            forecast = np.array([forecast1_all, forecast2_all])
+            self.rd = TeckwahDemand(seed, self.demand_records, forecast, self.num_retailer, self.epi_len)
+        else:
+            self.rd = RandomDemand(seed, self.demand_level, self.num_retailer, self.epi_len)
+            self.demand_records = self.rd.gen_demand()
         self.n_retailers = self.num_retailer
         self.retailers = []
         for i in range(self.n_retailers):

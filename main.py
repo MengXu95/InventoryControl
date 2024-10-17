@@ -6,7 +6,6 @@ import MTGP_niching.testRuleMTGP as testRuleMTGP
 import CCGP_niching.testRuleCCGP as testRuleCCGP
 import DRL.testRuleDRL as testRuleDRL
 import sSPolicy.trainRulesSPolicy as trainRulesSPolicy
-import sSPolicy.testRulesSPolicy as testRulesSPolicy
 
 sys.path
 

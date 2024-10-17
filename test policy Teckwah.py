@@ -24,7 +24,7 @@ per_trans_order = 5 # Fixed cost per transshipment (either direction)
 #########################################################
 
 # Obtain testing demand data from csv file
-test_demand = pd.read_csv('teckwah.csv')
+test_demand = pd.read_csv('Utils/teckwah.csv')
 demand_test = []
 for k in range(10):
     demand_hist_list = test_demand.iloc[2*k : 2*k +2, 1:].to_numpy()
