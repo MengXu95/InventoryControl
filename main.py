@@ -1,6 +1,7 @@
 import sys
 import CCGP_niching.GPFC as CCGPmain_niching
 import MTGP_niching.GPFC as GPmain_niching
+import MTGP_niching_rental.GPFC as GPmain_niching_rental
 import DRL.DRL_main as DRL_main
 import MTGP_niching.testRuleMTGP as testRuleMTGP
 import CCGP_niching.testRuleCCGP as testRuleCCGP
@@ -20,6 +21,9 @@ if __name__ == '__main__':
     elif algo == 'MTGP_niching':
         print('----------MTGP_niching----------')
         GPmain_niching.main(dataset_name, seed)
+    elif algo == 'MTGP_niching_rental':
+        print('----------MTGP_niching_rental----------')
+        GPmain_niching_rental.main(dataset_name, seed)
     elif algo == 'DRL':
         print('----------DRL----------')
         DRL_main.main(dataset_name, seed)

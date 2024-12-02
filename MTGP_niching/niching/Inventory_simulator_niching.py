@@ -590,7 +590,7 @@ class InvOptEnv:
                 transshipment_decisions.append(transshipment_decision)
                 # ------ get replenishment decision ---------
             else:
-                print("Error in Inventory_simulator_niching.py!")
+                print("Error in Inventory_simulator_rental_niching.py!")
 
 
 
@@ -667,7 +667,7 @@ class InvOptEnv:
             decisions.append(replenishment_decisions)
             decisions.append(transshipment_decisions)
         else:
-            print("Error in Inventory_simulator_niching.py!")
+            print("Error in Inventory_simulator_rental_niching.py!")
 
         fitness = -current_ep_reward/max_ep_len
         return decisions
