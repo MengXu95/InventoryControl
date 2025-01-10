@@ -75,7 +75,7 @@ def GPFC_main(dataset_name, seed):
     rd['seed'] = seed
     rd['dataset_name'] = dataset_name
     num_features = 0 # the initial number of terminals is 0, then I will add more terminals into the pset
-    if DIFF_PSET:
+    if DIFF_PSET and N_TREES == 2:
         pset1 = gp.PrimitiveSet("MAIN1", num_features, prefix="f")
         pset1.context["array"] = np.array
         REP.init_primitives_replenishment(pset1)
@@ -91,7 +91,7 @@ def GPFC_main(dataset_name, seed):
     else:
         pset = gp.PrimitiveSet("MAIN", num_features, prefix="f")
         pset.context["array"] = np.array
-        REP.init_primitives(pset)
+        REP.init_primitives_replenishment(pset)
         weights = (-1.,)
         creator.create("FitnessMin", base.Fitness, weights=weights)
         # set up toolbox
@@ -119,7 +119,7 @@ TOURNSIZE = 5
 MAX_HEIGHT = 8
 REP = mt  # individual representation {mt (multi-tree) or vt (vector-tree)}
 #still only two trees, but one for replenishment, one for rental, no transshipment
-N_TREES = 2
+N_TREES = 1
 rd = {}
 DIFF_PSET = True
 seedRotate = True # added by mengxu 2022.10.13

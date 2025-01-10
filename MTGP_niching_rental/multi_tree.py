@@ -121,7 +121,7 @@ def init_toolbox(toolbox, pset, num_tree):
     toolbox.register("expr_mut", gp.genFull, min_=2, max_=8)
 
     toolbox.register("mate",lim_xmate)
-    toolbox.register("mutate",lim_xmut,expr=toolbox.expr_mut)
+    toolbox.register("mutate",lim_xmut_onetree,expr=toolbox.expr_mut)
 
 
 def init_toolbox_two_pset(toolbox, pset1, pset2, num_tree=2):
@@ -221,6 +221,25 @@ def xmut(ind, expr1, expr2):
 def lim_xmut(ind, expr1, expr2):
     # have to put expr=expr otherwise it tries to use it as an individual
     res = wrap(xmut, ind, expr1=expr1, expr2=expr2)
+    # print(res)
+    return res
+
+def xmut_onetree(ind, expr):
+    # Randomly select which tree to mutate (0 for the first tree, 1 for the second tree)
+    i1 = random.randrange(len(ind))
+
+    # Select the correct expr and pset based on the tree index
+    indx = gp.mutUniform(ind[i1], expr, pset=ind.pset)
+
+    # Replace the mutated tree in the individual
+    ind[i1] = indx[0]
+
+    return ind,
+
+
+def lim_xmut_onetree(ind, expr):
+    # have to put expr=expr otherwise it tries to use it as an individual
+    res = wrap(xmut_onetree, ind, expr=expr)
     # print(res)
     return res
 

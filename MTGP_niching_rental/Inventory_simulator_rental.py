@@ -701,19 +701,23 @@ class InvOptEnv:
                     total_rental_requirement = total_rental_requirement + require_quantity
                 action_modified.append(replenishment_quantity)
 
-            # for making rental decision and delete not enough rental choice, by xu meng 2024.12.2
-            all_rental_priority = []
-            for each_rental_state in rental_state:
-                each_rental_state.append(total_rental_requirement)
-                current_rental = each_rental_state[0]
-                rental_capacity = each_rental_state[2]
-                if current_rental+rental_capacity < total_rental_requirement:
-                    rental_priority = np.inf
-                else:
-                    rental_priority = GP_evolve_rental(each_rental_state, rental_policy)
-                all_rental_priority.append(rental_priority)
-            # Get the index of the minimal value
-            rental_decision = all_rental_priority.index(min(all_rental_priority))
+            if len(individual) == 1:
+                rental_decision = 0
+                # print("One tree and do not consider rental!")
+            else:
+                # for making rental decision and delete not enough rental choice, by xu meng 2024.12.2
+                all_rental_priority = []
+                for each_rental_state in rental_state:
+                    each_rental_state.append(total_rental_requirement)
+                    current_rental = each_rental_state[0]
+                    rental_capacity = each_rental_state[2]
+                    if current_rental+rental_capacity < total_rental_requirement:
+                        rental_priority = np.inf
+                    else:
+                        rental_priority = GP_evolve_rental(each_rental_state, rental_policy)
+                    all_rental_priority.append(rental_priority)
+                # Get the index of the minimal value
+                rental_decision = all_rental_priority.index(min(all_rental_priority))
             action_modified.append(rental_decision)
             # print("rental decision: " + str(rental_decision))
 
@@ -757,7 +761,7 @@ class InvOptEnv:
                 replenishment_policy = individual[0]
             else:
                 replenishment_policy = individual[0]
-                transshipment_policy = individual[1]
+                rental_policy = individual[1]
 
 
             # ------- strategy 3 ---------------------
@@ -765,16 +769,45 @@ class InvOptEnv:
             # for the scenario that only consider one site
             action_modified = []
             # get transshipment state for all pairs of sites/retailers
-            transshipment_state = state[1]
             replenishment_state = state[0]
+            transshipment_state = state[1]
+            rental_state = state[
+                2]  # for each choice in rental_state: [current_rental, rental_price, rental_capacity, rental_month, total_rental_requirement]
+            total_rental_requirement = 0
             for each_transshipment_state in transshipment_state:
-                transshipment_quantity = round(GP_pair_R_test(each_transshipment_state, transshipment_policy),2)
+                transshipment_quantity = 0
+                # transshipment_quantity = round(GP_evolve_R(each_transshipment_state, transshipment_policy), 2)
                 action_modified.append(transshipment_quantity)
             for each_replenishment_state in replenishment_state:
-                replenishment_quantity = round(GP_pair_S_test(each_replenishment_state, replenishment_policy),2)
-                if replenishment_quantity<0:
-                    replenishment_quantity=0
+                replenishment_quantity = round(GP_pair_S_test(each_replenishment_state, replenishment_policy), 2)
+                if replenishment_quantity < 0:
+                    replenishment_quantity = 0
+                # add by xu meng to consider rental
+                production_capacity = each_replenishment_state[4]
+                if replenishment_quantity > production_capacity:
+                    replenishment_quantity = production_capacity
+                    require_quantity = replenishment_quantity - production_capacity
+                    total_rental_requirement = total_rental_requirement + require_quantity
                 action_modified.append(replenishment_quantity)
+
+            if len(individual) == 1:
+                rental_decision = 0
+                # print("One tree and do not consider rental!")
+            else:
+                # for making rental decision and delete not enough rental choice, by xu meng 2024.12.2
+                all_rental_priority = []
+                for each_rental_state in rental_state:
+                    each_rental_state.append(total_rental_requirement)
+                    current_rental = each_rental_state[0]
+                    rental_capacity = each_rental_state[2]
+                    if current_rental + rental_capacity < total_rental_requirement:
+                        rental_priority = np.inf
+                    else:
+                        rental_priority = GP_pair_rental_test(each_rental_state, rental_policy)
+                    all_rental_priority.append(rental_priority)
+                # Get the index of the minimal value
+                rental_decision = all_rental_priority.index(min(all_rental_priority))
+            action_modified.append(rental_decision)
             # ------- strategy 3 ---------------------
             if states is not None:
                 states.append(state)

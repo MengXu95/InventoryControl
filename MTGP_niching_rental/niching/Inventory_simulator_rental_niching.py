@@ -908,19 +908,22 @@ class InvOptEnv:
                     total_rental_requirement = total_rental_requirement + require_quantity
                 action_modified.append(replenishment_quantity)
 
-            # for making rental decision and delete not enough rental choice, by xu meng 2024.12.2
-            all_rental_priority = []
-            for each_rental_state in rental_state:
-                each_rental_state.append(total_rental_requirement)
-                current_rental = each_rental_state[0]
-                rental_capacity = each_rental_state[2]
-                if current_rental + rental_capacity < total_rental_requirement:
-                    rental_priority = np.inf
-                else:
-                    rental_priority = GP_evolve_rental(each_rental_state, rental_policy)
-                all_rental_priority.append(rental_priority)
-            # Get the index of the minimal value
-            rental_decision = all_rental_priority.index(min(all_rental_priority))
+            if len(individual) == 1:
+                rental_decision = 0
+            elif len(individual) == 2:
+                # for making rental decision and delete not enough rental choice, by xu meng 2024.12.2
+                all_rental_priority = []
+                for each_rental_state in rental_state:
+                    each_rental_state.append(total_rental_requirement)
+                    current_rental = each_rental_state[0]
+                    rental_capacity = each_rental_state[2]
+                    if current_rental + rental_capacity < total_rental_requirement:
+                        rental_priority = np.inf
+                    else:
+                        rental_priority = GP_evolve_rental(each_rental_state, rental_policy)
+                    all_rental_priority.append(rental_priority)
+                # Get the index of the minimal value
+                rental_decision = all_rental_priority.index(min(all_rental_priority))
             action_modified.append(rental_decision)
             # ------- strategy 3 ---------------------
 
