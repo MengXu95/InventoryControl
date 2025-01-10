@@ -180,8 +180,7 @@ class InvOptEnv:
         self.per_trans_item = parameters['per_trans_item']
         self.per_trans_order = parameters['per_trans_order']
         # add by xu meng 2024.12.2
-        self.rental_choice = [[0,0,0],# this represents do not rent
-                              [40,100,1], [160,500,1], [200,700,1],
+        self.rental_choice = [[40,100,1], [160,500,1], [200,700,1],
                               [20,100,6], [80,500,6], [100,700,6]]
         self.current_rentals = []
 
@@ -366,10 +365,18 @@ class InvOptEnv:
             for retailer, demand in zip(self.retailers, self.demand_records):
                 rental_available = retailer.order_arrival(demand[self.current_period - 2], rental_available)  # -2 not -1
 
-            # Update rental decision and calculate rental cost
-            rental_decision = self.rental_choice[action_modified[-1]]  # currently each time only rental one choice
-            self.current_rentals.append(rental_decision)
-            rental_cost = rental_decision[0]
+            # Update rental decision and calculate rental cost, new for Strategy version 2.0
+            rental_cost = 0
+            rental_decisions = action_modified[-1]  # currently each time only rental one choice
+            for each_rental_decision in rental_decisions:
+                rental_decision = self.rental_choice[each_rental_decision]
+                self.current_rentals.append(rental_decision)
+                rental_cost = rental_cost + rental_decision[0]
+
+            # # Update rental decision and calculate rental cost, old for Strategy version 1.0
+            # rental_decision = self.rental_choice[action_modified[-1]]  # currently each time only rental one choice
+            # self.current_rentals.append(rental_decision)
+            # rental_cost = rental_decision[0]
 
             trans = action_modified[0]  # Transshipment quantity, possibly infeasible
             # Make transshipment quantity feasible
@@ -486,10 +493,18 @@ class InvOptEnv:
                 rental_available = retailer.order_arrival(demand[self.current_period - 2],
                                                           rental_available)  # -2 not -1
 
-            # Update rental decision and calculate rental cost
-            rental_decision = self.rental_choice[action_modified[-1]]  # currently each time only rental one choice
-            self.current_rentals.append(rental_decision)
-            rental_cost = rental_decision[0]
+            # Update rental decision and calculate rental cost, new for Strategy version 2.0
+            rental_cost = 0
+            rental_decisions = action_modified[-1]  # currently each time only rental one choice
+            for each_rental_decision in rental_decisions:
+                rental_decision = self.rental_choice[each_rental_decision]
+                self.current_rentals.append(rental_decision)
+                rental_cost = rental_cost + rental_decision[0]
+
+            # # Update rental decision and calculate rental cost, old for Strategy version 1.0
+            # rental_decision = self.rental_choice[action_modified[-1]]  # currently each time only rental one choice
+            # self.current_rentals.append(rental_decision)
+            # rental_cost = rental_decision[0]
 
             trans01 = action_modified[0]  # Transshipment quantity, possibly infeasible
             trans02 = action_modified[1]  # Transshipment quantity, possibly infeasible
@@ -696,30 +711,67 @@ class InvOptEnv:
                 # add by xu meng to consider rental
                 production_capacity = each_replenishment_state[4]
                 if replenishment_quantity > production_capacity:
-                    replenishment_quantity = production_capacity
                     require_quantity = replenishment_quantity - production_capacity
                     total_rental_requirement = total_rental_requirement + require_quantity
+                    replenishment_quantity = production_capacity
                 action_modified.append(replenishment_quantity)
 
             if len(individual) == 1:
-                rental_decision = 0
+                # rental_decision = -1
+                rental_decisions = []
                 # print("One tree and do not consider rental!")
             else:
-                # for making rental decision and delete not enough rental choice, by xu meng 2024.12.2
-                all_rental_priority = []
-                for each_rental_state in rental_state:
-                    each_rental_state.append(total_rental_requirement)
-                    current_rental = each_rental_state[0]
-                    rental_capacity = each_rental_state[2]
-                    if current_rental+rental_capacity < total_rental_requirement:
-                        rental_priority = np.inf
-                    else:
+                rental_decisions = []
+                onlyRentalOne = True
+                if onlyRentalOne:
+                # Strategy version 1.0: only rental one decision each time, for making rental decision and delete not enough rental choice, by xu meng 2024.12.2
+
+                    current_rental = 0
+                    if len(rental_state) > 0:
+                        current_rental = rental_state[0][0]
+                    if current_rental < total_rental_requirement:
+                        all_rental_priority = []
+                        for each_rental_state in rental_state:
+                            each_rental_state.append(total_rental_requirement)
+                            current_rental = each_rental_state[0]
+                            rental_capacity = each_rental_state[2]
+                            if current_rental+rental_capacity < total_rental_requirement:
+                                rental_priority = np.inf
+                            else:
+                                rental_priority = GP_evolve_rental(each_rental_state, rental_policy)
+                            all_rental_priority.append(rental_priority)
+                        # Get the index of the minimal value
+                        rental_decision = all_rental_priority.index(min(all_rental_priority))
+                        rental_decisions.append(rental_decision)
+                else:
+                    # Strategy version 2.0: only rental n decision each time, by xu meng 2025.1.10
+                    all_rental_priority = []
+                    for each_rental_state in rental_state:
+                        each_rental_state.append(total_rental_requirement)
                         rental_priority = GP_evolve_rental(each_rental_state, rental_policy)
-                    all_rental_priority.append(rental_priority)
-                # Get the index of the minimal value
-                rental_decision = all_rental_priority.index(min(all_rental_priority))
-            action_modified.append(rental_decision)
-            # print("rental decision: " + str(rental_decision))
+                        all_rental_priority.append(rental_priority)
+
+                    current_rental = 0
+                    if len(rental_state) > 0:
+                        current_rental = rental_state[0][0]
+                    new_current_rental = current_rental
+                    try_times = 0
+                    while new_current_rental < total_rental_requirement and try_times < 5:
+                        try_times = try_times + 1
+                        # Get the index of the minimal value
+                        rental_decision = all_rental_priority.index(min(all_rental_priority))
+                        all_rental_priority[rental_decision] = np.inf
+                        rental_decisions.append(rental_decision)
+
+                        for each_rental_decision in rental_decisions:
+                            rental_decision_capacity = self.rental_choice[each_rental_decision][1]
+                            new_current_rental = new_current_rental + rental_decision_capacity
+
+                    # if len(rental_decisions) > 1:
+                    #     print("rental_decisions: ", rental_decisions)
+            action_modified.append(rental_decisions)
+
+
 
             # ------- strategy 3 ---------------------
 
