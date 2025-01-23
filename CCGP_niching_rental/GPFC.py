@@ -2,15 +2,15 @@ import simpy
 from deap import base
 from deap import creator
 from deap import gp
-import MTGP_niching_rental.multi_tree as mt
-from MTGP_niching_rental import ea_simple_elitism
-from MTGP_niching_rental.ParallelToolbox import ParallelToolbox
-from MTGP_niching_rental.selection import *
+import CCGP_niching_rental.multi_tree as mt
+from CCGP_niching_rental import ea_simple_elitism
+from CCGP_niching_rental.ParallelToolbox import ParallelToolbox
+from CCGP_niching_rental.selection import *
 import sys
-from MTGP_niching_rental import saveFile
+from CCGP_niching_rental import saveFile
 import time
 import random
-from MTGP_niching_rental.Inventory_simulator_rental import *
+from CCGP_niching_rental.Inventory_simulator_rental import *
 
 import numpy as np
 
@@ -25,7 +25,7 @@ def init_toolbox(toolbox, pset):
     toolbox.register("select", selElitistAndTournament, tournsize=TOURNSIZE, elitism=ELITISM)
 
 def init_toolbox_two_pset(toolbox, pset1, pset2):
-    REP.init_toolbox_two_pset(toolbox, pset1, pset2, N_TREES)
+    REP.init_toolbox_two_pset(toolbox, pset1, pset2)
     toolbox.register("select", selElitistAndTournament, tournsize=TOURNSIZE, elitism=ELITISM)
 
 
@@ -70,12 +70,12 @@ def init_data(rundata):
     rd = rundata
 
 
-def GPFC_main(dataset_name, seed, randomSeed_ngen):
+def GPFC_main(dataset_name, seed,randomSeed_ngen):
 
     rd['seed'] = seed
     rd['dataset_name'] = dataset_name
     num_features = 0 # the initial number of terminals is 0, then I will add more terminals into the pset
-    if DIFF_PSET and N_TREES == 2:
+    if DIFF_PSET:
         pset1 = gp.PrimitiveSet("MAIN1", num_features, prefix="f")
         pset1.context["array"] = np.array
         REP.init_primitives_replenishment(pset1)
@@ -91,7 +91,7 @@ def GPFC_main(dataset_name, seed, randomSeed_ngen):
     else:
         pset = gp.PrimitiveSet("MAIN", num_features, prefix="f")
         pset.context["array"] = np.array
-        REP.init_primitives_replenishment(pset)
+        REP.init_primitives(pset)
         weights = (-1.,)
         creator.create("FitnessMin", base.Fitness, weights=weights)
         # set up toolbox
@@ -118,7 +118,6 @@ ELITISM = 5
 TOURNSIZE = 5
 MAX_HEIGHT = 8
 REP = mt  # individual representation {mt (multi-tree) or vt (vector-tree)}
-#still only two trees, but one for replenishment, one for rental, no transshipment
 N_TREES = 2
 rd = {}
 DIFF_PSET = True
@@ -128,14 +127,11 @@ USE_Niching = False
 # create the shop floor instance
 ins_each_gen = 1 # added by mengxu followed the advice of Meng 2022.11.01
 def main(dataset_name, seed):
-# if __name__ == "__main__":
-#     dataset_name = str(sys.argv[1])
-#     seed = int(sys.argv[2])
     random.seed(int(seed))
     np.random.seed(int(seed))
     randomSeed_ngen = []
     for i in range((NGEN + 1)):
-    # for i in range((ngen+1)*ins_each_gen): # the *ins_each_gen is added by mengxu followed the advice of Meng 2022.11.01
+        # for i in range((ngen+1)*ins_each_gen): # the *ins_each_gen is added by mengxu followed the advice of Meng 2022.11.01
         randomSeed_ngen.append(np.random.randint(2000000000))
     saveFile.clear_individual_each_gen_to_txt(seed, dataset_name)
     start = time.time()

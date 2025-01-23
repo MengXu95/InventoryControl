@@ -55,12 +55,12 @@ def sortPopulation(toolbox, population):
     return populationCopy
 
 
-def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate, use_niching, rd, stats=None,halloffame=None, verbose=__debug__, seed = __debug__, dataset_name=__debug__):
+def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate, use_niching, rd, stats=None,halloffame=None, verbose=__debug__, seed = __debug__, dataset_name=__debug__):
     # initialise the random seed of each generation
-    randomSeed_ngen = []
-    for i in range((ngen + 1)):
-    # for i in range((ngen+1)*ins_each_gen): # the *ins_each_gen is added by mengxu followed the advice of Meng 2022.11.01
-        randomSeed_ngen.append(np.random.randint(2000000000))
+    # randomSeed_ngen = []
+    # for i in range((ngen + 1)):
+    # # for i in range((ngen+1)*ins_each_gen): # the *ins_each_gen is added by mengxu followed the advice of Meng 2022.11.01
+    #     randomSeed_ngen.append(np.random.randint(2000000000))
 
     # get parameters for the given dataset/scenario
     scenarioDesign = ScenarioDesign_rental(dataset_name)
@@ -74,6 +74,8 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
 
     rd['seed'] = randomSeed_ngen[0]
+
+    print("Instance seed: ", rd['seed'])
 
     fitnesses = toolbox.multiProcess(toolbox.evaluate, invalid_ind, rd['seed'], parameters)
     # fitnesses = toolbox.multiProcess(toolbox.evaluate, invalid_ind)
@@ -123,6 +125,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
         if seedRotate:
             rd['seed'] = randomSeed_ngen[gen]
             # rd['seed'] = np.random.randint(2000000000)
+        print("Instance seed: ", rd['seed'])
         # Select the next generation individuals
         sorted_elite = sortPopulation(toolbox, population)[:elitism]  # modified by mengxu 2022.10.29
         # sorted_elite = sorted(population, key=attrgetter("fitness"), reverse=True)[:elitism]

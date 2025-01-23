@@ -16,6 +16,15 @@ class ScenarioDesign_rental():
 
     def get_parameter(self, seed=0):
 
+        #the following is for PSO, must have [0,0,0], represents do not rental
+        rental_choice = [[0, 0, 0],
+                         [40, 100, 1], [160, 500, 1], [200, 700, 1],
+                         [20, 100, 6], [80, 500, 6], [100, 700, 6]]
+
+        # the following is for GP
+        # rental_choice = [[40, 100, 1], [160, 500, 1], [200, 700, 1],
+        #                 [20, 100, 6], [80, 500, 6], [100, 700, 6]]
+
         if self.scenario == "teckwah_training":
             # Calculated values
             L = 2  # Length of forecast horizon (default)
@@ -45,7 +54,8 @@ class ScenarioDesign_rental():
                 'production_capacity': production_capacity,
                 'fixed_order': fixed_order,
                 'per_trans_item': per_trans_item,
-                'per_trans_order': per_trans_order
+                'per_trans_order': per_trans_order,
+                'rental_choice': rental_choice
             }
         elif self.scenario == "teckwah_test":
             # Obtain testing demand data from csv file
@@ -92,7 +102,8 @@ class ScenarioDesign_rental():
                 'production_capacity': production_capacity,
                 'fixed_order': fixed_order,
                 'per_trans_item': per_trans_item,
-                'per_trans_order': per_trans_order
+                'per_trans_order': per_trans_order,
+                'rental_choice': rental_choice
             }
         else:
             # Assuming the string format is: "s/m/lN<retailers>h_<holding1>_<holding2>_<holding3>b<LT>"
@@ -146,7 +157,8 @@ class ScenarioDesign_rental():
                 'production_capacity': production_capacity,
                 'fixed_order': fixed_order,
                 'per_trans_item': per_trans_item,
-                'per_trans_order': per_trans_order
+                'per_trans_order': per_trans_order,
+                'rental_choice': rental_choice
             }
 
 
