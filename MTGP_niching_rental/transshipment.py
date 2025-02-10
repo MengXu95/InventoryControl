@@ -50,151 +50,158 @@ def UT(idx, data, job_pt, job_slack, wc_idx, *args): # lowest utilization rate
     return machine_idx
 
 def GP_pair_R_test(state, tree_R): # genetic programming rule 1
-    transshipment = treeNode_R_test(tree_R, 0, state)  # todo: actually, this should be used for sequencing rule
+    transshipment,length_tree = treeNode_R_test(tree_R, 0, state)  # todo: actually, this should be used for sequencing rule
     return transshipment
 
 
 def treeNode_R_test(tree, index, data):
     if tree[index] == 'add':
-        return safe_add(treeNode_R_test(tree, index + 1, data), treeNode_R_test(tree, index + 2, data))
-        # return treeNode_R_test(tree, index + 1, data) + treeNode_R_test(tree, index + 2, data)
+        left, length_left = treeNode_R_test(tree, index + 1, data)
+        right, length_right = treeNode_R_test(tree, index + length_left + 1, data)
+        return safe_add(left, right), length_left+length_right+1
     elif tree[index] == 'subtract':
-        return safe_subtract(treeNode_R_test(tree, index + 1, data), treeNode_R_test(tree, index + 2, data))
-        # return treeNode_R_test(tree, index + 1, data) - treeNode_R_test(tree, index + 2, data)
+        left, length_left = treeNode_R_test(tree, index + 1, data)
+        right, length_right = treeNode_R_test(tree, index + length_left + 1, data)
+        return safe_subtract(left, right), length_left+length_right+1
     elif tree[index] == 'multiply':
-        return safe_multiply(treeNode_R_test(tree, index + 1, data), treeNode_R_test(tree, index + 2, data))
-        # return treeNode_R_test(tree, index + 1, data) * treeNode_R_test(tree, index + 2, data)
+        left, length_left = treeNode_R_test(tree, index + 1, data)
+        right, length_right = treeNode_R_test(tree, index + length_left + 1, data)
+        return safe_multiply(left, right), length_left+length_right+1
     elif tree[index] == 'protected_div':
-        return protected_div(treeNode_R_test(tree, index + 1, data), treeNode_R_test(tree, index + 2, data))
+        left, length_left = treeNode_R_test(tree, index + 1, data)
+        right, length_right = treeNode_R_test(tree, index + length_left + 1, data)
+        return protected_div(left, right), length_left+length_right+1
     elif tree[index] == 'maximum':
-        return np.maximum(treeNode_R_test(tree, index + 1, data), treeNode_R_test(tree, index + 2, data))
+        left, length_left = treeNode_R_test(tree, index + 1, data)
+        right, length_right = treeNode_R_test(tree, index + length_left + 1, data)
+        return np.maximum(left, right), length_left+length_right+1
     elif tree[index] == 'minimum':
-        return np.minimum(treeNode_R_test(tree, index + 1, data), treeNode_R_test(tree, index + 2, data))
+        left, length_left = treeNode_R_test(tree, index + 1, data)
+        right, length_right = treeNode_R_test(tree, index + length_left + 1, data)
+        return np.minimum(left, right), length_left+length_right+1
     elif tree[index] == 'protected_sqrt':
-        return protected_sqrt(treeNode_R_test(tree, index+1, data))
+        child, length_child = treeNode_R_test(tree, index + 1, data)
+        return protected_sqrt(child),length_child+1
     elif tree[index] == 'square':
-        return safe_square(treeNode_R_test(tree, index + 1, data))
-        # return np.square(treeNode_R_test(tree, index+1, data))
+        child, length_child = treeNode_R_test(tree, index + 1, data)
+        return safe_square(child),length_child+1
     elif tree[index] == 'lf':  # add by mengxu 2022.11.08
-        ref = treeNode_R_test(tree, index + 1, data)
-        if isinstance(ref, (np.int64, np.float64, float, int)):
-            return 1 / (1 + np.exp(-ref))
+        child, length_child = treeNode_R_test(tree, index + 1, data)
+        if isinstance(child, (np.int64, np.float64, float, int)):
+            return 1 / (1 + np.exp(-child)),length_child+1
         else:
-            for i in range(len(ref)):
-                ref[i] = 1 / (1 + np.exp(-ref[i]))
-            return ref
+            for i in range(len(child)):
+                child[i] = 1 / (1 + np.exp(-child[i]))
+            return child,length_child+1
     elif tree[index] == 'INL1':
-        return data[2]
+        return data[2],1
     elif tree[index] == 'PHC1':
-        return data[3]
+        return data[3],1
     elif tree[index] == 'PLSC1':
-        return data[4]
+        return data[4],1
     elif tree[index] == 'INC1':
-        return data[5]
+        return data[5],1
     elif tree[index] == 'FOC1':
-        return data[6]
+        return data[6],1
     elif tree[index] == 'PIP1':
-        return data[7]
+        return data[7],1
     elif tree[index] == 'FC11':
-        return data[8]
+        return data[8],1
     elif tree[index] == 'FC12':
-        return data[9]
+        return data[9],1
     elif tree[index] == 'INL2':
-        return data[10]
+        return data[10],1
     elif tree[index] == 'PHC2':
-        return data[11]
+        return data[11],1
     elif tree[index] == 'PLSC2':
-        return data[12]
+        return data[12],1
     elif tree[index] == 'INC2':
-        return data[13]
+        return data[13],1
     elif tree[index] == 'FOC2':
-        return data[14]
+        return data[14],1
     elif tree[index] == 'PIP2':
-        return data[15]
+        return data[15],1
     elif tree[index] == 'FC21':
-        return data[16]
+        return data[16],1
     elif tree[index] == 'FC22':
-        return data[17]
+        return data[17],1
     elif tree[index] == 'PTC':
-        return data[18]
+        return data[18],1
     elif tree[index] == 'FTC':
-        return data[19]
+        return data[19],1
 
 
 def GP_evolve_R(data, tree_R): # genetic programming evolved sequencing rule
-    transshipment = treeNode_R(tree_R, 0, data)  # todo: actually, this should be used for sequencing rule
+    transshipment,length_tree = treeNode_R(tree_R, 0, data)  # todo: actually, this should be used for sequencing rule
     return transshipment
 
 
 def treeNode_R(tree, index, data):
     if tree[index].arity == 2:
+        left, length_left = treeNode_R(tree, index + 1, data)
+        right, length_right = treeNode_R(tree, index + length_left + 1, data)
         if tree[index].name == 'add':
-            return safe_add(treeNode_R(tree, index + 1, data), treeNode_R(tree, index + 2, data))
-            # return treeNode_R(tree, index + 1, data) + treeNode_R(tree, index + 2, data)
+            return safe_add(left, right), length_left+length_right+1
         elif tree[index].name == 'subtract':
-            return safe_subtract(treeNode_R(tree, index + 1, data), treeNode_R(tree, index + 2, data))
-            # return treeNode_R(tree, index + 1, data) - treeNode_R(tree, index + 2, data)
+            return safe_subtract(left, right), length_left+length_right+1
         elif tree[index].name == 'multiply':
-            return safe_multiply(treeNode_R(tree, index + 1, data), treeNode_R(tree, index + 2, data))
-            # return treeNode_R(tree, index + 1, data) * treeNode_R(tree, index + 2, data)
+            return safe_multiply(left, right), length_left+length_right+1
         elif tree[index].name == 'protected_div':
-            return protected_div(treeNode_R(tree, index + 1, data), treeNode_R(tree, index + 2, data))
+            return protected_div(left, right), length_left+length_right+1
         elif tree[index].name == 'maximum':
-            return np.maximum(treeNode_R(tree, index + 1, data), treeNode_R(tree, index + 2, data))
+            return np.maximum(left, right), length_left+length_right+1
         elif tree[index].name == 'minimum':
-            return np.minimum(treeNode_R(tree, index + 1, data), treeNode_R(tree, index + 2, data))
+            return np.minimum(left, right), length_left+length_right+1
     elif tree[index].arity == 1:
+        child, length_child = treeNode_R(tree, index + 1, data)
         if tree[index].name == 'lf':  # add by mengxu 2022.11.08
-            ref = treeNode_R(tree, index + 1, data)
-            if isinstance(ref, (np.int64, np.float64, float, int)):
-                return 1 / (1 + np.exp(-ref))
+            if isinstance(child, (np.int64, np.float64, float, int)):
+                return 1 / (1 + np.exp(-child)),length_child+1
             else:
-                for i in range(len(ref)):
-                    ref[i] = 1 / (1 + np.exp(-ref[i]))
-                    # print(ref[i])
-                return ref
+                for i in range(len(child)):
+                    child[i] = 1 / (1 + np.exp(-child[i]))
+                return child,length_child+1
         elif tree[index].name == 'protected_sqrt':
-            return protected_sqrt(treeNode_R(tree, index + 1, data))
+            return protected_sqrt(child),length_child+1
         elif tree[index].name == 'square':
-            return safe_square(treeNode_R(tree, index + 1, data))
-            # return np.square(treeNode_R(tree, index + 1, data))
+            return safe_square(child),length_child+1
     elif tree[index].arity == 0:
         if tree[index].name == 'INL1':
-            return data[2]
+            return data[2],1
         elif tree[index].name == 'PHC1':
-            return data[3]
+            return data[3],1
         elif tree[index].name == 'PLSC1':
-            return data[4]
+            return data[4],1
         elif tree[index].name == 'INC1':
-            return data[5]
+            return data[5],1
         elif tree[index].name == 'FOC1':
-            return data[6]
+            return data[6],1
         elif tree[index].name == 'PIP1':
-            return data[7]
+            return data[7],1
         elif tree[index].name == 'FC11':
-            return data[8]
+            return data[8],1
         elif tree[index].name == 'FC12':
-            return data[9]
+            return data[9],1
         elif tree[index].name == 'INL2':
-            return data[10]
+            return data[10],1
         elif tree[index].name == 'PHC2':
-            return data[11]
+            return data[11],1
         elif tree[index].name == 'PLSC2':
-            return data[12]
+            return data[12],1
         elif tree[index].name == 'INC2':
-            return data[13]
+            return data[13],1
         elif tree[index].name == 'FOC2':
-            return data[14]
+            return data[14],1
         elif tree[index].name == 'PIP2':
-            return data[15]
+            return data[15],1
         elif tree[index].name == 'FC21':
-            return data[16]
+            return data[16],1
         elif tree[index].name == 'FC22':
-            return data[17]
+            return data[17],1
         elif tree[index].name == 'PTC':
-            return data[18]
+            return data[18],1
         elif tree[index].name == 'FTC':
-            return data[19]
+            return data[19],1
 
 
 def protected_div(left, right):
@@ -258,3 +265,4 @@ def safe_square(a):
             # Handle cases where conversion to float fails
             return np.inf  # or some default safe value
     return value
+

@@ -14,98 +14,105 @@ or choose to use trained parameters for decision-making
 
 
 def GP_pair_rental_test(state, tree_S): #data is the state
-    rental_priority = treeNode_rental_test(tree_S, 0, state)  # todo: actually, this should be used for sequencing rule
+    rental_priority,length_tree = treeNode_rental_test(tree_S, 0, state)  # todo: actually, this should be used for sequencing rule
     return rental_priority
 
 
 def treeNode_rental_test(tree, index, data):
     if tree[index] == 'add':
-        return safe_add(treeNode_rental_test(tree, index+1, data), treeNode_rental_test(tree, index+2, data))
-        # return treeNode_S_test(tree, index+1, data) + treeNode_S_test(tree, index+2, data)
+        left, length_left = treeNode_rental_test(tree, index + 1, data)
+        right, length_right = treeNode_rental_test(tree, index + length_left + 1, data)
+        return safe_add(left, right), length_left+length_right+1
     elif tree[index] == 'subtract':
-        # return treeNode_S_test(tree, index + 1, data) - treeNode_S_test(tree, index + 2, data)
-        return safe_subtract(treeNode_rental_test(tree, index+1, data), treeNode_rental_test(tree, index+2, data))
+        left, length_left = treeNode_rental_test(tree, index + 1, data)
+        right, length_right = treeNode_rental_test(tree, index + length_left + 1, data)
+        return safe_subtract(left, right), length_left+length_right+1
     elif tree[index] == 'multiply':
-        # return treeNode_S_test(tree, index + 1, data) * treeNode_S_test(tree, index + 2, data)
-        return safe_multiply(treeNode_rental_test(tree, index+1, data), treeNode_rental_test(tree, index+2, data))
+        left, length_left = treeNode_rental_test(tree, index + 1, data)
+        right, length_right = treeNode_rental_test(tree, index + length_left + 1, data)
+        return safe_multiply(left, right), length_left+length_right+1
     elif tree[index] == 'protected_div':
-        return protected_div(treeNode_rental_test(tree, index+1, data), treeNode_rental_test(tree, index+2, data))
+        left, length_left = treeNode_rental_test(tree, index + 1, data)
+        right, length_right = treeNode_rental_test(tree, index + length_left + 1, data)
+        return protected_div(left, right), length_left+length_right+1
     elif tree[index] == 'maximum':
-        return np.maximum(treeNode_rental_test(tree, index+1, data), treeNode_rental_test(tree, index+2, data))
+        left, length_left = treeNode_rental_test(tree, index + 1, data)
+        right, length_right = treeNode_rental_test(tree, index + length_left + 1, data)
+        return np.maximum(left, right), length_left+length_right+1
     elif tree[index] == 'minimum':
-        return np.minimum(treeNode_rental_test(tree, index+1, data), treeNode_rental_test(tree, index+2, data))
+        left, length_left = treeNode_rental_test(tree, index + 1, data)
+        right, length_right = treeNode_rental_test(tree, index + length_left + 1, data)
+        return np.minimum(left, right), length_left+length_right+1
     elif tree[index] == 'protected_sqrt':
-        return protected_sqrt(treeNode_rental_test(tree, index+1, data))
+        child, length_child = treeNode_rental_test(tree, index + 1, data)
+        return protected_sqrt(child),length_child+1
     elif tree[index] == 'square':
-        return safe_square(treeNode_rental_test(tree, index + 1, data))
-        # return np.square(treeNode_S_test(tree, index+1, data))
+        child, length_child = treeNode_rental_test(tree, index + 1, data)
+        return safe_square(child),length_child+1
     elif tree[index] == 'lf': # add by mengxu 2022.11.08
-        ref = treeNode_rental_test(tree, index+1, data)
-        if isinstance(ref, (np.int64, np.float64, float, int)):
-            return 1 / (1 + np.exp(-ref))
+        child, length_child = treeNode_rental_test(tree, index + 1, data)
+        if isinstance(child, (np.int64, np.float64, float, int)):
+            return 1 / (1 + np.exp(-child)),length_child+1
         else:
-            for i in range(len(ref)):
-                ref[i] = 1 / (1 + np.exp(-ref[i]))
-            return ref
+            for i in range(len(child)):
+                child[i] = 1 / (1 + np.exp(-child[i]))
+            return child,length_child+1
     elif tree[index] == 'CRENT':
-        return data[0]
+        return data[0],1
     elif tree[index] == 'RP':
-        return data[1]
+        return data[1],1
     elif tree[index] == 'RCAP':
-        return data[2]
+        return data[2],1
     elif tree[index] == 'RDUR':
-        return data[3]
+        return data[3],1
     elif tree[index] == 'TREQ':
-        return data[4]
+        return data[4],1
 
 
 def GP_evolve_rental(data, tree_S): # genetic programming evolved sequencing rule
-    rental_priority = treeNode_rental(tree_S, 0, data)
+    rental_priority,length_tree = treeNode_rental(tree_S, 0, data)
     return rental_priority
 
 def treeNode_rental(tree, index, data):
     if tree[index].arity == 2:
+        left, length_left = treeNode_rental(tree, index + 1, data)
+        right, length_right = treeNode_rental(tree, index + length_left + 1, data)
         if tree[index].name == 'add':
-            return safe_add(treeNode_rental(tree, index + 1, data), treeNode_rental(tree, index + 2, data))
-            # return treeNode_S(tree, index+1, data) + treeNode_S(tree, index+2, data)
+            return safe_add(left, right), length_left+length_right+1
         elif tree[index].name == 'subtract':
-            # return treeNode_S(tree, index + 1, data) - treeNode_S(tree, index + 2, data)
-            return safe_subtract(treeNode_rental(tree, index+1, data), treeNode_rental(tree, index+2, data))
+            return safe_subtract(left, right), length_left+length_right+1
         elif tree[index].name == 'multiply':
-            # return treeNode_S(tree, index + 1, data) * treeNode_S(tree, index + 2, data)
-            return safe_multiply(treeNode_rental(tree, index+1, data), treeNode_rental(tree, index+2, data))
+            return safe_multiply(left, right), length_left+length_right+1
         elif tree[index].name == 'protected_div':
-            return protected_div(treeNode_rental(tree, index+1, data), treeNode_rental(tree, index+2, data))
+            return protected_div(left, right), length_left+length_right+1
         elif tree[index].name == 'maximum':
-            return np.maximum(treeNode_rental(tree, index+1, data), treeNode_rental(tree, index+2, data))
+            return np.maximum(left, right), length_left+length_right+1
         elif tree[index].name == 'minimum':
-            return np.minimum(treeNode_rental(tree, index+1, data), treeNode_rental(tree, index+2, data))
+            return np.minimum(left, right), length_left+length_right+1
     elif tree[index].arity == 1:
+        child, length_child = treeNode_rental(tree, index + 1, data)
         if tree[index].name == 'lf': # add by mengxu 2022.11.08
-            ref = treeNode_rental(tree, index + 1, data)
-            if isinstance(ref, (np.int64, np.float64, float, int)):
-                return 1 / (1 + np.exp(-ref))
+            if isinstance(child, (np.int64, np.float64, float, int)):
+                return 1 / (1 + np.exp(-child)),length_child+1
             else:
-                for i in range(len(ref)):
-                    ref[i] = 1 / (1 + np.exp(-ref[i]))
-                    # print(ref[i])
-                return ref
+                for i in range(len(child)):
+                    child[i] = 1 / (1 + np.exp(-child[i]))
+                return child,length_child+1
         elif tree[index].name == 'protected_sqrt':
-            return protected_sqrt(treeNode_rental(tree, index + 1, data))
+            return protected_sqrt(child),length_child+1
         elif tree[index].name == 'square':
-            return safe_square(treeNode_rental(tree, index + 1, data))
-            # return np.square(treeNode_S(tree, index + 1, data))
+            return safe_square(child),length_child+1
     elif tree[index].arity == 0:
         if tree[index].name == 'CRENT':
-            return data[0]
+            return data[0],1
         elif tree[index].name == 'RP':
-            return data[1]
+            return data[1],1
         elif tree[index].name == 'RCAP':
-            return data[2]
+            return data[2],1
         elif tree[index].name == 'RDUR':
-            return data[3]
+            return data[3],1
         elif tree[index].name == 'TREQ':
-            return data[4]
+            return data[4],1
 
 def protected_div(left, right):
     with np.errstate(divide='ignore', invalid='ignore'):
