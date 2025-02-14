@@ -2,6 +2,8 @@ import random
 import numpy as np
 from PSO_rental.Inventory_simulator_rental import *
 from Utils.ScenarioDesign_rental import ScenarioDesign_rental
+import time
+from PSO_rental import saveFile
 
 def evaluate_function(seed,parameters,individual):
     """
@@ -107,11 +109,16 @@ def pso_optimize(randomSeed_ngen, seedRotate, seed, parameters, T, num_retailer,
     instance_seed = randomSeed_ngen[0]
     print("Instance seed: ", instance_seed)
 
+    min_fitness = []
+    best_individual_al_gen = []
+
     # Initialize personal and global bests
     personal_bests = particles[:]
     personal_best_scores = [evaluate_function(instance_seed, parameters, p) for p in particles]
     global_best = personal_bests[np.argmin(personal_best_scores)]
     global_best_score = min(personal_best_scores)
+    min_fitness.append(global_best_score)
+    best_individual_al_gen.append(global_best)
 
     for iteration in range(1, max_iterations+1):
         # Added by mengxu to do seed rotation
@@ -139,9 +146,12 @@ def pso_optimize(randomSeed_ngen, seedRotate, seed, parameters, T, num_retailer,
                     global_best = particles[i]
                     global_best_score = score
 
+        min_fitness.append(global_best_score)
+        best_individual_al_gen.append(global_best)
+
         print(f"Iteration {iteration + 1}/{max_iterations}, Best Score: {global_best_score}")
 
-    return global_best, global_best_score
+    return global_best, global_best_score, min_fitness, best_individual_al_gen
 
 
 
@@ -149,7 +159,7 @@ def main(dataset_name, seed):
 # if __name__ == "__main__":
 #     dataset_name = str(sys.argv[1])
 #     seed = int(sys.argv[2])
-    num_particles = 400
+    num_particles = 200
     max_iterations = 50
     seed_rotation = False
 
@@ -176,6 +186,15 @@ def main(dataset_name, seed):
     c1 = 1.5  # Cognitive component
     c2 = 1.5  # Social component
 
-    best_position, best_score = pso_optimize(randomSeed_ngen, seed_rotation, seed, parameters, T, num_retailer, m, n, index_range, num_particles, max_iterations, w, c1, c2)
+    start = time.time()
+    best_position, best_score, min_fitness, best_ind_all_gen = pso_optimize(randomSeed_ngen, seed_rotation, seed, parameters, T, num_retailer, m, n, index_range, num_particles, max_iterations, w, c1, c2)
+    end = time.time()
+    running_time = end - start
+    saveFile.save_individual_all_gen_to_txt(seed, dataset_name, best_ind_all_gen)
+    saveFile.saveMinFitness(seed, dataset_name, min_fitness)
+    saveFile.saveRunningTime(seed, dataset_name, running_time)
+    print(min_fitness)
     print("Best Position:", best_position)
     print("Best Score:", best_score)
+    print("Training time: " + str(running_time))
+    print('Training end!')

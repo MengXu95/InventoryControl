@@ -1,0 +1,358 @@
+Best individuals from each gen:
+
+Gen: 0
+Individual:
+Tree 0:
+subtract(multiply(multiply('FOC', 'PHC'), add('INL', 'PLSC')), add(subtract('INC', 'INC'), protected_sqrt('PIP')))
+Tree 1:
+maximum('RP', 'RP')
+
+Gen: 1
+Individual:
+Tree 0:
+subtract(multiply(multiply('FOC', 'PHC'), add('INL', 'PLSC')), add(subtract('INC', 'INC'), protected_sqrt('PIP')))
+Tree 1:
+maximum('RP', 'RP')
+
+Gen: 2
+Individual:
+Tree 0:
+subtract(multiply(multiply('FOC', 'PHC'), add('INL', 'PLSC')), add(subtract('INC', 'INC'), protected_sqrt('PIP')))
+Tree 1:
+maximum('RP', 'RP')
+
+Gen: 3
+Individual:
+Tree 0:
+subtract(multiply(multiply('FOC', 'PHC'), 'FC2'), add(subtract('INC', 'INC'), protected_sqrt('PIP')))
+Tree 1:
+protected_sqrt(add(square(minimum('CRENT', 'CRENT')), protected_div(minimum('RCAP', 'TREQ'), protected_sqrt('RDUR'))))
+
+Gen: 4
+Individual:
+Tree 0:
+minimum(subtract(maximum('INL', square('PHC')), add('FOC', 'PLSC')), subtract(protected_sqrt(subtract('INC', 'INL')), multiply(multiply('FC1', 'PLSC'), maximum('PHC', 'FTC'))))
+Tree 1:
+add('RP', maximum('RP', 'CRENT'))
+
+Gen: 5
+Individual:
+Tree 0:
+square(protected_sqrt(maximum(add(add(protected_sqrt('PIP'), subtract('INL', 'FOC')), subtract(maximum(multiply(protected_sqrt('PIP'), 'FC2'), 'FTC'), add('FOC', 'PLSC'))), protected_sqrt(multiply(square('PLSC'), subtract('PTC', 'PIP'))))))
+Tree 1:
+subtract(protected_sqrt(maximum(add(square(maximum('CRENT', 'RCAP')), square(square('RCAP'))), maximum(minimum(subtract('TREQ', 'RCAP'), add('CRENT', 'TREQ')), subtract(multiply('CRENT', 'CRENT'), protected_div('RP', 'RP'))))), square(add(minimum(minimum(multiply('RDUR', 'RDUR'), square('RCAP')), add(protected_sqrt('RDUR'), maximum('RCAP', 'RP'))), protected_div(add('TREQ', protected_sqrt('RP')), square(subtract('TREQ', 'CRENT'))))))
+
+Gen: 6
+Individual:
+Tree 0:
+subtract(multiply(multiply('FOC', 'PHC'), 'FC2'), add(subtract('INC', multiply(multiply('FOC', 'PHC'), 'FC2')), protected_sqrt('PIP')))
+Tree 1:
+protected_sqrt(add(square(minimum(square(square('CRENT')), 'CRENT')), protected_div(minimum('RCAP', 'TREQ'), protected_sqrt('RDUR'))))
+
+Gen: 7
+Individual:
+Tree 0:
+subtract(multiply(multiply('FOC', 'PHC'), 'FC2'), add(subtract('INC', multiply(multiply('FC1', 'PLSC'), maximum('PHC', 'FTC'))), protected_sqrt('PIP')))
+Tree 1:
+add(protected_div('CRENT', 'TREQ'), maximum(square('RDUR'), 'RP'))
+
+Gen: 8
+Individual:
+Tree 0:
+subtract(multiply(multiply('FOC', 'PHC'), 'FC2'), add(subtract('INC', multiply(multiply('FOC', 'PHC'), 'PHC')), protected_sqrt('PIP')))
+Tree 1:
+multiply('RP', 'RP')
+
+Gen: 9
+Individual:
+Tree 0:
+subtract(multiply(multiply('FOC', 'PHC'), 'FC2'), add(subtract('INC', multiply(multiply('FOC', 'PHC'), 'PHC')), protected_sqrt('PIP')))
+Tree 1:
+multiply('RP', 'RP')
+
+Gen: 10
+Individual:
+Tree 0:
+subtract(multiply(multiply('FOC', 'PHC'), 'FC2'), add(subtract('INC', multiply(multiply('FOC', 'PLSC'), 'PHC')), protected_sqrt('PIP')))
+Tree 1:
+subtract(protected_sqrt(maximum(add(square(maximum('CRENT', 'RCAP')), square(square('RCAP'))), 'RDUR')), square(add(minimum(minimum(multiply('RDUR', 'RDUR'), square('RCAP')), add(protected_sqrt('RDUR'), maximum('RCAP', 'RP'))), protected_div(add('TREQ', protected_sqrt('RP')), square(subtract('TREQ', 'CRENT'))))))
+
+Gen: 11
+Individual:
+Tree 0:
+subtract(multiply(multiply('FOC', 'PHC'), 'FC2'), add(subtract('INC', multiply(multiply('FOC', 'PLSC'), 'PHC')), protected_sqrt('PIP')))
+Tree 1:
+subtract(protected_sqrt(maximum(add(square(maximum('CRENT', 'RCAP')), square(square('RCAP'))), 'RDUR')), square(add(minimum(minimum(multiply('RDUR', 'RDUR'), square('RCAP')), add(protected_sqrt('RDUR'), maximum('RCAP', 'RP'))), protected_div(add('TREQ', protected_sqrt('RP')), square(subtract('TREQ', 'CRENT'))))))
+
+Gen: 12
+Individual:
+Tree 0:
+subtract(multiply(multiply('FOC', 'PHC'), 'FC2'), add(subtract('INC', multiply(multiply('FOC', 'PLSC'), 'PHC')), protected_sqrt('PIP')))
+Tree 1:
+subtract(protected_sqrt(maximum(add(square(maximum('CRENT', 'RCAP')), square(square('RCAP'))), 'RDUR')), square(add(minimum(minimum(multiply('RDUR', 'RDUR'), square('RCAP')), add(protected_sqrt('RDUR'), maximum('RCAP', 'RP'))), protected_div(add('TREQ', protected_sqrt('RP')), square(subtract('TREQ', 'CRENT'))))))
+
+Gen: 13
+Individual:
+Tree 0:
+subtract(multiply(multiply('FOC', 'PHC'), 'FC2'), add(subtract(square(square('PHC')), 'INC'), protected_sqrt(add(subtract('INC', multiply(multiply('FOC', 'PHC'), 'PHC')), protected_sqrt('PIP')))))
+Tree 1:
+maximum(maximum(minimum('RCAP', 'RP'), square(subtract('TREQ', 'RDUR'))), multiply(subtract(multiply(multiply(minimum('RCAP', 'RCAP'), square('RCAP')), multiply(protected_sqrt('TREQ'), 'RP')), maximum(protected_sqrt(protected_div('RCAP', 'CRENT')), protected_sqrt(subtract('RDUR', 'RCAP')))), protected_div('RP', protected_sqrt('TREQ'))))
+
+Gen: 14
+Individual:
+Tree 0:
+subtract(multiply(multiply('FOC', 'PHC'), 'FC2'), add(subtract(square(square('PHC')), 'INC'), protected_sqrt(add(subtract('INC', multiply(multiply('FOC', 'PHC'), 'PHC')), protected_sqrt('PIP')))))
+Tree 1:
+maximum(maximum(minimum('RCAP', 'RP'), square(subtract('TREQ', 'RDUR'))), multiply(subtract(multiply(multiply(minimum('RCAP', 'RCAP'), square('RCAP')), multiply(protected_sqrt('TREQ'), 'RP')), maximum(protected_sqrt(protected_div('RCAP', 'CRENT')), protected_sqrt(subtract('RDUR', 'RCAP')))), protected_div('RP', protected_sqrt('TREQ'))))
+
+Gen: 15
+Individual:
+Tree 0:
+subtract(multiply(multiply('FOC', 'PHC'), 'FC2'), add(subtract(square(square('PHC')), 'INC'), protected_sqrt(add(subtract('INC', multiply(multiply('FOC', 'PHC'), 'PHC')), protected_sqrt('PIP')))))
+Tree 1:
+maximum(maximum(minimum('RCAP', 'RP'), square(subtract('TREQ', 'RDUR'))), multiply(subtract(multiply(multiply(minimum('RCAP', 'RCAP'), square('RCAP')), multiply(protected_sqrt('TREQ'), 'RP')), maximum(protected_sqrt(protected_div('RCAP', 'CRENT')), protected_sqrt(subtract('RDUR', 'RCAP')))), protected_div('RP', protected_sqrt('TREQ'))))
+
+Gen: 16
+Individual:
+Tree 0:
+subtract(multiply('FC1', 'FC2'), add(subtract(square(square('PHC')), 'INC'), protected_sqrt('PIP')))
+Tree 1:
+maximum(maximum('TREQ', square(subtract('TREQ', 'RDUR'))), multiply(subtract(multiply(multiply(minimum('RCAP', 'RCAP'), square('RCAP')), multiply(protected_sqrt('TREQ'), 'RP')), maximum(protected_sqrt(protected_div('RCAP', 'CRENT')), protected_sqrt(subtract('RDUR', 'RCAP')))), protected_div('RP', protected_sqrt('TREQ'))))
+
+Gen: 17
+Individual:
+Tree 0:
+subtract(multiply('PHC', 'FC2'), add(subtract(square(square('PHC')), 'INC'), protected_sqrt('PIP')))
+Tree 1:
+multiply(minimum(maximum('CRENT', 'RCAP'), add('RP', protected_sqrt(add(square('CRENT'), protected_div(minimum('RCAP', 'TREQ'), protected_sqrt('RDUR')))))), subtract(multiply(multiply(minimum('RCAP', 'RCAP'), square('RCAP')), multiply(protected_sqrt('TREQ'), 'RP')), maximum(protected_sqrt(protected_div('RCAP', 'CRENT')), protected_sqrt(subtract('RDUR', 'RCAP')))))
+
+Gen: 18
+Individual:
+Tree 0:
+subtract(multiply('PHC', 'FC2'), add(subtract(square(square('PHC')), 'INC'), protected_sqrt('PIP')))
+Tree 1:
+multiply(minimum(maximum('CRENT', 'RCAP'), add('RP', protected_sqrt(add(square('CRENT'), protected_div(minimum('RCAP', 'TREQ'), protected_sqrt('RDUR')))))), subtract(multiply(multiply(minimum('RCAP', 'RCAP'), square('RCAP')), multiply(protected_sqrt('TREQ'), 'RP')), maximum(protected_sqrt(protected_div('RCAP', 'CRENT')), protected_sqrt(subtract('RDUR', 'RCAP')))))
+
+Gen: 19
+Individual:
+Tree 0:
+subtract(multiply('PHC', 'FC2'), add(subtract(square(square('PHC')), 'INC'), protected_sqrt('PIP')))
+Tree 1:
+multiply(minimum(maximum('CRENT', 'RCAP'), add('RP', protected_sqrt(add(square('CRENT'), protected_div(minimum('RCAP', 'TREQ'), protected_sqrt('RDUR')))))), subtract(multiply(multiply(minimum('RCAP', 'RCAP'), square('RCAP')), multiply(protected_sqrt('TREQ'), 'RP')), maximum(protected_sqrt(protected_div('RCAP', 'CRENT')), protected_sqrt(subtract('RDUR', 'RCAP')))))
+
+Gen: 20
+Individual:
+Tree 0:
+subtract(multiply('FC1', protected_sqrt('PIP')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt('PIP')))
+Tree 1:
+protected_sqrt(add(add(square(square('RCAP')), 'RP'), 'RP'))
+
+Gen: 21
+Individual:
+Tree 0:
+subtract(multiply('FC1', protected_sqrt('PIP')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt('PIP')))
+Tree 1:
+protected_sqrt(add(add(square(square('RCAP')), 'RP'), 'RP'))
+
+Gen: 22
+Individual:
+Tree 0:
+subtract(multiply('FC1', protected_sqrt('PIP')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt('PIP')))
+Tree 1:
+protected_sqrt(add(add(square(square('RCAP')), 'RP'), 'RP'))
+
+Gen: 23
+Individual:
+Tree 0:
+subtract(multiply('FC1', protected_sqrt('PIP')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt('PIP')))
+Tree 1:
+protected_sqrt(add(add(square(square('RCAP')), 'RP'), 'RP'))
+
+Gen: 24
+Individual:
+Tree 0:
+subtract(multiply('FC1', protected_sqrt('PIP')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt('PIP')))
+Tree 1:
+protected_sqrt(add(add(square(square('RCAP')), 'RP'), 'RP'))
+
+Gen: 25
+Individual:
+Tree 0:
+subtract(multiply('FC1', protected_sqrt('PIP')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt('PIP')))
+Tree 1:
+protected_sqrt(add(add(square(square('RCAP')), 'RP'), 'RP'))
+
+Gen: 26
+Individual:
+Tree 0:
+subtract(multiply('FC1', protected_sqrt('PIP')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt('PIP')))
+Tree 1:
+protected_sqrt(add(add(square(square('RCAP')), 'RP'), 'RP'))
+
+Gen: 27
+Individual:
+Tree 0:
+subtract(multiply('FC1', protected_sqrt('PIP')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt('PIP')))
+Tree 1:
+protected_sqrt(add(add(square(square('RCAP')), 'RP'), 'RP'))
+
+Gen: 28
+Individual:
+Tree 0:
+subtract(multiply('FC1', protected_sqrt('PIP')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt('PIP')))
+Tree 1:
+protected_sqrt(add(add(square(square('RCAP')), 'RP'), 'RP'))
+
+Gen: 29
+Individual:
+Tree 0:
+subtract(multiply('FC1', protected_sqrt('PIP')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt('PIP')))
+Tree 1:
+protected_sqrt(add(add(square(square('RCAP')), 'RP'), 'RP'))
+
+Gen: 30
+Individual:
+Tree 0:
+subtract(multiply('FC1', protected_sqrt('PIP')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt('PIP')))
+Tree 1:
+protected_sqrt(add(add(square(square('RCAP')), 'RP'), 'RP'))
+
+Gen: 31
+Individual:
+Tree 0:
+subtract(multiply('FC1', protected_sqrt('PIP')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt('PIP')))
+Tree 1:
+protected_sqrt(add(add(square(square('RCAP')), 'RP'), 'RP'))
+
+Gen: 32
+Individual:
+Tree 0:
+subtract(multiply('FC1', protected_sqrt('PIP')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt('PIP')))
+Tree 1:
+protected_sqrt(add(add(square(square('RCAP')), 'RP'), 'RP'))
+
+Gen: 33
+Individual:
+Tree 0:
+subtract(multiply('FC1', protected_sqrt('PIP')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt('PIP')))
+Tree 1:
+protected_sqrt(add(add(square(square('RCAP')), 'RP'), 'RP'))
+
+Gen: 34
+Individual:
+Tree 0:
+subtract(multiply('FC1', protected_sqrt('PIP')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt('PIP')))
+Tree 1:
+protected_sqrt(add(add(square(square('RCAP')), 'RP'), 'RP'))
+
+Gen: 35
+Individual:
+Tree 0:
+subtract(multiply('FC1', protected_sqrt('PIP')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt('PIP')))
+Tree 1:
+protected_sqrt(add(add(square(square('RCAP')), 'RP'), 'RP'))
+
+Gen: 36
+Individual:
+Tree 0:
+subtract(multiply('FC1', subtract('PTC', 'PHC')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt(protected_sqrt('PIP'))))
+Tree 1:
+add(protected_div(protected_sqrt(subtract('RDUR', 'RP')), add('TREQ', protected_sqrt(square(protected_div(add('TREQ', protected_sqrt('RP')), square(subtract('TREQ', 'CRENT'))))))), 'RP')
+
+Gen: 37
+Individual:
+Tree 0:
+subtract(multiply('FC1', subtract('PTC', 'PHC')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt(protected_sqrt('PIP'))))
+Tree 1:
+add(protected_div(protected_sqrt(subtract('RDUR', 'RP')), add('TREQ', protected_sqrt(square(protected_div(add('TREQ', protected_sqrt('RP')), square(subtract('TREQ', 'CRENT'))))))), 'RP')
+
+Gen: 38
+Individual:
+Tree 0:
+subtract(multiply('FC1', subtract('PTC', 'PHC')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt(protected_sqrt('PIP'))))
+Tree 1:
+add(protected_div(protected_sqrt(subtract('RDUR', 'RP')), add('TREQ', protected_sqrt(square(protected_div(add('TREQ', protected_sqrt('RP')), square(subtract('TREQ', 'CRENT'))))))), 'RP')
+
+Gen: 39
+Individual:
+Tree 0:
+subtract(multiply('FC1', subtract('PTC', 'PHC')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt(protected_sqrt('PIP'))))
+Tree 1:
+add(protected_div(protected_sqrt(subtract('RDUR', 'RP')), add('TREQ', protected_sqrt(square(protected_div(add('TREQ', protected_sqrt('RP')), square(subtract('TREQ', 'CRENT'))))))), 'RP')
+
+Gen: 40
+Individual:
+Tree 0:
+subtract(multiply('FC1', subtract('PTC', 'PHC')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt(protected_sqrt('PIP'))))
+Tree 1:
+add(protected_div(protected_sqrt(subtract('RDUR', 'RP')), add('TREQ', protected_sqrt(square(protected_div(add('TREQ', protected_sqrt('RP')), square(subtract('TREQ', 'CRENT'))))))), 'RP')
+
+Gen: 41
+Individual:
+Tree 0:
+subtract(multiply('FC1', subtract('PTC', 'PHC')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt(protected_sqrt('PIP'))))
+Tree 1:
+add(protected_div(protected_sqrt(subtract('RDUR', 'RP')), add('TREQ', protected_sqrt(square(protected_div(add('TREQ', protected_sqrt('RP')), square(subtract('TREQ', 'CRENT'))))))), 'RP')
+
+Gen: 42
+Individual:
+Tree 0:
+subtract(multiply('FC1', subtract('PTC', 'PHC')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt(protected_sqrt('PIP'))))
+Tree 1:
+add(protected_div(protected_sqrt(subtract('RDUR', 'RP')), add('TREQ', protected_sqrt(square(protected_div(add('TREQ', protected_sqrt('RP')), square(subtract('TREQ', 'CRENT'))))))), 'RP')
+
+Gen: 43
+Individual:
+Tree 0:
+subtract(multiply('FC1', subtract('PTC', 'PHC')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt(protected_sqrt('PIP'))))
+Tree 1:
+add(protected_div(protected_sqrt(subtract('RDUR', 'RP')), add('TREQ', protected_sqrt(square(protected_div(add('TREQ', protected_sqrt('RP')), square(subtract('TREQ', 'CRENT'))))))), 'RP')
+
+Gen: 44
+Individual:
+Tree 0:
+subtract(multiply('FC1', subtract('PTC', 'PHC')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt(protected_sqrt('PIP'))))
+Tree 1:
+add(protected_div(protected_sqrt(subtract('RDUR', 'RP')), add('TREQ', protected_sqrt(square(protected_div(add('TREQ', protected_sqrt('RP')), square(subtract('TREQ', 'CRENT'))))))), 'RP')
+
+Gen: 45
+Individual:
+Tree 0:
+subtract(multiply('FC1', subtract('PTC', 'PHC')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt(protected_sqrt('PIP'))))
+Tree 1:
+add(protected_div(protected_sqrt(subtract('RDUR', 'RP')), add('TREQ', protected_sqrt(square(protected_div(add('TREQ', protected_sqrt('RP')), square(subtract('TREQ', 'CRENT'))))))), 'RP')
+
+Gen: 46
+Individual:
+Tree 0:
+subtract(multiply('FC1', subtract('PTC', 'PHC')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt(protected_sqrt('PIP'))))
+Tree 1:
+add(protected_div(protected_sqrt(subtract('RDUR', 'RP')), add('TREQ', protected_sqrt(square(protected_div(add('TREQ', protected_sqrt('RP')), square(subtract('TREQ', 'CRENT'))))))), 'RP')
+
+Gen: 47
+Individual:
+Tree 0:
+subtract(multiply('FC1', subtract('PTC', 'PHC')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt(protected_sqrt('PIP'))))
+Tree 1:
+add(protected_div(protected_sqrt(subtract('RDUR', 'RP')), add('TREQ', protected_sqrt(square(protected_div(add('TREQ', protected_sqrt('RP')), square(subtract('TREQ', 'CRENT'))))))), 'RP')
+
+Gen: 48
+Individual:
+Tree 0:
+subtract(multiply('FC1', subtract('PTC', 'PHC')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt(protected_sqrt('PIP'))))
+Tree 1:
+add(protected_div(protected_sqrt(subtract('RDUR', 'RP')), add('TREQ', protected_sqrt(square(protected_div(add('TREQ', protected_sqrt('RP')), square(subtract('TREQ', 'CRENT'))))))), 'RP')
+
+Gen: 49
+Individual:
+Tree 0:
+subtract(multiply('FC1', subtract('PTC', 'PHC')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt(protected_sqrt('PIP'))))
+Tree 1:
+add(protected_div(protected_sqrt(subtract('RDUR', 'RP')), add('TREQ', protected_sqrt(square(protected_div(add('TREQ', protected_sqrt('RP')), square(subtract('TREQ', 'CRENT'))))))), 'RP')
+
+Gen: 50
+Individual:
+Tree 0:
+subtract(multiply('FC1', subtract('PTC', 'PHC')), add(subtract(square(square('PHC')), 'INC'), protected_sqrt(protected_sqrt('PIP'))))
+Tree 1:
+add(protected_div(protected_sqrt(subtract('RDUR', 'RP')), add('TREQ', protected_sqrt(square(protected_div(add('TREQ', protected_sqrt('RP')), square(subtract('TREQ', 'CRENT'))))))), 'RP')

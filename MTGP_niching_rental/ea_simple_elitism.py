@@ -69,6 +69,7 @@ def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, 
     logbook = tools.Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
     min_fitness = []
+    min_all_cost = []
     best_ind_all_gen = [] #add by mengxu
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
@@ -83,7 +84,8 @@ def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, 
     for ind, fit in zip(invalid_ind, fitnesses):
         ind.fitness.values = fit
         
-    pop_fit = [ind.fitness.values[0] for ind in population]
+    # pop_fit = [ind.fitness.values[0] for ind in population]
+    pop_fit = [np.sum(ind.fitness.values) for ind in population]
     min_fitness.append(min(pop_fit))
     # add by mengxu 2022.10.26
     best_index = np.argmin(pop_fit)
@@ -211,7 +213,10 @@ def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, 
             saveFile.save_PCdiversity_to_csv(seed, dataset_name, PC_diversity_all)
         # add by mengxu 2024.8.5 for niching---------------------------
 
-        pop_fit = [ind.fitness.values[0] for ind in population]  ######selection from author
+        # pop_fit = [ind.fitness.values[0] for ind in population]  ######selection from author
+        pop_fit = [np.sum(ind.fitness.values) for ind in population]  ######selection from author
+        index_best_fit = pop_fit.index(min(pop_fit))
         min_fitness.append(min(pop_fit))
-    return population, logbook, min_fitness, best_ind_all_gen
+        min_all_cost.append(population[index_best_fit].fitness.values)
+    return population, logbook, min_fitness, best_ind_all_gen, min_all_cost
 

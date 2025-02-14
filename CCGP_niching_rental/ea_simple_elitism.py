@@ -73,6 +73,7 @@ def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, 
     logbook = tools.Logbook()
     logbook.header = ['gen', 'subpop', 'nevals'] + (stats.fields if stats else [])
     min_fitness = []
+    min_all_cost = []
     best_ind_all_gen = [] #add by mengxu
     # Evaluate the individuals with an invalid fitness
     invalid_population = []
@@ -92,16 +93,20 @@ def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, 
             ind.fitness.values = fit
 
     best_fit = np.inf
+    best_index = -1
+    best_subpop = 0
     best_combined_ind = []
     for i in range(len(population)):
         subpop = population[i]
-        pop_fit = [ind.fitness.values[0] for ind in subpop]
-        best_index_subpop = np.argmin(pop_fit)
-        if(min(pop_fit)<best_fit):
+        pop_fit = [np.sum(ind.fitness.values) for ind in subpop]
+        best_index_subpop = pop_fit.index(min(pop_fit))
+        if (min(pop_fit) < best_fit):
             best_fit = min(pop_fit)
+            best_subpop = i
             best_index = best_index_subpop
         best_combined_ind.append(population[i][best_index_subpop])
     min_fitness.append(best_fit)
+    min_all_cost.append(population[best_subpop][best_index].fitness.values)
     best_ind_all_gen.append(best_combined_ind)  # add by mengxu
     p_one = best_combined_ind
     saveFile.save_individual_each_gen_to_txt(seed, dataset_name, p_one, 0)
@@ -202,16 +207,19 @@ def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, 
 
         best_fit = np.inf
         best_index = -1
+        best_subpop = 0
         best_combined_ind = []
         for i in range(len(population)):
             subpop = population[i]
-            pop_fit = [ind.fitness.values[0] for ind in subpop]
-            best_index_subpop = np.argmin(pop_fit)
+            pop_fit = [np.sum(ind.fitness.values) for ind in subpop]
+            best_index_subpop = pop_fit.index(min(pop_fit))
             if (min(pop_fit) < best_fit):
                 best_fit = min(pop_fit)
+                best_subpop = i
                 best_index = best_index_subpop
             best_combined_ind.append(population[i][best_index_subpop])
         min_fitness.append(best_fit)
+        min_all_cost.append(population[best_subpop][best_index].fitness.values)
         best_ind_all_gen.append(best_combined_ind)  # add by mengxu
         p_one = best_combined_ind
         saveFile.save_individual_each_gen_to_txt(seed, dataset_name, p_one, gen)
@@ -233,5 +241,5 @@ def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, 
             saveFile.save_PCdiversity_to_csv(seed, dataset_name, PC_diversity_all)
         # add by mengxu 2024.8.5 for niching---------------------------
 
-    return population, logbook, min_fitness, best_ind_all_gen
+    return population, logbook, min_fitness, best_ind_all_gen, min_all_cost
 

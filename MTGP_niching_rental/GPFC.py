@@ -30,7 +30,8 @@ def init_toolbox_two_pset(toolbox, pset1, pset2):
 
 
 def init_stats():
-    fitness_stats = tools.Statistics(lambda ind: ind.fitness.values)
+    # fitness_stats = tools.Statistics(lambda ind: ind.fitness.values)
+    fitness_stats = tools.Statistics(lambda ind: np.sum(ind.fitness.values))  # Compute mean first
     stats = tools.MultiStatistics(fitness=fitness_stats)
     stats.register("avg", np.mean)
     stats.register("std", np.std)
@@ -44,17 +45,23 @@ def evaluate(individual,seed,parameters):
     # Generate forecasts and demand
     # seed = rd['seed']
     env = InvOptEnv(seed,parameters)
-    fitness = env.run(individual)
+    fitness, all_cost = env.run(individual)
+    all_cost = np.array(all_cost)
 
     for i in range(ins_each_gen-1):
         env.reset()
-        fitness_i = env.run(individual)
+        fitness_i, all_cost_i = env.run(individual)
+        all_cost_i = np.array(all_cost_i)
 
         fitness = fitness + fitness_i
+        all_cost = all_cost + all_cost_i
 
     # spf.job_creator.final_output() #for check
     fitness = fitness/ins_each_gen
-    scores = [fitness]
+    all_cost = np.array(all_cost)
+    all_cost = all_cost / ins_each_gen
+    # scores = [fitness]
+    scores = all_cost
     return scores
 
 
@@ -82,7 +89,8 @@ def GPFC_main(dataset_name, seed, randomSeed_ngen):
         pset2 = gp.PrimitiveSet("MAIN2", num_features, prefix="f")
         pset2.context["array"] = np.array
         REP.init_primitives_rental(pset2)
-        weights = (-1.,)
+        # weights = (-1.,)
+        weights = (-1.,-1.,-1.,-1.,)
         creator.create("FitnessMin", base.Fitness, weights=weights)
         # set up toolbox
         toolbox = ParallelToolbox()  # base.Toolbox()
@@ -92,7 +100,8 @@ def GPFC_main(dataset_name, seed, randomSeed_ngen):
         pset = gp.PrimitiveSet("MAIN", num_features, prefix="f")
         pset.context["array"] = np.array
         REP.init_primitives_replenishment(pset)
-        weights = (-1.,)
+        # weights = (-1.,)
+        weights = (-1.,-1.,-1.,-1.,)
         creator.create("FitnessMin", base.Fitness, weights=weights)
         # set up toolbox
         toolbox = ParallelToolbox()  # base.Toolbox()
@@ -104,17 +113,17 @@ def GPFC_main(dataset_name, seed, randomSeed_ngen):
     stats = init_stats()
     hof = tools.HallOfFame(1)
     # seedRotate = False # added by mengxu 2022.10.13
-    pop, logbook, min_fitness, best_ind_all_gen = ea_simple_elitism.eaSimple(randomSeed_ngen, pop, toolbox, CXPB, MUTPB, REPPB, ELITISM, NGEN, seedRotate, USE_Niching, rd, stats, halloffame=hof, verbose=True, seed =seed, dataset_name=dataset_name)
+    pop, logbook, min_fitness, best_ind_all_gen, min_all_cost = ea_simple_elitism.eaSimple(randomSeed_ngen, pop, toolbox, CXPB, MUTPB, REPPB, ELITISM, NGEN, seedRotate, USE_Niching, rd, stats, halloffame=hof, verbose=True, seed =seed, dataset_name=dataset_name)
     best = hof[0]
-    return min_fitness,best, best_ind_all_gen
+    return min_fitness,best, best_ind_all_gen, min_all_cost
 
 
-POP_SIZE = 400
+POP_SIZE = 200
 NGEN = 50
 CXPB = 0.8
 MUTPB = 0.15
 REPPB = 0.05
-ELITISM = 5
+ELITISM = 2
 TOURNSIZE = 5
 MAX_HEIGHT = 8
 REP = mt  # individual representation {mt (multi-tree) or vt (vector-tree)}
@@ -139,12 +148,15 @@ def main(dataset_name, seed):
         randomSeed_ngen.append(np.random.randint(2000000000))
     saveFile.clear_individual_each_gen_to_txt(seed, dataset_name)
     start = time.time()
-    min_fitness,p_one,best_ind_all_gen= GPFC_main(dataset_name,seed,randomSeed_ngen)
+    min_fitness,p_one,best_ind_all_gen, min_all_cost= GPFC_main(dataset_name,seed,randomSeed_ngen)
     end = time.time()
     running_time = end - start
     saveFile.save_each_gen_best_individual_meng(seed, dataset_name, best_ind_all_gen)
     saveFile.saveMinFitness(seed, dataset_name, min_fitness)
+    saveFile.saveMinAllCost(seed, dataset_name, min_all_cost)
     saveFile.saveRunningTime(seed, dataset_name, running_time)
+    print("min_all_cost: ")
+    print(min_all_cost)
     print(min_fitness)
     print("Training time: " + str(running_time))
     print('Training end!')

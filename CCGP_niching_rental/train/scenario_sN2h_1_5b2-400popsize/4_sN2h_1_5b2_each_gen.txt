@@ -1,0 +1,358 @@
+Best individuals from each gen:
+
+Gen: 0
+Individual:
+Tree 0:
+multiply(subtract(maximum('INC', 'INL'), maximum('FOC', 'INC')), multiply(maximum('FOC', 'PIP'), subtract('FTC', 'PIP')))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 1
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(subtract('PTC', 'PIP'), square('PHC'))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div('FC2', 'FTC')))), minimum(protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', 'PHC'))), square(square(protected_div('INC', 'FC2'))))), maximum(multiply(minimum(multiply(add('INL', 'INL'), protected_sqrt('FC1')), subtract(protected_div('FC2', 'PTC'), add('PIP', 'PHC'))), add(protected_div(protected_div('FC2', 'PHC'), subtract('FC2', 'INL')), protected_sqrt(minimum('FC2', 'PTC')))), protected_sqrt('PIP')))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 2
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(subtract('PTC', 'PIP'), square('PHC'))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div('FC2', 'FTC')))), minimum(protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', 'PHC'))), square(square(protected_div('INC', 'FC2'))))), maximum(multiply(minimum(multiply(add('INL', 'INL'), protected_sqrt('FC1')), subtract(protected_div('FC2', 'PTC'), add('PIP', 'PHC'))), add(protected_div(protected_div('FC2', 'PHC'), subtract('FC2', 'INL')), protected_sqrt(minimum('FC2', 'PTC')))), protected_sqrt('PIP')))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 3
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(subtract('PTC', 'PIP'), square('PHC'))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div('FC2', 'FTC')))), minimum(protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', 'PHC'))), square(square(protected_div('INC', 'FC2'))))), subtract('PTC', 'FC1'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 4
+Individual:
+Tree 0:
+minimum(multiply(protected_div('PLSC', protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div('FC2', 'FTC')))), minimum(protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', 'PHC'))), square(square(protected_div('INC', 'FC2'))))), subtract('PTC', 'FC1'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 5
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), subtract('PIP', square(minimum('PIP', 'FOC')))), protected_div(add(protected_sqrt('PTC'), add('INL', subtract('FC2', 'INL'))), square(protected_div('FC2', 'FTC')))), minimum(protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', 'PHC'))), square(square(protected_div('INC', 'FC2'))))), maximum(multiply(minimum(multiply(add('INL', 'INL'), protected_sqrt('FC1')), subtract(protected_div('FC2', 'PTC'), add('PIP', 'PHC'))), 'INC'), protected_sqrt('PIP')))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 6
+Individual:
+Tree 0:
+minimum(multiply(protected_div('PLSC', protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div('FC2', 'FTC')))), minimum(protected_div('PHC', subtract(square('PHC'), add('PHC', 'PHC'))), square(square(protected_div('INC', 'FC2'))))), subtract('PTC', maximum(multiply(minimum('PLSC', 'PTC'), add(protected_div(protected_div('FC2', 'PHC'), subtract('FC2', 'INL')), protected_sqrt(protected_div('INL', 'PTC')))), 'PHC')))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 7
+Individual:
+Tree 0:
+minimum(multiply(protected_div('PLSC', protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div('FC2', 'FTC')))), minimum(protected_div('PHC', subtract(square('PHC'), add('PHC', 'PHC'))), square(square(protected_div('INC', 'FC2'))))), subtract('PTC', maximum(multiply(minimum('PLSC', 'PTC'), add(protected_div(protected_div('FC2', 'PHC'), subtract('FC2', 'INL')), protected_sqrt(protected_div('INL', 'PTC')))), 'PHC')))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 8
+Individual:
+Tree 0:
+minimum(multiply(protected_div('PLSC', protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div('FC2', 'FTC')))), minimum(protected_div('PHC', subtract(square('PHC'), add('PHC', 'PHC'))), square(square(protected_div('INC', 'FC2'))))), subtract('PTC', maximum(multiply(square(protected_div('PTC', 'FC2')), add(protected_div(protected_div('FC2', 'PHC'), subtract('FC2', 'INL')), protected_sqrt(protected_div('INL', 'PTC')))), 'PHC')))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 9
+Individual:
+Tree 0:
+minimum(multiply(protected_div('PLSC', protected_div(add(protected_sqrt('PTC'), add('INL', protected_div('FC2', 'PHC'))), square(protected_div('FC2', 'FTC')))), minimum(protected_div('PHC', subtract(square('PHC'), add('PHC', 'PHC'))), square(square(protected_div('INC', 'FC2'))))), subtract('PTC', maximum(multiply(square(protected_div('PTC', 'FC2')), add(protected_div(protected_div('FC2', 'PHC'), subtract('FC2', 'INL')), protected_sqrt(protected_div('INL', 'PTC')))), 'PHC')))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 10
+Individual:
+Tree 0:
+minimum(multiply(protected_div('PLSC', protected_div(add(protected_sqrt('PTC'), add('INL', protected_div('FC2', 'PHC'))), square(protected_div('FC2', 'FTC')))), minimum(protected_div('PHC', subtract(square('PHC'), add('PHC', 'PHC'))), square(square(protected_div('INC', 'FC2'))))), subtract('PTC', maximum(multiply(square(protected_div('PTC', 'FC2')), add(protected_div(protected_div('FC2', 'PHC'), subtract('FC2', 'INL')), protected_sqrt(protected_div('INL', 'PTC')))), 'PHC')))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 11
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div('INL', square('PHC'))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div('FC2', 'FTC')))), minimum(protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 12
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div('INL', square('PHC'))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div('FC2', 'FTC')))), minimum(protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 13
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div('INL', square('PHC'))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div('FC2', 'FTC')))), minimum(protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 14
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div('INL', square('PHC'))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div('FC2', 'FTC')))), minimum(protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 15
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div('INL', square('PHC'))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div('FC2', 'FTC')))), minimum(protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 16
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div('INL', square('PHC'))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div('FC2', 'FTC')))), minimum(protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 17
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div('INL', square('PHC'))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square('FC2'))), minimum(protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', maximum(multiply(square(protected_div('PTC', 'FC2')), add(protected_div(protected_div('FC2', 'PHC'), subtract('FC2', 'INL')), 'INL')), 'PHC')))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 18
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div('INL', square('PHC'))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square('FC2'))), minimum(protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', maximum(multiply(square(protected_div('PTC', 'FC2')), add(protected_div(protected_div('FC2', 'PHC'), subtract('FC2', 'INL')), 'INL')), 'PHC')))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 19
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div('INL', square('PHC'))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square('FC2'))), minimum(protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', maximum(multiply(square(protected_div('PTC', 'FC2')), add(protected_div(protected_div('FC2', 'PHC'), subtract('FC2', 'INL')), 'INL')), 'PHC')))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 20
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div('INL', square('PHC'))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square('FC2'))), minimum(protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', maximum(multiply(square(protected_div('PTC', 'FC2')), add(protected_div(protected_div('FC2', 'PHC'), subtract('FC2', 'INL')), 'INL')), 'PHC')))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 21
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(protected_sqrt('PTC'), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 22
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(protected_sqrt('PTC'), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 23
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(protected_sqrt('PTC'), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 24
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(protected_sqrt('PTC'), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 25
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(protected_sqrt('PTC'), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 26
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(protected_sqrt('PTC'), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 27
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(protected_sqrt('PTC'), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 28
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(protected_sqrt('PTC'), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 29
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(protected_sqrt('PTC'), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 30
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(protected_sqrt('PTC'), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 31
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(protected_sqrt('PTC'), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 32
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(protected_sqrt('PTC'), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 33
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(protected_sqrt('PTC'), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 34
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(protected_sqrt('PTC'), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 35
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(protected_sqrt('PTC'), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 36
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(protected_sqrt('PTC'), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 37
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div('PTC', 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(protected_sqrt('PTC'), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 38
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div(add('INL', 'PLSC'), 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(square(protected_div('FC1', 'INC')), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add(add('INL', 'PLSC'), protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'FC2'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 39
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div(add('INL', 'PLSC'), 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(square(protected_div('FC1', 'INC')), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add(add('INL', 'PLSC'), protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'PTC'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 40
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div(add('INL', 'PLSC'), 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(square(protected_div('FC1', 'INC')), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add(add('INL', 'PLSC'), protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'PTC'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 41
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div(add('INL', 'PLSC'), 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(square(protected_div('FC1', 'INC')), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add(add('INL', 'PLSC'), protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'PTC'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 42
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div(add('INL', 'PLSC'), 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(square(protected_div('FC1', 'INC')), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add(add('INL', 'PLSC'), protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'PTC'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 43
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div(add('INL', 'PLSC'), 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(square(protected_div('FC1', 'INC')), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add(add('INL', 'PLSC'), protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'PTC'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 44
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div(add('INL', 'PLSC'), 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(square(protected_div('FC1', 'INC')), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add(add('INL', 'PLSC'), protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'PTC'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 45
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div(add('INL', 'PLSC'), 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(square(protected_div('FC1', 'INC')), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add(add('INL', 'PLSC'), protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'PTC'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 46
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div(add('INL', 'PLSC'), 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(square(protected_div('FC1', 'INC')), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add(add('INL', 'PLSC'), protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'PTC'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 47
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div(add('INL', 'PLSC'), 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(square(protected_div('FC1', 'INC')), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add(add('INL', 'PLSC'), protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'PTC'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 48
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div(add('INL', 'PLSC'), 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(square(protected_div('FC1', 'INC')), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add(add('INL', 'PLSC'), protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'PTC'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 49
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div(add('INL', 'PLSC'), 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(square(protected_div('FC1', 'INC')), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add(add('INL', 'PLSC'), protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'PTC'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))
+
+Gen: 50
+Individual:
+Tree 0:
+minimum(multiply(protected_div(subtract(square(subtract('PTC', 'PHC')), protected_div(square(protected_div(add('INL', 'PLSC'), 'FC2')), subtract(square('PHC'), add('PHC', protected_div('PTC', 'FC2'))))), protected_div(add(protected_sqrt('PTC'), add('INL', 'PLSC')), square(protected_div(square(protected_div('FC1', 'INC')), 'FTC')))), minimum(protected_div(square('INC'), subtract(square('PHC'), add(add('INL', 'PLSC'), protected_div('PTC', 'FC2')))), square(square(protected_div(square(subtract('PTC', 'PHC')), 'PTC'))))), subtract('PTC', 'PHC'))
+Tree 1:
+maximum(maximum(subtract(multiply('TREQ', 'RDUR'), minimum('CRENT', 'RP')), add(add('TREQ', 'TREQ'), square('RP'))), maximum(maximum(minimum('TREQ', 'RCAP'), minimum('TREQ', 'RP')), multiply(maximum('RDUR', 'TREQ'), maximum('RCAP', 'TREQ'))))

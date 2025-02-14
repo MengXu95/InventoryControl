@@ -180,8 +180,9 @@ class InvOptEnv:
         self.per_trans_item = parameters['per_trans_item']
         self.per_trans_order = parameters['per_trans_order']
         # add by xu meng 2024.12.2
-        self.rental_choice = [[40,100,1], [160,500,1], [200,700,1],
-                              [20,100,6], [80,500,6], [100,700,6]]
+        self.rental_choice = [[0, 0, 0],
+                              [40, 100, 1], [160, 500, 1], [200, 700, 1],
+                              [20, 100, 6], [80, 500, 6], [100, 700, 6]]
         self.current_rentals = []
 
         if self.demand_level == None:#use teckwah dataset
@@ -351,6 +352,7 @@ class InvOptEnv:
 
     def step_value(self, action_modified):  # modified by mengxu to make it not only suitable for 2 sites
         if len(self.retailers) == 2:
+            all_cost = []
             # Update inv levels and pipelines
             total_current_rental = 0
             if len(self.current_rentals) != 0:
@@ -408,6 +410,10 @@ class InvOptEnv:
                 else:
                     hl_cost_total += retailer.inv_level * retailer.holding_cost
             reward = - trans_cost - hl_cost_total - order_cost - rental_cost
+            all_cost.append(trans_cost)
+            all_cost.append(hl_cost_total)
+            all_cost.append(order_cost)
+            all_cost.append(rental_cost)
 
             self.current_period += 1
             if self.current_period >= self.n_period:
@@ -471,13 +477,14 @@ class InvOptEnv:
                 state_rental.append(each_rental_state)
             self.state.append(state_rental)
 
-            return self.state, reward, terminate
+            return self.state, reward, terminate, all_cost
             # the following is the original
             # self.state = np.array(
             #     [retailer.inv_level for retailer in self.retailers] + [x for retailer in self.retailers for x in
             #                                                            retailer.forecast] + \
             #     [x for retailer in self.retailers for x in retailer.pipeline])
         elif len(self.retailers) == 3:
+            all_cost = []
             # Update inv levels and pipelines
             total_current_rental = 0
             if len(self.current_rentals) != 0:
@@ -551,6 +558,10 @@ class InvOptEnv:
                 else:
                     hl_cost_total += retailer.inv_level * retailer.holding_cost
             reward = - trans_cost - hl_cost_total - order_cost - rental_cost
+            all_cost.append(trans_cost)
+            all_cost.append(hl_cost_total)
+            all_cost.append(order_cost)
+            all_cost.append(rental_cost)
 
             self.current_period += 1
             if self.current_period >= self.n_period:
@@ -613,7 +624,7 @@ class InvOptEnv:
                 state_rental.append(each_rental_state)
             self.state.append(state_rental)
 
-            return self.state, reward, terminate
+            return self.state, reward, terminate, all_cost
 
 
 
@@ -621,6 +632,8 @@ class InvOptEnv:
         # run simulation
         state = self.reset()
         current_ep_reward = 0
+        current_ep_all_cost = [0., 0., 0., 0.]
+        current_ep_all_cost = np.array(current_ep_all_cost)
 
         max_ep_len = self.epi_len  # max timesteps in one episode
         time_step = 0
@@ -776,7 +789,7 @@ class InvOptEnv:
             # ------- strategy 3 ---------------------
 
             # original
-            state, reward, done = self.step_value(action_modified)
+            state, reward, done, all_cost = self.step_value(action_modified)
 
             # todo: to stop bad run and save training time by mengxu 2024.8.27
             # state, reward, done = None, np.nan, False
@@ -790,13 +803,17 @@ class InvOptEnv:
 
             time_step += 1
             current_ep_reward += reward
+            all_cost = np.array(all_cost)
+            current_ep_all_cost += all_cost
 
             # break; if the episode is over
             if done:
                 break
 
         fitness = -current_ep_reward/max_ep_len
-        return fitness
+        all_cost_final = np.array(current_ep_all_cost)  # Convert list to NumPy array
+        all_cost_fit = all_cost_final/max_ep_len
+        return fitness, all_cost_fit
 
     def run_test(self, individual, states=None, actions=None, rewards=None): # add by xumeng 2024.8.1
         # run simulation

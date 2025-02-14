@@ -180,7 +180,8 @@ class InvOptEnv:
         self.per_trans_item = parameters['per_trans_item']
         self.per_trans_order = parameters['per_trans_order']
         # add by xu meng 2024.12.2
-        self.rental_choice = [[40,100,1], [160,500,1], [200,700,1],
+        self.rental_choice = [[0, 0, 0],
+                              [40,100,1], [160,500,1], [200,700,1],
                               [20,100,6], [80,500,6], [100,700,6]]
         self.current_rentals = []
 
@@ -351,6 +352,7 @@ class InvOptEnv:
 
     def step_value(self, action_modified):  # modified by mengxu to make it not only suitable for 2 sites
         if len(self.retailers) == 2:
+            all_cost = []
             # Update inv levels and pipelines
             total_current_rental = 0
             if len(self.current_rentals) != 0:
@@ -408,6 +410,10 @@ class InvOptEnv:
                 else:
                     hl_cost_total += retailer.inv_level * retailer.holding_cost
             reward = - trans_cost - hl_cost_total - order_cost - rental_cost
+            all_cost.append(trans_cost)
+            all_cost.append(hl_cost_total)
+            all_cost.append(order_cost)
+            all_cost.append(rental_cost)
 
             self.current_period += 1
             if self.current_period >= self.n_period:
@@ -471,13 +477,14 @@ class InvOptEnv:
                 state_rental.append(each_rental_state)
             self.state.append(state_rental)
 
-            return self.state, reward, terminate
+            return self.state, reward, terminate, all_cost
             # the following is the original
             # self.state = np.array(
             #     [retailer.inv_level for retailer in self.retailers] + [x for retailer in self.retailers for x in
             #                                                            retailer.forecast] + \
             #     [x for retailer in self.retailers for x in retailer.pipeline])
         elif len(self.retailers) == 3:
+            all_cost = []
             # Update inv levels and pipelines
             total_current_rental = 0
             if len(self.current_rentals) != 0:
@@ -551,6 +558,10 @@ class InvOptEnv:
                 else:
                     hl_cost_total += retailer.inv_level * retailer.holding_cost
             reward = - trans_cost - hl_cost_total - order_cost - rental_cost
+            all_cost.append(trans_cost)
+            all_cost.append(hl_cost_total)
+            all_cost.append(order_cost)
+            all_cost.append(rental_cost)
 
             self.current_period += 1
             if self.current_period >= self.n_period:
@@ -613,7 +624,7 @@ class InvOptEnv:
                 state_rental.append(each_rental_state)
             self.state.append(state_rental)
 
-            return self.state, reward, terminate
+            return self.state, reward, terminate, all_cost
 
 
 
@@ -621,6 +632,8 @@ class InvOptEnv:
         # run simulation
         state = self.reset()
         current_ep_reward = 0
+        current_ep_all_cost = [0., 0., 0., 0.]
+        current_ep_all_cost = np.array(current_ep_all_cost)
 
         max_ep_len = self.epi_len  # max timesteps in one episode
         time_step = 0
@@ -633,63 +646,6 @@ class InvOptEnv:
             else:
                 replenishment_policy = individual[0]
                 rental_policy = individual[1]
-
-            # ------- strategy 2 ---------------------
-            # quantity_site1 = round(GP_evolve_S(state, replenishment_site1))
-            # quantity_site2 = round(GP_evolve_R(state, replenishment_site2))
-            #
-            # if quantity_site1 < site1_candidate[0]:
-            #     quantity_site1 = site1_candidate[0]
-            # if quantity_site1 > site1_candidate[len(site1_candidate)-1]:
-            #     quantity_site1 = site1_candidate[len(site1_candidate)-1]
-            #
-            # if quantity_site2 < site2_candidate[0]:
-            #     quantity_site2 = site2_candidate[0]
-            # if quantity_site2 > site2_candidate[len(site2_candidate)-1]:
-            #     quantity_site2 = site2_candidate[len(site2_candidate)-1]
-            #
-            # action_modified = [0, quantity_site1, quantity_site2]
-            # ------- strategy 2 ---------------------
-
-            # # ------- strategy 1 ---------------------
-            # # the action space of this one is the same as jinsheng
-            # quantity_site1 = GP_evolve_S(state, replenishment_site1)
-            # quantity_site2 = GP_evolve_R(state, replenishment_site2)
-            #
-            # index_site1 = 0
-            # min_dis = np.Infinity
-            # for i in range(1,len(site1_candidate)):
-            #     dis = np.abs(quantity_site1-site1_candidate[i])
-            #     if dis < min_dis:
-            #         index_site1 = i
-            #         min_dis = dis
-            #
-            # index_site2 = 0
-            # min_dis = np.Infinity
-            # for i in range(1,len(site2_candidate)):
-            #     dis = np.abs(quantity_site2-site2_candidate[i])
-            #     if dis < min_dis:
-            #         index_site2 = i
-            #         min_dis = dis
-            #
-            # action_modified = [0, site1_candidate[index_site1], site2_candidate[index_site2]]
-            # # ------- strategy 1 ---------------------
-
-            # ------- strategy 1 ---------------------
-            # the action space of this one is the same as jinsheng
-            # for the scenario that only consider one site
-            # quantity_site1 = GP_evolve_S(state, replenishment_site1)
-            #
-            # index_site1 = 0
-            # min_dis = np.Infinity
-            # for i in range(len(site1_candidate)):
-            #     dis = np.abs(quantity_site1 - site1_candidate[i])
-            #     if dis < min_dis:
-            #         index_site1 = i
-            #         min_dis = dis
-            #
-            # action_modified = [0, site1_candidate[index_site1], 0]
-            # ------- strategy 1 ---------------------
 
             # ------- strategy 3 ---------------------
             # the action space of this one is the same as jinsheng
@@ -776,7 +732,7 @@ class InvOptEnv:
             # ------- strategy 3 ---------------------
 
             # original
-            state, reward, done = self.step_value(action_modified)
+            state, reward, done, all_cost = self.step_value(action_modified)
 
             # todo: to stop bad run and save training time by mengxu 2024.8.27
             # state, reward, done = None, np.nan, False
@@ -790,13 +746,17 @@ class InvOptEnv:
 
             time_step += 1
             current_ep_reward += reward
+            all_cost = np.array(all_cost)
+            current_ep_all_cost += all_cost
 
             # break; if the episode is over
             if done:
                 break
 
         fitness = -current_ep_reward/max_ep_len
-        return fitness
+        all_cost_final = np.array(current_ep_all_cost)  # Convert list to NumPy array
+        all_cost_fit = all_cost_final/max_ep_len
+        return fitness, all_cost_fit
 
     def run_test(self, individual, states=None, actions=None, rewards=None): # add by xumeng 2024.8.1
         # run simulation
@@ -814,7 +774,6 @@ class InvOptEnv:
             else:
                 replenishment_policy = individual[0]
                 rental_policy = individual[1]
-
 
             # ------- strategy 3 ---------------------
             # the action space of this one is the same as jinsheng
@@ -837,35 +796,72 @@ class InvOptEnv:
                 # add by xu meng to consider rental
                 production_capacity = each_replenishment_state[4]
                 if replenishment_quantity > production_capacity:
-                    replenishment_quantity = production_capacity
                     require_quantity = replenishment_quantity - production_capacity
                     total_rental_requirement = total_rental_requirement + require_quantity
+                    replenishment_quantity = production_capacity
                 action_modified.append(replenishment_quantity)
 
             if len(individual) == 1:
-                rental_decision = 0
+                # rental_decision = -1
+                rental_decisions = []
                 # print("One tree and do not consider rental!")
             else:
-                # for making rental decision and delete not enough rental choice, by xu meng 2024.12.2
-                all_rental_priority = []
-                for each_rental_state in rental_state:
-                    each_rental_state.append(total_rental_requirement)
-                    current_rental = each_rental_state[0]
-                    rental_capacity = each_rental_state[2]
-                    if current_rental + rental_capacity < total_rental_requirement:
-                        rental_priority = np.inf
-                    else:
-                        rental_priority = GP_pair_rental_test(each_rental_state, rental_policy)
-                    all_rental_priority.append(rental_priority)
-                # Get the index of the minimal value
-                rental_decision = all_rental_priority.index(min(all_rental_priority))
-            action_modified.append(rental_decision)
+                rental_decisions = []
+                onlyRentalOne = True
+                if onlyRentalOne:
+                    # Strategy version 1.0: only rental one decision each time, for making rental decision and delete not enough rental choice, by xu meng 2024.12.2
+
+                    current_rental = 0
+                    if len(rental_state) > 0:
+                        current_rental = rental_state[0][0]
+                    if current_rental < total_rental_requirement:
+                        all_rental_priority = []
+                        for each_rental_state in rental_state:
+                            each_rental_state.append(total_rental_requirement)
+                            current_rental = each_rental_state[0]
+                            rental_capacity = each_rental_state[2]
+                            if current_rental + rental_capacity < total_rental_requirement:
+                                rental_priority = np.inf
+                            else:
+                                rental_priority = GP_pair_rental_test(each_rental_state, rental_policy)
+                            all_rental_priority.append(rental_priority)
+                        # Get the index of the minimal value
+                        rental_decision = all_rental_priority.index(min(all_rental_priority))
+                        rental_decisions.append(rental_decision)
+                else:
+                    # Strategy version 2.0: only rental n decision each time, by xu meng 2025.1.10
+                    all_rental_priority = []
+                    for each_rental_state in rental_state:
+                        each_rental_state.append(total_rental_requirement)
+                        rental_priority = GP_evolve_rental(each_rental_state, rental_policy)
+                        all_rental_priority.append(rental_priority)
+
+                    current_rental = 0
+                    if len(rental_state) > 0:
+                        current_rental = rental_state[0][0]
+                    new_current_rental = current_rental
+                    try_times = 0
+                    while new_current_rental < total_rental_requirement and try_times < 5:
+                        try_times = try_times + 1
+                        # Get the index of the minimal value
+                        rental_decision = all_rental_priority.index(min(all_rental_priority))
+                        all_rental_priority[rental_decision] = np.inf
+                        rental_decisions.append(rental_decision)
+
+                        for each_rental_decision in rental_decisions:
+                            rental_decision_capacity = self.rental_choice[each_rental_decision][1]
+                            new_current_rental = new_current_rental + rental_decision_capacity
+
+                    # if len(rental_decisions) > 1:
+                    #     print("rental_decisions: ", rental_decisions)
+            rental_decisions = []
+            action_modified.append(rental_decisions)
             # ------- strategy 3 ---------------------
             if states is not None:
                 states.append(state)
 
             # the original
-            state, reward, done = self.step_value(action_modified)
+            state, reward, done, _ = self.step_value(action_modified)
             # todo: to stop bad run and save training time by mengxu 2024.8.27
             # state, reward, done = None, np.nan, False
             # result = self.run_with_timeout(self.step_value, 0.01, action_modified)
