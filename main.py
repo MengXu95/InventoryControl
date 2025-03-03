@@ -2,6 +2,7 @@ import sys
 import CCGP_niching.GPFC as CCGPmain_niching
 import MTGP_niching.GPFC as GPmain_niching
 import MTGP_niching_rental.GPFC as GPmain_niching_rental
+import MTGP_niching_rental_RFQ.GPFC as GPmain_niching_rental_RFQ
 import CCGP_niching_rental.GPFC as CCGPmain_niching_rental
 import MTGP_niching_rental_original.GPFC as GPmain_niching_rental_original
 import CCGP_niching_rental_original.GPFC as CCGPmain_niching_rental_original
@@ -38,6 +39,9 @@ if __name__ == '__main__':
     elif algo == 'MTGP_niching_rental':
         print('----------MTGP_niching_rental----------')
         GPmain_niching_rental.main(dataset_name, seed)
+    elif algo == 'MTGP_niching_rental_RFQ':
+        print('----------MTGP_niching_rental_RFQ----------')
+        GPmain_niching_rental_RFQ.main(dataset_name, seed)
     elif algo == 'MTGP_niching_rental_2':
         for i in range(3):
             print('----------MTGP_niching_rental_'+str(i)+'_----------')
