@@ -4,8 +4,9 @@ from deap import tools
 import numpy as np
 from MTGP_niching_rental_RFQ import saveFile
 from MTGP_niching_rental_RFQ.selection import selElitistAndTournament
-from Utils.PCDiversity import PCDiversityCalculator
-from MTGP_niching_rental_RFQ.niching.niching import niching_clear
+from Utils.FitnessDiversity import FitnessDiversityCalculator
+# from MTGP_niching_rental_RFQ.niching.niching import niching_clear
+from MTGP_niching_rental_RFQ.fitnessNiching import niching_clear
 from Utils.ScenarioDesign_rental_RFQ import ScenarioDesign_rental_RFQ
 
 def varAnd(population, toolbox, cxpb, mutpb, reppb):
@@ -107,16 +108,27 @@ def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, 
     if verbose:
         print(logbook.stream)
 
-    # using niching to clear duplicated individual 2024.8.5
-    PC_diversity_all = []
+    # # Strategy 1: using niching to clear duplicated individual 2024.8.5
+    # PC_diversity_all = []
+    # nich = niching_clear(0, 1)
+    # nich.initial_phenoCharacterisation(parameters, population[best_index])
+    # population, PC_pop = nich.clearPopulation(toolbox, population, use_niching)
+    # # calculate the PC diversity of population
+    # calculator = PCDiversityCalculator(PC_pop)
+    # PC_diversity = calculator.calculate_diversity()
+    # PC_diversity_all.append(PC_diversity)
+    # print("PC diversity: " + str(PC_diversity))
+
+    # Strategy 2: using niching to clear duplicated individual 2025.3.7
+    # This one performs better than Strategy 1 using PC as JSS
+    fitness_diversity_all = []
     nich = niching_clear(0, 1)
-    nich.initial_phenoCharacterisation(parameters, population[best_index])
-    population, PC_pop = nich.clearPopulation(toolbox, population, use_niching)
+    population, fitness_pop = nich.clearPopulation(toolbox, population, use_niching)
     # calculate the PC diversity of population
-    calculator = PCDiversityCalculator(PC_pop)
-    PC_diversity = calculator.calculate_diversity()
-    PC_diversity_all.append(PC_diversity)
-    print("PC diversity: " + str(PC_diversity))
+    calculator = FitnessDiversityCalculator(fitness_pop)
+    fitness_diversity = calculator.calculate_diversity()
+    fitness_diversity_all.append(fitness_diversity)
+    print("Fitness diversity: " + str(fitness_diversity))
 
     np.random.seed(seed) #add by mengxu to avoid niching make the same seed
 
@@ -200,17 +212,29 @@ def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, 
         if verbose:
             print(logbook.stream)
 
-        # add by mengxu 2024.8.5 for niching---------------------------
-        nich.calculate_phenoCharacterisation(population[best_index])
-        population, PC_pop = nich.clearPopulation(toolbox, population, use_niching)
+        # #Strategy 1: add by mengxu 2024.8.5 for niching---------------------------
+        # nich.calculate_phenoCharacterisation(population[best_index])
+        # population, PC_pop = nich.clearPopulation(toolbox, population, use_niching)
+        # # calculate the PC diversity of population
+        # calculator = PCDiversityCalculator(PC_pop)
+        # PC_diversity = calculator.calculate_diversity()
+        # PC_diversity_all.append(PC_diversity)
+        # print("PC diversity: " + str(PC_diversity))
+        # if gen == ngen:
+        #     # save the PC diversity to a csv file
+        #     saveFile.save_PCdiversity_to_csv(seed, dataset_name, PC_diversity_all)
+        # # add by mengxu 2024.8.5 for niching---------------------------
+
+        # Strategy 2: add by mengxu 2024.8.5 for niching---------------------------
+        population, fitness_pop = nich.clearPopulation(toolbox, population, use_niching)
         # calculate the PC diversity of population
-        calculator = PCDiversityCalculator(PC_pop)
-        PC_diversity = calculator.calculate_diversity()
-        PC_diversity_all.append(PC_diversity)
-        print("PC diversity: " + str(PC_diversity))
+        calculator = FitnessDiversityCalculator(fitness_pop)
+        fitness_diversity = calculator.calculate_diversity()
+        fitness_diversity_all.append(fitness_diversity)
+        print("Fitness diversity: " + str(fitness_diversity))
         if gen == ngen:
             # save the PC diversity to a csv file
-            saveFile.save_PCdiversity_to_csv(seed, dataset_name, PC_diversity_all)
+            saveFile.save_PCdiversity_to_csv(seed, dataset_name, fitness_diversity_all)
         # add by mengxu 2024.8.5 for niching---------------------------
 
         # pop_fit = [ind.fitness.values[0] for ind in population]  ######selection from author

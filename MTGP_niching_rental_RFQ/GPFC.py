@@ -153,7 +153,7 @@ N_TREES = 3
 rd = {}
 DIFF_PSET = True
 seedRotate = False # added by mengxu 2022.10.13
-USE_Niching = False
+USE_Niching = True
 
 # create the shop floor instance
 ins_each_gen = 1 # added by mengxu followed the advice of Meng 2022.11.01

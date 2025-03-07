@@ -30,6 +30,7 @@ class ScenarioDesign_rental_RFQ():
             LT = 2
             epi_len = 64  # Length of one episode (default)
             demand_level = 30000
+            support_level = demand_level/3
             num_retailer = 2
             ini_inv = [500] * 2  # Initial inventory levels
             holding = [2, 10]  # Holding costs
@@ -40,11 +41,14 @@ class ScenarioDesign_rental_RFQ():
             per_trans_item = 1  # Per unit cost for transshipment (either direction)
             per_trans_order = 10  # Fixed cost per transshipment (either direction)
             partial_information_visibility = True
+            support_unit_cost = 1
+            RFQ_happen_pro = 0.3
             # Returning as a dictionary
             return {
                 'L': L,
                 'LT': LT,
                 'demand_level': demand_level,
+                'support_level': support_level,
                 'epi_len': epi_len,
                 'num_retailer': num_retailer,
                 'ini_inv': ini_inv,
@@ -56,6 +60,8 @@ class ScenarioDesign_rental_RFQ():
                 'per_trans_item': per_trans_item,
                 'per_trans_order': per_trans_order,
                 'rental_choice': rental_choice,
+                'RFQ_happen_pro': RFQ_happen_pro,
+                'support_unit_cost': support_unit_cost,
                 'partial_information_visibility': partial_information_visibility
             }
         elif self.scenario == "teckwah_test":
@@ -77,7 +83,8 @@ class ScenarioDesign_rental_RFQ():
             # Calculated values
             L = 2  # Length of forecast horizon (default)
             LT = 2
-            demand_level = None
+            demand_level = 30000
+            support_level = demand_level / 3
             epi_len = 64  # Length of one episode (default)
             num_retailer = 2
             ini_inv = [500] * 2  # Initial inventory levels
@@ -89,12 +96,14 @@ class ScenarioDesign_rental_RFQ():
             per_trans_item = 1  # Per unit cost for transshipment (either direction)
             per_trans_order = 10  # Fixed cost per transshipment (either direction)
             partial_information_visibility = True
+            support_unit_cost = 1
+            RFQ_happen_pro = 0.3
             # Returning as a dictionary
             return {
                 'L': L,
                 'LT': LT,
                 'demand_level': demand_level,
-                'demand_test': demand_hist_list,
+                'support_level': support_level,
                 'epi_len': epi_len,
                 'num_retailer': num_retailer,
                 'ini_inv': ini_inv,
@@ -106,6 +115,8 @@ class ScenarioDesign_rental_RFQ():
                 'per_trans_item': per_trans_item,
                 'per_trans_order': per_trans_order,
                 'rental_choice': rental_choice,
+                'RFQ_happen_pro': RFQ_happen_pro,
+                'support_unit_cost': support_unit_cost,
                 'partial_information_visibility': partial_information_visibility
             }
         else:
@@ -138,6 +149,7 @@ class ScenarioDesign_rental_RFQ():
             L = 2  # Length of forecast horizon (default)
             LT = 2
             epi_len = 64  # Length of one episode (default)
+            support_level = demand_level/3
             ini_inv = [10] * num_retailer  # Initial inventory levels
             lost_sales = [b * h for h in holding]  # Per unit lost sales costs
             capacity = [5 * demand_level] * num_retailer  # Inventory capacities
@@ -147,12 +159,15 @@ class ScenarioDesign_rental_RFQ():
             per_trans_item = 1  # Per unit cost for transshipment (either direction)
             per_trans_order = 10  # Fixed cost per transshipment (either direction)
             partial_information_visibility = True
+            support_unit_cost = 0.5
+            RFQ_happen_pro = 0.5
 
             # Returning as a dictionary
             return {
                 'L': L,
                 'LT': LT,
                 'demand_level': demand_level,
+                'support_level': support_level,
                 'epi_len': epi_len,
                 'num_retailer': num_retailer,
                 'ini_inv': ini_inv,
@@ -164,10 +179,12 @@ class ScenarioDesign_rental_RFQ():
                 'per_trans_item': per_trans_item,
                 'per_trans_order': per_trans_order,
                 'rental_choice': rental_choice,
+                'RFQ_happen_pro': RFQ_happen_pro,
+                'support_unit_cost': support_unit_cost,
                 'partial_information_visibility': partial_information_visibility
             }
 
-    def get_parameter_S2Demo(self, seed=0, epi_len = 64):
+    def get_parameter_S2Demo(self, seed=0, epi_len = 64): # haven't modify by mengxu
 
         #the following is for PSO, must have [0,0,0], represents do not rental
         rental_choice = [[40, 100, 1], [160, 500, 1], [200, 700, 1],

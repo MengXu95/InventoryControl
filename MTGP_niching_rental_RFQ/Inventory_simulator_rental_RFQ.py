@@ -292,11 +292,11 @@ class InvOptEnv:
         self.fixed_order = parameters['fixed_order']
         self.per_trans_item = parameters['per_trans_item']
         self.per_trans_order = parameters['per_trans_order']
-        self.support_level = self.demand_level / 5
-        self.support_unit_cost = 20 #todo: need to find a suitable value
-        self.RFQ_happen_pro = -0.2
+        self.support_level = parameters['support_level']
+        self.support_unit_cost = parameters['support_unit_cost'] #todo: need to find a suitable value
+        self.RFQ_happen_pro = parameters['RFQ_happen_pro']
         # self.partial_information_visibility = parameters['partial_information_visibility']
-        self.partial_information_visibility = True
+        self.partial_information_visibility = parameters['partial_information_visibility']
         # add by xu meng 2024.12.2
         self.rental_choice = parameters['rental_choice']
         self.current_rentals = []
@@ -323,8 +323,8 @@ class InvOptEnv:
             self.urgent_RFQ_demand_records = self.rd.gen_urgent_RFQ_demand(self.RFQ_happen_pro) # add by meng xu for urgent RFQ
 
         # this is for RFQ and support for partial information visibility
-        self.support_level = SupplierSupport(seed, self.support_level, self.num_retailer, self.epi_len)
-        self.support_records = self.support_level.gen_support()
+        supplierSupport = SupplierSupport(seed, self.support_level, self.num_retailer, self.epi_len)
+        self.support_records = supplierSupport.gen_support()
 
         self.n_retailers = self.num_retailer
         self.retailers = []
@@ -480,6 +480,20 @@ class InvOptEnv:
         if len(self.retailers) == 2:
             all_cost = []
 
+            # Update inv levels and pipelines
+            total_current_rental = 0
+            if len(self.current_rentals) != 0:
+                total_current_rental = sum(each_current_rental[1] for each_current_rental in self.current_rentals)
+                # Filter and update the current rentals, mainly for rental length
+                self.current_rentals = [
+                    [each[0], each[1], each[2] - 1] if each[2] > 1 else each
+                    for each in self.current_rentals
+                    if each[2] != 1
+                ]
+            rental_available = total_current_rental
+            for retailer, demand in zip(self.retailers, self.demand_records):
+                rental_available = retailer.order_arrival(demand[self.current_period - 2], rental_available)  # -2 not -1
+
             # this is for handle urgent RFQ demand
             total_support_cost = 0
             RFQ_predict_decisions = action_modified[-1]
@@ -499,22 +513,6 @@ class InvOptEnv:
                         urgent_RFQ_demand[self.current_period - 2], rental_available, predict_support_inventory,
                         true_support_inventory[self.current_period - 2])  # -2 not -1
                     total_support_cost += support_cost
-
-            # Update inv levels and pipelines
-            total_current_rental = 0
-            if len(self.current_rentals) != 0:
-                total_current_rental = sum(each_current_rental[1] for each_current_rental in self.current_rentals)
-                # Filter and update the current rentals, mainly for rental length
-                self.current_rentals = [
-                    [each[0], each[1], each[2] - 1] if each[2] > 1 else each
-                    for each in self.current_rentals
-                    if each[2] != 1
-                ]
-            rental_available = total_current_rental
-            for retailer, demand in zip(self.retailers, self.demand_records):
-                rental_available = retailer.order_arrival(demand[self.current_period - 2], rental_available)  # -2 not -1
-
-
 
             # Update rental decision and calculate rental cost, new for Strategy version 2.0
             rental_cost = 0
@@ -855,7 +853,7 @@ class InvOptEnv:
 
             for each_replenishment_state in replenishment_state:
                 replenishment_quantity = round(GP_evolve_S(each_replenishment_state, replenishment_policy), 2)
-                print("replenishment_quantity: ", replenishment_quantity)
+                # print("replenishment_quantity: ", replenishment_quantity)
 
                 # Strategy 2 (sigmoid): constrain the replenishment quantity to [0, production_capacity]
                 # this strategy performs worse than Strategy 1, by testing, GP is able to finally retain individuals within bound
@@ -937,11 +935,14 @@ class InvOptEnv:
                 action_modified.append(rental_decisions)
 
                 RFQ_predict_decisions = []
+                upbound_support_quantity = self.support_level * 2
                 for each_RFQ_predict_state in RFQ_predict_state:
                     RFQ_predict_quantity = round(GP_evolve_RFQ_predict(each_RFQ_predict_state, RFQ_predict_policy), 2)
+                    # print("RFQ_predict_quantity: ", RFQ_predict_quantity)
                     if RFQ_predict_quantity <= 0:
                         RFQ_predict_quantity = 0
-                    print("RFQ_predict_quantity: ", RFQ_predict_quantity)
+                    if RFQ_predict_quantity > upbound_support_quantity:
+                        RFQ_predict_quantity = upbound_support_quantity
                     RFQ_predict_decisions.append(RFQ_predict_quantity)
                 action_modified.append(RFQ_predict_decisions)
 
