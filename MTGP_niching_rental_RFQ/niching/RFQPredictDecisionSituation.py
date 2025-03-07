@@ -1,6 +1,6 @@
 import MTGP_niching_rental_RFQ.niching.DecisionSituation as DecisionSituation
 
-class TransshipmentDecisionSituation(DecisionSituation.DecisionSituation):
+class RFQPredictDecisionSituation(DecisionSituation.DecisionSituation):
     def __init__(self, data, **kwargs):
         DecisionSituation.DecisionSituation.__init__(self, data)
 
@@ -8,6 +8,6 @@ class TransshipmentDecisionSituation(DecisionSituation.DecisionSituation):
         dataClone = []
         for op in self.data:
             dataClone.append(op)
-        return TransshipmentDecisionSituation(dataClone)
+        return RFQPredictDecisionSituation(dataClone)
 
 

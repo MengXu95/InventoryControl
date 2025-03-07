@@ -136,11 +136,16 @@ def save_individual_each_gen_to_txt(randomSeeds, dataSetName, individuals, gen):
     with open(file_path, 'a') as file:
         file.write('\nGen: ' + str(gen) + '\n')
         file.write('Individual:\n')
-        file.write('Tree 0:\n')  # Routing rule
+        file.write('Tree 0:\n')  # Replenishment rule
         file.write(str(individuals[0]) + '\n')
         if len(individuals) == 2:
-            file.write('Tree 1:\n')  # Sequencing rule
+            file.write('Tree 1:\n')  # Rental rule
             file.write(str(individuals[1]) + '\n')
+        elif len(individuals) == 3:
+            file.write('Tree 1:\n')  # Rental rule
+            file.write(str(individuals[1]) + '\n')
+            file.write('Tree 2:\n')  # Prediction rule
+            file.write(str(individuals[2]) + '\n')
 
     return
 

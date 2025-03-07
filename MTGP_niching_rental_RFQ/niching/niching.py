@@ -1,9 +1,10 @@
-import MTGP_niching_rental.niching.PhenoCharacterisation as PhenoCharacterisation
+import MTGP_niching_rental_RFQ.niching.PhenoCharacterisation as PhenoCharacterisation
 import numpy as np
-import MTGP_niching_rental.replenishment as sequencing
-import MTGP_niching_rental.niching.ReplenishmentPhenoCharacterisation as ReplenishmentPhenoCharacterisation
-import MTGP_niching_rental.niching.RentalPhenoCharacterisation as RentalPhenoCharacterisation
-from MTGP_niching_rental.niching.Inventory_simulator_rental_niching import *
+import MTGP_niching_rental_RFQ.replenishment as sequencing
+import MTGP_niching_rental_RFQ.niching.ReplenishmentPhenoCharacterisation as ReplenishmentPhenoCharacterisation
+import MTGP_niching_rental_RFQ.niching.RentalPhenoCharacterisation as RentalPhenoCharacterisation
+import MTGP_niching_rental_RFQ.niching.RFQPredictPhenoCharacterisation as RFQPredictPhenoCharacterisation
+from MTGP_niching_rental_RFQ.niching.Inventory_simulator_rental_niching import *
 
 class simulator_niching:
     def __init__(self, parameters, num_decision_points, individual, **kwargs):
@@ -39,6 +40,30 @@ class simulator_niching:
             np.random.shuffle(rental_decision_points)
             subset_rental_decision_points = rental_decision_points[:20]
             decisionSituations.append(subset_rental_decision_points)
+        elif len(self.decision_points) == 3:  # consider replenishment, rental, and RFQ_predict
+            replenishment_decision_points = self.decision_points[0]
+            if len(replenishment_decision_points) < self.num_decision_points:
+                print("Error in get enough number of self.replenishment_decision_points)")
+
+            np.random.shuffle(replenishment_decision_points)
+            subset_replenishment_decision_points = replenishment_decision_points[:20]
+            decisionSituations.append(subset_replenishment_decision_points)
+
+            rental_decision_points = self.decision_points[1]
+            if len(rental_decision_points) < self.num_decision_points:
+                print("Error in get enough number of self.rental_decision_points)")
+
+            np.random.shuffle(rental_decision_points)
+            subset_rental_decision_points = rental_decision_points[:20]
+            decisionSituations.append(subset_rental_decision_points)
+
+            RFQ_predict_decision_points = self.decision_points[2]
+            if len(RFQ_predict_decision_points) < self.num_decision_points:
+                print("Error in get enough number of self.RFQ_predict_decision_points)")
+
+            np.random.shuffle(RFQ_predict_decision_points)
+            subset_RFQ_predict_decision_points = RFQ_predict_decision_points[:20]
+            decisionSituations.append(subset_RFQ_predict_decision_points)
         # decisionSituations.append(subset_routingDecisionSituations) # this is for considering the transshipment value
         return decisionSituations
 
@@ -69,6 +94,19 @@ class niching_clear:
             rentalDecisionSituation = RentalDecisionSituation.RentalDecisionSituation(self.decisionSituations[1])
             rentalPhenoCharacterisation = RentalPhenoCharacterisation.RentalPhenoCharacterisation(individual[1], rentalDecisionSituation)
             self.phenotypic_characristics.append(rentalPhenoCharacterisation)
+        elif len(individual) == 3: # for the instances that consider both the replenishment and transshipment
+            replenishmentDecisionSituation = ReplenishmentDecisionSituation.ReplenishmentDecisionSituation(
+                self.decisionSituations[0])
+            replenishmentPhenoCharacterisation = ReplenishmentPhenoCharacterisation.ReplenishmentPhenoCharacterisation(
+                individual[0], replenishmentDecisionSituation)
+            self.phenotypic_characristics.append(replenishmentPhenoCharacterisation)
+            rentalDecisionSituation = RentalDecisionSituation.RentalDecisionSituation(self.decisionSituations[1])
+            rentalPhenoCharacterisation = RentalPhenoCharacterisation.RentalPhenoCharacterisation(individual[1], rentalDecisionSituation)
+            self.phenotypic_characristics.append(rentalPhenoCharacterisation)
+            RFQ_predictDecisionSituation = RFQPredictDecisionSituation.RFQPredictDecisionSituation(self.decisionSituations[2])
+            RFQ_predictPhenoCharacterisation = RFQPredictPhenoCharacterisation.RFQPredictPhenoCharacterisation(individual[2],
+                                                                                                  RFQ_predictDecisionSituation)
+            self.phenotypic_characristics.append(RFQ_predictPhenoCharacterisation)
         else:
             # this is for also consider transshipment
             print('Error in niching!')
@@ -79,6 +117,10 @@ class niching_clear:
         if len(individual) == 2:
             self.phenotypic_characristics[0].setReferenceRule(individual[0])
             self.phenotypic_characristics[1].setReferenceRule(individual[1])
+        elif len(individual) == 3:
+            self.phenotypic_characristics[0].setReferenceRule(individual[0])
+            self.phenotypic_characristics[1].setReferenceRule(individual[1])
+            self.phenotypic_characristics[2].setReferenceRule(individual[2])
         else:
             self.phenotypic_characristics[0].setReferenceRule(individual[0])
 
@@ -133,11 +175,57 @@ class niching_clear:
             for idx in range(len(sorted_pop)):
                 ind = sorted_pop[idx]
                 replenishment_charList = self.phenotypic_characristics[0].characterise(ind[0])
-                transshipment_charList = self.phenotypic_characristics[1].characterise(ind[1])
+                rental_charList = self.phenotypic_characristics[1].characterise(ind[1])
                 all_charList = []
                 for ref in replenishment_charList:
                     all_charList.append(ref)
-                for ref in transshipment_charList:
+                for ref in rental_charList:
+                    all_charList.append(ref)
+                phenotypic_characristics_pop.append(all_charList)
+                isCleared_pop.append(False)
+
+            if Clear:
+                #clear this population
+                for idx in range(len(sorted_pop)):
+                    if isCleared_pop[idx]:
+                        continue
+
+                    numWinners = 1
+                    for idy in range(idx+1, len(sorted_pop)):
+                        if isCleared_pop[idy]:
+                            continue
+
+                        distance = self.phenotypic_characristics[0].distance(
+                            phenotypic_characristics_pop[idx], phenotypic_characristics_pop[idy])
+                        if distance > self.radius:
+                            continue
+
+                        if numWinners < self.capacity:
+                            numWinners = numWinners + 1
+                        else:
+                            isCleared_pop[idy] = True
+                            len_fitness_values = len(sorted_pop[idy].fitness.values)
+                            bad_fitness = [np.Infinity for i in range(len_fitness_values)]
+                            sorted_pop[idy].fitness.values = bad_fitness
+                            clearedInds = clearedInds + 1
+                print("Cleared number by niching: " + str(clearedInds))
+        elif len(population[0]) == 3: # consider replenishment, rental, and RFQ predict
+            clearedInds = 0
+            phenotypic_characristics_pop = []
+            sorted_pop = self.sortPopulation(toolbox, population)
+            isCleared_pop = []
+            # calculate the PC of all individuals in population
+            for idx in range(len(sorted_pop)):
+                ind = sorted_pop[idx]
+                replenishment_charList = self.phenotypic_characristics[0].characterise(ind[0])
+                rental_charList = self.phenotypic_characristics[1].characterise(ind[1])
+                RFQ_predict_charList = self.phenotypic_characristics[2].characterise(ind[2])
+                all_charList = []
+                for ref in replenishment_charList:
+                    all_charList.append(ref)
+                for ref in rental_charList:
+                    all_charList.append(ref)
+                for ref in RFQ_predict_charList:
                     all_charList.append(ref)
                 phenotypic_characristics_pop.append(all_charList)
                 isCleared_pop.append(False)

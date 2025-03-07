@@ -1,7 +1,7 @@
-import MTGP_niching_rental.niching.PhenoCharacterisation as PhenoCharacterisation
+import MTGP_niching_rental_RFQ.niching.PhenoCharacterisation as PhenoCharacterisation
 import numpy as np
 
-import MTGP_niching_rental.transshipment as transshipment
+import MTGP_niching_rental_RFQ.transshipment as transshipment
 
 
 class TransshipmentPhenoCharacterisation(PhenoCharacterisation.PhenoCharacterisation):

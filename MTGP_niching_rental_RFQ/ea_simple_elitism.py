@@ -4,9 +4,9 @@ from deap import tools
 import numpy as np
 from MTGP_niching_rental_RFQ import saveFile
 from MTGP_niching_rental_RFQ.selection import selElitistAndTournament
-from MTGP_niching_rental_RFQ.niching.niching import niching_clear
 from Utils.PCDiversity import PCDiversityCalculator
-from Utils.ScenarioDesign_rental import ScenarioDesign_rental
+from MTGP_niching_rental_RFQ.niching.niching import niching_clear
+from Utils.ScenarioDesign_rental_RFQ import ScenarioDesign_rental_RFQ
 
 def varAnd(population, toolbox, cxpb, mutpb, reppb):
     offspring = [toolbox.clone(ind) for ind in population]
@@ -63,7 +63,7 @@ def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, 
     #     randomSeed_ngen.append(np.random.randint(2000000000))
 
     # get parameters for the given dataset/scenario
-    scenarioDesign = ScenarioDesign_rental(dataset_name)
+    scenarioDesign = ScenarioDesign_rental_RFQ(dataset_name)
     parameters = scenarioDesign.get_parameter()
 
     logbook = tools.Logbook()
@@ -127,7 +127,7 @@ def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, 
         if seedRotate:
             rd['seed'] = randomSeed_ngen[gen]
             # rd['seed'] = np.random.randint(2000000000)
-        print("Instance seed: ", rd['seed'])
+        # print("Instance seed: ", rd['seed'])
         # Select the next generation individuals
         sorted_elite = sortPopulation(toolbox, population)[:elitism]  # modified by mengxu 2022.10.29
         # sorted_elite = sorted(population, key=attrgetter("fitness"), reverse=True)[:elitism]

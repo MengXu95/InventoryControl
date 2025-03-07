@@ -3,7 +3,6 @@ import math
 import simpy
 import random
 import numpy as np
-import torch
 
 '''
 this module contains the machine routing rules used for comparison

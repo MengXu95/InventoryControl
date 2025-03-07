@@ -1,7 +1,7 @@
-import MTGP_niching_rental.niching.PhenoCharacterisation as PhenoCharacterisation
+import MTGP_niching_rental_RFQ.niching.PhenoCharacterisation as PhenoCharacterisation
 import numpy as np
 
-import MTGP_niching_rental.rental as rental
+import MTGP_niching_rental_RFQ.rental as rental
 
 
 class RentalPhenoCharacterisation(PhenoCharacterisation.PhenoCharacterisation):
@@ -30,8 +30,11 @@ class RentalPhenoCharacterisation(PhenoCharacterisation.PhenoCharacterisation):
                     rental_priority = rental.GP_evolve_rental(each_rental_state, self.referenceRule)
                 all_rental_priority.append(rental_priority)
             # Get the index of the minimal value
+            #todo: currently, only consider the highest priority value of rental, but true rental can be a set of top
+            #high priority choice
             rental_decision = all_rental_priority.index(min(all_rental_priority))
             self.decisions.append(rental_decision)
+
             # the following is the original with candidate selection
             # candidate_action = replenishment_data[1]
             # quantity = replenishment.GP_evolve_S(state, self.referenceRule)

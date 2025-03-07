@@ -28,6 +28,10 @@ def init_toolbox_two_pset(toolbox, pset1, pset2):
     REP.init_toolbox_two_pset(toolbox, pset1, pset2, N_TREES)
     toolbox.register("select", selElitistAndTournament, tournsize=TOURNSIZE, elitism=ELITISM)
 
+def init_toolbox_three_pset(toolbox, pset1, pset2, pset3):
+    REP.init_toolbox_three_pset(toolbox, pset1, pset2, pset3, N_TREES)
+    toolbox.register("select", selElitistAndTournament, tournsize=TOURNSIZE, elitism=ELITISM)
+
 
 def init_stats():
     # fitness_stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -96,6 +100,23 @@ def GPFC_main(dataset_name, seed, randomSeed_ngen):
         toolbox = ParallelToolbox()  # base.Toolbox()
         init_toolbox_two_pset(toolbox, pset1, pset2)
         toolbox.register("evaluate", eval_wrapper)
+    elif DIFF_PSET and N_TREES == 3:
+        pset1 = gp.PrimitiveSet("MAIN1", num_features, prefix="f")
+        pset1.context["array"] = np.array
+        REP.init_primitives_replenishment(pset1)
+        pset2 = gp.PrimitiveSet("MAIN2", num_features, prefix="f")
+        pset2.context["array"] = np.array
+        REP.init_primitives_rental(pset2)
+        pset3 = gp.PrimitiveSet("MAIN3", num_features, prefix="f")
+        pset3.context["array"] = np.array
+        REP.init_primitives_RFQ_predict(pset3)
+        # weights = (-1.,)
+        weights = (-1.,-1.,-1.,-1.,-1.,)
+        creator.create("FitnessMin", base.Fitness, weights=weights)
+        # set up toolbox
+        toolbox = ParallelToolbox()  # base.Toolbox()
+        init_toolbox_three_pset(toolbox, pset1, pset2, pset3)
+        toolbox.register("evaluate", eval_wrapper)
     else:
         pset = gp.PrimitiveSet("MAIN", num_features, prefix="f")
         pset.context["array"] = np.array
@@ -128,7 +149,7 @@ TOURNSIZE = 5
 MAX_HEIGHT = 8
 REP = mt  # individual representation {mt (multi-tree) or vt (vector-tree)}
 #still only two trees, but one for replenishment, one for rental, no transshipment
-N_TREES = 2
+N_TREES = 3
 rd = {}
 DIFF_PSET = True
 seedRotate = False # added by mengxu 2022.10.13

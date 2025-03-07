@@ -12,7 +12,9 @@ from torch.distributions import Categorical
 from MTGP_niching_rental_RFQ.replenishment import *
 from MTGP_niching_rental_RFQ.transshipment import *
 from MTGP_niching_rental_RFQ.rental import *
+from MTGP_niching_rental_RFQ.RFQ_predict import *
 import threading
+import MTGP_niching_rental_RFQ.logistic_util as logistic_util
 
 # np.random.seed(0)
 # ###############training##########################################
@@ -179,7 +181,7 @@ class TeckwahDemand:
 class Retailer:
     def __init__(self, demand_records, number, f,
                  ini_inv, holding, lost_sales, L, LT, capacity, production_capacity, fixed_order,
-                 per_trans_item, per_trans_order, support_records, support_unit_cost, RFQ_happen_pro = -1):  # Each retailer has its own number 0,1,2,... f is its forecast
+                 per_trans_item, per_trans_order, support_records, support_unit_cost, RFQ_happen_pro = -1.0):  # Each retailer has its own number 0,1,2,... f is its forecast
         self.ini_inv = ini_inv
         self.L = L
         self.LT = LT
@@ -225,7 +227,7 @@ class Retailer:
 
     def urgent_RFQ_order_arrival(self, RFQ_demand, rental_available, predict_support_inventory, true_support_inventory):  # Get next state after pipeline inv arrives and demand is realized
         self.inv_level = min(self.capacity,
-                             self.inv_level + self.pipeline[0])  # Pipeline arrives, cannot exceed storage capacity
+                             self.inv_level)  # Pipeline arrives, cannot exceed storage capacity
         self.inv_level -= RFQ_demand
 
         support_cost = 0
@@ -240,20 +242,20 @@ class Retailer:
                 #todo: need to double-check this part!
                 if predict_support_inventory <= true_support_inventory:
                     if np.absolute(self.inv_level) < predict_support_inventory:
-                        self.inv_level = 0
                         support_cost = np.absolute(self.inv_level) * self.support_unit_cost
-                    elif np.absolute(self.inv_level) > predict_support_inventory and np.absolute(self.inv_level) < true_support_inventory:
+                    elif np.absolute(self.inv_level) > predict_support_inventory:
                         support_cost = predict_support_inventory * self.support_unit_cost + (np.absolute(self.inv_level)-predict_support_inventory) * self.lost_sales_cost
+                    self.inv_level = 0
                 else:
                     if np.absolute(self.inv_level) < true_support_inventory:
-                        self.inv_level = 0
                         support_cost = np.absolute(self.inv_level) * self.support_unit_cost
-                    elif np.absolute(self.inv_level) > true_support_inventory and np.absolute(self.inv_level) < predict_support_inventory:
-                        support_cost = true_support_inventory * self.support_unit_cost + (np.absolute(self.inv_level)-true_support_inventory)
+                    elif np.absolute(self.inv_level) > true_support_inventory:
+                        support_cost = true_support_inventory * self.support_unit_cost + (np.absolute(self.inv_level)-true_support_inventory)* self.lost_sales_cost
+                    self.inv_level = 0
         if rental_available < 0:
             print("Error! rental_available should not be smaller than 0!!!")
         # Update pipeline
-        self.pipeline = np.concatenate((self.pipeline[1:], [self.action]))
+        # self.pipeline = np.concatenate((self.pipeline[1:], [self.action]))
         return rental_available, support_cost
 
 class TimeoutException(Exception):
@@ -291,12 +293,12 @@ class InvOptEnv:
         self.per_trans_item = parameters['per_trans_item']
         self.per_trans_order = parameters['per_trans_order']
         self.support_level = self.demand_level / 5
-        self.support_unit_cost = 1 #todo: need to find a suitable value
-        self.RFQ_happen_pro = 0.2
+        self.support_unit_cost = 20 #todo: need to find a suitable value
+        self.RFQ_happen_pro = -0.2
+        # self.partial_information_visibility = parameters['partial_information_visibility']
+        self.partial_information_visibility = True
         # add by xu meng 2024.12.2
-        self.rental_choice = [[0, 0, 0],
-                              [40,100,1], [160,500,1], [200,700,1],
-                              [20,100,6], [80,500,6], [100,700,6]]
+        self.rental_choice = parameters['rental_choice']
         self.current_rentals = []
 
         if self.demand_level == None:#use teckwah dataset
@@ -466,16 +468,38 @@ class InvOptEnv:
             state_rental.append(each_rental_state)
         self.state.append(state_rental)
 
-        #the following is the original
-        # self.state = np.array(
-        #     [retailer.inv_level for retailer in self.retailers] + [x for retailer in self.retailers for x in
-        #                                                            retailer.forecast] + \
-        #     [x for retailer in self.retailers for x in retailer.pipeline])
+        state_RFQ_predict= []
+        for retailer_index in range(len(self.retailers)):
+            retailer = self.retailers[retailer_index]
+            state_RFQ_predict_retailer = np.array([self.urgent_RFQ_demand_records[retailer_index][self.current_period-2], retailer.inv_level])  # only suitable for LT = 2
+            state_RFQ_predict.append(state_RFQ_predict_retailer)
+        self.state.append(state_RFQ_predict)
         return self.state
 
     def step_value(self, action_modified):  # modified by mengxu to make it not only suitable for 2 sites
         if len(self.retailers) == 2:
             all_cost = []
+
+            # this is for handle urgent RFQ demand
+            total_support_cost = 0
+            RFQ_predict_decisions = action_modified[-1]
+            for RFQ_predict_decision, retailer, urgent_RFQ_demand, true_support_inventory in zip(
+                    RFQ_predict_decisions, self.retailers, self.urgent_RFQ_demand_records,
+                    self.support_records):
+                if urgent_RFQ_demand[self.current_period - 2] > 0:  # urgent_RFQ happen
+                    # true_support_inventory represents the true maximal inventory support by others
+                    # predict_support_inventory = 10 # this represents the predict maximal inventory support by others
+                    # todo: here need to predict how much our partner/competitive can support by mengxu 2025.3.3
+                    if self.partial_information_visibility:
+                        predict_support_inventory = RFQ_predict_decision
+                        # print("RFQ_predict_decision: ", RFQ_predict_decision)
+                    else:
+                        predict_support_inventory = true_support_inventory[self.current_period - 2]
+                    rental_available, support_cost = retailer.urgent_RFQ_order_arrival(
+                        urgent_RFQ_demand[self.current_period - 2], rental_available, predict_support_inventory,
+                        true_support_inventory[self.current_period - 2])  # -2 not -1
+                    total_support_cost += support_cost
+
             # Update inv levels and pipelines
             total_current_rental = 0
             if len(self.current_rentals) != 0:
@@ -490,20 +514,11 @@ class InvOptEnv:
             for retailer, demand in zip(self.retailers, self.demand_records):
                 rental_available = retailer.order_arrival(demand[self.current_period - 2], rental_available)  # -2 not -1
 
-            # this is for handle urgent RFQ demand
-            total_support_cost = 0
-            for retailer, urgent_RQF_demand, true_support_inventory in zip(self.retailers, self.urgent_RFQ_demand_records, self.support_records):
-                if urgent_RQF_demand[self.current_period - 2] > 0: #urgent_RFQ happen
-                    # true_support_inventory represents the true maximal inventory support by others
-                    # todo: here need to predict how much our partner/competitive can support by mengxu 2025.3.3
-                    # predict_support_inventory = 10 # this represents the predict maximal inventory support by others
-                    predict_support_inventory = true_support_inventory[self.current_period - 2]
-                    rental_available, support_cost = retailer.urgent_RFQ_order_arrival(urgent_RQF_demand[self.current_period - 2], rental_available, predict_support_inventory, true_support_inventory[self.current_period - 2])  # -2 not -1
-                    total_support_cost += support_cost
+
 
             # Update rental decision and calculate rental cost, new for Strategy version 2.0
             rental_cost = 0
-            rental_decisions = action_modified[-1]  # currently each time only rental one choice
+            rental_decisions = action_modified[-2]  # currently each time only rental one choice
             for each_rental_decision in rental_decisions:
                 rental_decision = self.rental_choice[each_rental_decision]
                 self.current_rentals.append(rental_decision)
@@ -543,6 +558,9 @@ class InvOptEnv:
                     retailer.inv_level = 0
                 else:
                     hl_cost_total += retailer.inv_level * retailer.holding_cost
+
+
+
             reward = - trans_cost - hl_cost_total - order_cost - rental_cost - total_support_cost
             all_cost.append(trans_cost)
             all_cost.append(hl_cost_total)
@@ -612,6 +630,15 @@ class InvOptEnv:
                 state_rental.append(each_rental_state)
             self.state.append(state_rental)
 
+            state_RFQ_predict = []
+            for retailer_index in range(len(self.retailers)):
+                retailer = self.retailers[retailer_index]
+                state_RFQ_predict_retailer = np.array(
+                    [self.urgent_RFQ_demand_records[retailer_index][self.current_period - 2],
+                     retailer.inv_level])  # only suitable for LT = 2
+                state_RFQ_predict.append(state_RFQ_predict_retailer)
+            self.state.append(state_RFQ_predict)
+
             return self.state, reward, terminate, all_cost
             # the following is the original
             # self.state = np.array(
@@ -620,6 +647,27 @@ class InvOptEnv:
             #     [x for retailer in self.retailers for x in retailer.pipeline])
         elif len(self.retailers) == 3:
             all_cost = []
+
+            # this is for handle urgent RFQ demand
+            total_support_cost = 0
+            RFQ_predict_decisions = action_modified[-1]
+            for RFQ_predict_decision, retailer, urgent_RFQ_demand, true_support_inventory in zip(
+                    RFQ_predict_decisions, self.retailers, self.urgent_RFQ_demand_records,
+                    self.support_records):
+                if urgent_RFQ_demand[self.current_period - 2] > 0:  # urgent_RFQ happen
+                    # true_support_inventory represents the true maximal inventory support by others
+                    # predict_support_inventory = 10 # this represents the predict maximal inventory support by others
+                    # todo: here need to predict how much our partner/competitive can support by mengxu 2025.3.3
+                    if self.partial_information_visibility:
+                        predict_support_inventory = RFQ_predict_decision
+                        # print("RFQ_predict_decision: ", RFQ_predict_decision)
+                    else:
+                        predict_support_inventory = true_support_inventory[self.current_period - 2]
+                    rental_available, support_cost = retailer.urgent_RFQ_order_arrival(
+                        urgent_RFQ_demand[self.current_period - 2], rental_available, predict_support_inventory,
+                        true_support_inventory[self.current_period - 2])  # -2 not -1
+                    total_support_cost += support_cost
+
             # Update inv levels and pipelines
             total_current_rental = 0
             if len(self.current_rentals) != 0:
@@ -692,11 +740,13 @@ class InvOptEnv:
                     retailer.inv_level = 0
                 else:
                     hl_cost_total += retailer.inv_level * retailer.holding_cost
-            reward = - trans_cost - hl_cost_total - order_cost - rental_cost
+
+            reward = - trans_cost - hl_cost_total - order_cost - rental_cost - total_support_cost
             all_cost.append(trans_cost)
             all_cost.append(hl_cost_total)
             all_cost.append(order_cost)
             all_cost.append(rental_cost)
+            all_cost.append(total_support_cost)
 
             self.current_period += 1
             if self.current_period >= self.n_period:
@@ -773,14 +823,20 @@ class InvOptEnv:
         max_ep_len = self.epi_len  # max timesteps in one episode
         time_step = 0
 
+        sum_outbound = 0 # for test
+
         for _ in range(1, max_ep_len + 1):
             # select action with policy
 
             if len(individual) == 1:
                 replenishment_policy = individual[0]
-            else:
+            elif len(individual) == 2:
                 replenishment_policy = individual[0]
                 rental_policy = individual[1]
+            elif len(individual) == 3:
+                replenishment_policy = individual[0]
+                rental_policy = individual[1]
+                RFQ_predict_policy = individual[2]
 
             # ------- strategy 3 ---------------------
             # the action space of this one is the same as jinsheng
@@ -790,13 +846,31 @@ class InvOptEnv:
             replenishment_state = state[0]
             transshipment_state = state[1]
             rental_state = state[2] # for each choice in rental_state: [current_rental, rental_price, rental_capacity, rental_month, total_rental_requirement]
+            RFQ_predict_state = state[3]
             total_rental_requirement = 0
             for each_transshipment_state in transshipment_state:
                 transshipment_quantity = 0
                 # transshipment_quantity = round(GP_evolve_R(each_transshipment_state, transshipment_policy), 2)
                 action_modified.append(transshipment_quantity)
+
             for each_replenishment_state in replenishment_state:
                 replenishment_quantity = round(GP_evolve_S(each_replenishment_state, replenishment_policy), 2)
+                print("replenishment_quantity: ", replenishment_quantity)
+
+                # Strategy 2 (sigmoid): constrain the replenishment quantity to [0, production_capacity]
+                # this strategy performs worse than Strategy 1, by testing, GP is able to finally retain individuals within bound
+                # production_capacity = each_replenishment_state[4]
+                # capacity = each_replenishment_state[3]
+                # if replenishment_quantity > capacity or replenishment_quantity < 0:
+                #     sum_outbound += 1
+                #     replenishment_quantity = logistic_util.logistic_scale_and_shift(replenishment_quantity, 0, capacity)
+                # # print("replenishment_quantity after sigmoid: ", replenishment_quantity)
+                # if replenishment_quantity > production_capacity:
+                #     require_quantity = replenishment_quantity - production_capacity
+                #     total_rental_requirement = total_rental_requirement + require_quantity
+                #     replenishment_quantity = production_capacity
+
+                # Strategy 1 (original): constrain the replenishment quantity to [0, production_capacity]
                 if replenishment_quantity < 0:
                     replenishment_quantity = 0
                 # add by xu meng to consider rental
@@ -805,6 +879,8 @@ class InvOptEnv:
                     require_quantity = replenishment_quantity - production_capacity
                     total_rental_requirement = total_rental_requirement + require_quantity
                     replenishment_quantity = production_capacity
+
+                #total_rental_requirement = 0 # for testing the effectiveness of sigmoid
                 action_modified.append(replenishment_quantity)
 
             if len(individual) == 1:
@@ -813,10 +889,9 @@ class InvOptEnv:
                 # print("One tree and do not consider rental!")
             else:
                 rental_decisions = []
-                onlyRentalOne = True
+                onlyRentalOne = False
                 if onlyRentalOne:
                 # Strategy version 1.0: only rental one decision each time, for making rental decision and delete not enough rental choice, by xu meng 2024.12.2
-
                     current_rental = 0
                     if len(rental_state) > 0:
                         current_rental = rental_state[0][0]
@@ -857,11 +932,18 @@ class InvOptEnv:
                         for each_rental_decision in rental_decisions:
                             rental_decision_capacity = self.rental_choice[each_rental_decision][1]
                             new_current_rental = new_current_rental + rental_decision_capacity
-
                     # if len(rental_decisions) > 1:
                     #     print("rental_decisions: ", rental_decisions)
-            action_modified.append(rental_decisions)
+                action_modified.append(rental_decisions)
 
+                RFQ_predict_decisions = []
+                for each_RFQ_predict_state in RFQ_predict_state:
+                    RFQ_predict_quantity = round(GP_evolve_RFQ_predict(each_RFQ_predict_state, RFQ_predict_policy), 2)
+                    if RFQ_predict_quantity <= 0:
+                        RFQ_predict_quantity = 0
+                    print("RFQ_predict_quantity: ", RFQ_predict_quantity)
+                    RFQ_predict_decisions.append(RFQ_predict_quantity)
+                action_modified.append(RFQ_predict_decisions)
 
 
             # ------- strategy 3 ---------------------
@@ -888,7 +970,9 @@ class InvOptEnv:
             if done:
                 break
 
+        sum_outbound = sum_outbound / (2*max_ep_len)
         fitness = -current_ep_reward/max_ep_len
+        # print("sum_outbound: ", round(sum_outbound,2), "   , fitness: ", round(fitness,2))
         all_cost_final = np.array(current_ep_all_cost)  # Convert list to NumPy array
         all_cost_fit = all_cost_final/max_ep_len
         return fitness, all_cost_fit

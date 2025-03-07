@@ -1,4 +1,4 @@
-import MTGP_niching_rental.niching.DecisionSituation as DecisionSituation
+import MTGP_niching_rental_RFQ.niching.DecisionSituation as DecisionSituation
 
 class RentalDecisionSituation(DecisionSituation.DecisionSituation):
     def __init__(self, data, **kwargs):

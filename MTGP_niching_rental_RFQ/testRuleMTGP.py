@@ -11,7 +11,7 @@ from MTGP_niching_rental_RFQ.replenishment import *
 from MTGP_niching_rental_RFQ.transshipment import *
 from MTGP_niching_rental_RFQ.Inventory_simulator_rental_RFQ import InvOptEnv
 import os
-from Utils.ScenarioDesign import ScenarioDesign
+from logistic_util.ScenarioDesign import ScenarioDesign
 
 
 
