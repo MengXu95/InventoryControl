@@ -856,12 +856,12 @@ class InvOptEnv:
                 # print("replenishment_quantity: ", replenishment_quantity)
 
                 # Strategy 2 (sigmoid): constrain the replenishment quantity to [0, production_capacity]
-                # this strategy performs worse than Strategy 1, by testing, GP is able to finally retain individuals within bound
+                # Strategy 2: performs better than Strategy 1 based on one run with popsize 200
                 # production_capacity = each_replenishment_state[4]
                 # capacity = each_replenishment_state[3]
-                # if replenishment_quantity > capacity or replenishment_quantity < 0:
-                #     sum_outbound += 1
-                #     replenishment_quantity = logistic_util.logistic_scale_and_shift(replenishment_quantity, 0, capacity)
+                # upbound_replenishment_quantity = capacity * 3
+                # if replenishment_quantity > upbound_replenishment_quantity or replenishment_quantity < 0:
+                #     replenishment_quantity = logistic_util.logistic_scale_and_shift(replenishment_quantity, 0, upbound_replenishment_quantity)
                 # # print("replenishment_quantity after sigmoid: ", replenishment_quantity)
                 # if replenishment_quantity > production_capacity:
                 #     require_quantity = replenishment_quantity - production_capacity
@@ -869,10 +869,14 @@ class InvOptEnv:
                 #     replenishment_quantity = production_capacity
 
                 # Strategy 1 (original): constrain the replenishment quantity to [0, production_capacity]
+                production_capacity = each_replenishment_state[4]
+                capacity = each_replenishment_state[3]
+                upbound_replenishment_quantity = capacity * 3
+                if replenishment_quantity > upbound_replenishment_quantity:
+                    replenishment_quantity = upbound_replenishment_quantity
                 if replenishment_quantity < 0:
                     replenishment_quantity = 0
                 # add by xu meng to consider rental
-                production_capacity = each_replenishment_state[4]
                 if replenishment_quantity > production_capacity:
                     require_quantity = replenishment_quantity - production_capacity
                     total_rental_requirement = total_rental_requirement + require_quantity
@@ -936,6 +940,17 @@ class InvOptEnv:
 
                 RFQ_predict_decisions = []
                 upbound_support_quantity = self.support_level * 2
+
+                # Strategy 2: performs better than Strategy 1 based on one run with popsize 200
+                # for each_RFQ_predict_state in RFQ_predict_state:
+                #     RFQ_predict_quantity = round(GP_evolve_RFQ_predict(each_RFQ_predict_state, RFQ_predict_policy), 2)
+                #     # print("RFQ_predict_quantity: ", RFQ_predict_quantity)
+                #     if RFQ_predict_quantity <= 0 or RFQ_predict_quantity > upbound_support_quantity:
+                #         RFQ_predict_quantity = logistic_util.logistic_scale_and_shift(RFQ_predict_quantity, 0, upbound_support_quantity)
+                #     RFQ_predict_decisions.append(RFQ_predict_quantity)
+                # action_modified.append(RFQ_predict_decisions)
+
+                #Strategy 1
                 for each_RFQ_predict_state in RFQ_predict_state:
                     RFQ_predict_quantity = round(GP_evolve_RFQ_predict(each_RFQ_predict_state, RFQ_predict_policy), 2)
                     # print("RFQ_predict_quantity: ", RFQ_predict_quantity)
