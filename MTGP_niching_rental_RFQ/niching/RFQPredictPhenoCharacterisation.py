@@ -1,13 +1,15 @@
 import MTGP_niching_rental_RFQ.niching.PhenoCharacterisation as PhenoCharacterisation
 import numpy as np
 import MTGP_niching_rental_RFQ.RFQ_predict as RFQPredict
+from MTGP_niching_rental_RFQ import logistic_util
 
 
 class RFQPredictPhenoCharacterisation(PhenoCharacterisation.PhenoCharacterisation):
-    def __init__(self, referenceRule, decisionSituations, **kwargs):
+    def __init__(self, referenceRule, decisionSituations, support_level = 100, **kwargs):
         PhenoCharacterisation.PhenoCharacterisation.__init__(self, referenceRule)
         self.decisionSituations = decisionSituations.getData()
         self.decisions = []
+        self.support_level = support_level
         self.calcReferenceIndexes()
 
     def calcReferenceIndexes(self):
@@ -18,18 +20,14 @@ class RFQPredictPhenoCharacterisation(PhenoCharacterisation.PhenoCharacterisatio
             state = RFQ_Predict_data[0]
             for state_retailer in state:
                 quantity = round(RFQPredict.GP_evolve_RFQ_predict(state_retailer, self.referenceRule),2)
+                upbound_support_quantity = self.support_level * 2
+
+                if quantity <= 0 or quantity > upbound_support_quantity:
+                    quantity = logistic_util.logistic_scale_and_shift(quantity, 0,
+                                                                      upbound_support_quantity)
+
                 self.decisions.append(quantity)
-            # the following is the original with candidate selection
-            # candidate_action = replenishment_data[1]
-            # quantity = replenishment.GP_evolve_S(state, self.referenceRule)
-            # index = 0
-            # min_dis = np.Infinity
-            # for i in range(len(candidate_action)):
-            #     dis = np.abs(quantity - candidate_action[i])
-            #     if dis < min_dis:
-            #         index = i
-            #         min_dis = dis
-            # self.decisions.append(candidate_action[index])
+
 
     def setReferenceRule(self, rule):
         self.referenceRule = rule

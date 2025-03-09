@@ -3,6 +3,7 @@ import random
 from deap import tools
 import numpy as np
 from MTGP_niching_rental_RFQ import saveFile
+from MTGP_niching_rental_RFQ.BroodRecombination.broodRecombination import broodPop
 from MTGP_niching_rental_RFQ.selection import selElitistAndTournament
 from Utils.FitnessDiversity import FitnessDiversityCalculator
 # from MTGP_niching_rental_RFQ.niching.niching import niching_clear
@@ -56,7 +57,7 @@ def sortPopulation(toolbox, population):
     return populationCopy
 
 
-def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate, use_niching, rd, stats=None,halloffame=None, verbose=__debug__, seed = __debug__, dataset_name=__debug__):
+def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate, use_niching, USE_BroodRecombination, rd, stats=None,halloffame=None, verbose=__debug__, seed = __debug__, dataset_name=__debug__):
     # initialise the random seed of each generation
     # randomSeed_ngen = []
     # for i in range((ngen + 1)):
@@ -130,6 +131,11 @@ def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, 
     fitness_diversity_all.append(fitness_diversity)
     print("Fitness diversity: " + str(fitness_diversity))
 
+    brood = None
+    brood_threshold = []
+    if USE_BroodRecombination:
+        brood = broodPop(len(population),dataset_name,population[best_index])
+
     np.random.seed(seed) #add by mengxu to avoid niching make the same seed
 
     # Begin the generational process
@@ -141,20 +147,25 @@ def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, 
             # rd['seed'] = np.random.randint(2000000000)
         # print("Instance seed: ", rd['seed'])
         # Select the next generation individuals
-        sorted_elite = sortPopulation(toolbox, population)[:elitism]  # modified by mengxu 2022.10.29
+        population = sortPopulation(toolbox, population)
+        sorted_elite = population[:elitism]  # modified by mengxu 2022.10.29
         # sorted_elite = sorted(population, key=attrgetter("fitness"), reverse=True)[:elitism]
 
-        offspring = toolbox.select(population, len(population)-elitism)
+        # original
+        # offspring = toolbox.select(population, len(population)-elitism)
+        # offspring = varAnd(offspring, toolbox, cxpb, mutpb, reppb)
 
-        # Vary the pool of individuals
-        # print('ori',offspring[0][0])
-        # print('ori',offspring[0][1])
-        # print('ori',offspring[0][2])
-        offspring = varAnd(offspring, toolbox, cxpb, mutpb, reppb)
-        # print('after',offspring[0][0])
-        # print('after',offspring[0][1])
-        # print('after',offspring[0][2])
-        # exit()
+        if USE_BroodRecombination:
+            offspring = toolbox.select(population, brood.brood_size)
+            # print("Offspring size with brood recombination: ", len(offspring))
+            offspring = varAnd(offspring, toolbox, cxpb, mutpb, reppb)
+            offspring = brood.shrinkPopToSizeBasedOnRadius(offspring, size=len(population) - elitism)
+            brood_threshold.append(brood.threshold)
+            # offspring = brood.shrinkPopToSize(offspring,size=len(population) - elitism)
+            # print("Offspring size after shrink: ", len(offspring))
+        else:
+            offspring = toolbox.select(population, len(population) - elitism)
+            offspring = varAnd(offspring, toolbox, cxpb, mutpb, reppb)
 
         # Evaluate the sorted_elite with an invalid fitness as we rotate seed, add by mengxu
         # invalid_elite_ind = [ind for ind in sorted_elite if not ind.fitness.valid]
@@ -235,6 +246,7 @@ def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, 
         if gen == ngen:
             # save the PC diversity to a csv file
             saveFile.save_PCdiversity_to_csv(seed, dataset_name, fitness_diversity_all)
+            saveFile.save_BroodThreshold_to_csv(seed, dataset_name, brood_threshold)
         # add by mengxu 2024.8.5 for niching---------------------------
 
         # pop_fit = [ind.fitness.values[0] for ind in population]  ######selection from author

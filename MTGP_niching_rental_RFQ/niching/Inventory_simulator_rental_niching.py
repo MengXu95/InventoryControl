@@ -10,6 +10,8 @@ from datetime import datetime
 from torch.distributions import Categorical
 
 import threading
+
+from MTGP_niching_rental_RFQ import logistic_util
 from MTGP_niching_rental_RFQ.replenishment import *
 from MTGP_niching_rental_RFQ.transshipment import *
 from MTGP_niching_rental_RFQ.rental import *
@@ -275,11 +277,10 @@ class InvOptEnv:
         self.fixed_order = parameters['fixed_order']
         self.per_trans_item = parameters['per_trans_item']
         self.per_trans_order = parameters['per_trans_order']
-        self.support_level = self.demand_level / 5
-        self.support_unit_cost = 20 #todo: need to find a suitable value
-        self.RFQ_happen_pro = -0.2
-        # self.partial_information_visibility = parameters['partial_information_visibility']
-        self.partial_information_visibility = True
+        self.support_level = parameters['support_level']
+        self.support_unit_cost = parameters['support_unit_cost']  # todo: need to find a suitable value
+        self.RFQ_happen_pro = parameters['RFQ_happen_pro']
+        self.partial_information_visibility = parameters['partial_information_visibility']
         # add by xu meng 2024.12.2
         self.rental_choice = parameters['rental_choice']
         self.current_rentals = []
@@ -306,8 +307,8 @@ class InvOptEnv:
             self.urgent_RFQ_demand_records = self.rd.gen_urgent_RFQ_demand(self.RFQ_happen_pro) # add by meng xu for urgent RFQ
 
         # this is for RFQ and support for partial information visibility
-        self.support_level = SupplierSupport(seed, self.support_level, self.num_retailer, self.epi_len)
-        self.support_records = self.support_level.gen_support()
+        supplierSupport = SupplierSupport(seed, self.support_level, self.num_retailer, self.epi_len)
+        self.support_records = supplierSupport.gen_support()
 
         self.n_retailers = self.num_retailer
         self.retailers = []
@@ -463,26 +464,6 @@ class InvOptEnv:
         if len(self.retailers) == 2:
             all_cost = []
 
-            # this is for handle urgent RFQ demand
-            total_support_cost = 0
-            RFQ_predict_decisions = action_modified[-1]
-            for RFQ_predict_decision, retailer, urgent_RFQ_demand, true_support_inventory in zip(
-                    RFQ_predict_decisions, self.retailers, self.urgent_RFQ_demand_records,
-                    self.support_records):
-                if urgent_RFQ_demand[self.current_period - 2] > 0:  # urgent_RFQ happen
-                    # true_support_inventory represents the true maximal inventory support by others
-                    # predict_support_inventory = 10 # this represents the predict maximal inventory support by others
-                    # todo: here need to predict how much our partner/competitive can support by mengxu 2025.3.3
-                    if self.partial_information_visibility:
-                        predict_support_inventory = RFQ_predict_decision
-                        # print("RFQ_predict_decision: ", RFQ_predict_decision)
-                    else:
-                        predict_support_inventory = true_support_inventory[self.current_period - 2]
-                    rental_available, support_cost = retailer.urgent_RFQ_order_arrival(
-                        urgent_RFQ_demand[self.current_period - 2], rental_available, predict_support_inventory,
-                        true_support_inventory[self.current_period - 2])  # -2 not -1
-                    total_support_cost += support_cost
-
             # Update inv levels and pipelines
             total_current_rental = 0
             if len(self.current_rentals) != 0:
@@ -497,7 +478,25 @@ class InvOptEnv:
             for retailer, demand in zip(self.retailers, self.demand_records):
                 rental_available = retailer.order_arrival(demand[self.current_period - 2], rental_available)  # -2 not -1
 
-
+                # this is for handle urgent RFQ demand
+                total_support_cost = 0
+                RFQ_predict_decisions = action_modified[-1]
+                for RFQ_predict_decision, retailer, urgent_RFQ_demand, true_support_inventory in zip(
+                        RFQ_predict_decisions, self.retailers, self.urgent_RFQ_demand_records,
+                        self.support_records):
+                    if urgent_RFQ_demand[self.current_period - 2] > 0:  # urgent_RFQ happen
+                        # true_support_inventory represents the true maximal inventory support by others
+                        # predict_support_inventory = 10 # this represents the predict maximal inventory support by others
+                        # todo: here need to predict how much our partner/competitive can support by mengxu 2025.3.3
+                        if self.partial_information_visibility:
+                            predict_support_inventory = RFQ_predict_decision
+                            # print("RFQ_predict_decision: ", RFQ_predict_decision)
+                        else:
+                            predict_support_inventory = true_support_inventory[self.current_period - 2]
+                        rental_available, support_cost = retailer.urgent_RFQ_order_arrival(
+                            urgent_RFQ_demand[self.current_period - 2], rental_available, predict_support_inventory,
+                            true_support_inventory[self.current_period - 2])  # -2 not -1
+                        total_support_cost += support_cost
 
             # Update rental decision and calculate rental cost, new for Strategy version 2.0
             rental_cost = 0
@@ -842,26 +841,26 @@ class InvOptEnv:
 
                 # Strategy 2 (sigmoid): constrain the replenishment quantity to [0, production_capacity]
                 # this strategy performs worse than Strategy 1, by testing, GP is able to finally retain individuals within bound
-                # production_capacity = each_replenishment_state[4]
-                # capacity = each_replenishment_state[3]
-                # if replenishment_quantity > capacity or replenishment_quantity < 0:
-                #     sum_outbound += 1
-                #     replenishment_quantity = logistic_util.logistic_scale_and_shift(replenishment_quantity, 0, capacity)
-                # # print("replenishment_quantity after sigmoid: ", replenishment_quantity)
-                # if replenishment_quantity > production_capacity:
-                #     require_quantity = replenishment_quantity - production_capacity
-                #     total_rental_requirement = total_rental_requirement + require_quantity
-                #     replenishment_quantity = production_capacity
-
-                # Strategy 1 (original): constrain the replenishment quantity to [0, production_capacity]
-                if replenishment_quantity < 0:
-                    replenishment_quantity = 0
-                # add by xu meng to consider rental
                 production_capacity = each_replenishment_state[4]
+                capacity = each_replenishment_state[3]
+                if replenishment_quantity > capacity or replenishment_quantity < 0:
+                    sum_outbound += 1
+                    replenishment_quantity = logistic_util.logistic_scale_and_shift(replenishment_quantity, 0, capacity)
+                # print("replenishment_quantity after sigmoid: ", replenishment_quantity)
                 if replenishment_quantity > production_capacity:
                     require_quantity = replenishment_quantity - production_capacity
                     total_rental_requirement = total_rental_requirement + require_quantity
                     replenishment_quantity = production_capacity
+
+                # Strategy 1 (original): constrain the replenishment quantity to [0, production_capacity]
+                # if replenishment_quantity < 0:
+                #     replenishment_quantity = 0
+                # # add by xu meng to consider rental
+                # production_capacity = each_replenishment_state[4]
+                # if replenishment_quantity > production_capacity:
+                #     require_quantity = replenishment_quantity - production_capacity
+                #     total_rental_requirement = total_rental_requirement + require_quantity
+                #     replenishment_quantity = production_capacity
 
                 #total_rental_requirement = 0 # for testing the effectiveness of sigmoid
                 action_modified.append(replenishment_quantity)
@@ -920,12 +919,26 @@ class InvOptEnv:
                 action_modified.append(rental_decisions)
 
                 RFQ_predict_decisions = []
+                upbound_support_quantity = self.support_level * 2
+
+                # Strategy 2: performs better than Strategy 1 based on one run with popsize 200
                 for each_RFQ_predict_state in RFQ_predict_state:
                     RFQ_predict_quantity = round(GP_evolve_RFQ_predict(each_RFQ_predict_state, RFQ_predict_policy), 2)
-                    if RFQ_predict_quantity <= 0:
-                        RFQ_predict_quantity = 0
+                    # print("RFQ_predict_quantity: ", RFQ_predict_quantity)
+                    if RFQ_predict_quantity <= 0 or RFQ_predict_quantity > upbound_support_quantity:
+                        RFQ_predict_quantity = logistic_util.logistic_scale_and_shift(RFQ_predict_quantity, 0,
+                                                                                      upbound_support_quantity)
                     RFQ_predict_decisions.append(RFQ_predict_quantity)
-                action_modified.append(RFQ_predict_decisions)
+
+                # Strategy 1
+                # for each_RFQ_predict_state in RFQ_predict_state:
+                #     RFQ_predict_quantity = round(GP_evolve_RFQ_predict(each_RFQ_predict_state, RFQ_predict_policy), 2)
+                #     # print("RFQ_predict_quantity: ", RFQ_predict_quantity)
+                #     if RFQ_predict_quantity <= 0:
+                #         RFQ_predict_quantity = 0
+                #     if RFQ_predict_quantity > upbound_support_quantity:
+                #         RFQ_predict_quantity = upbound_support_quantity
+                #     RFQ_predict_decisions.append(RFQ_predict_quantity)
 
 
             # ------- strategy 3 ---------------------

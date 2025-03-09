@@ -1,8 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import itertools
-import torch
-import torch.nn as nn
 import pandas as pd
 import pytz
 import math

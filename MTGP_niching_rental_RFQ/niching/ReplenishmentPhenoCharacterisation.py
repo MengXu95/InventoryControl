@@ -2,6 +2,7 @@ import MTGP_niching_rental_RFQ.niching.PhenoCharacterisation as PhenoCharacteris
 import numpy as np
 
 import MTGP_niching_rental_RFQ.replenishment as replenishment
+from MTGP_niching_rental_RFQ import logistic_util
 
 
 class ReplenishmentPhenoCharacterisation(PhenoCharacterisation.PhenoCharacterisation):
@@ -19,18 +20,21 @@ class ReplenishmentPhenoCharacterisation(PhenoCharacterisation.PhenoCharacterisa
             state = replenishment_data[0]
             for state_retailer in state:
                 quantity = round(replenishment.GP_evolve_S(state_retailer, self.referenceRule),2)
+
+                # Strategy 2 (sigmoid): constrain the replenishment quantity to [0, production_capacity]
+                # Strategy 2: performs better than Strategy 1 based on one run with popsize 200
+                production_capacity = state_retailer[4]
+                capacity = state_retailer[3]
+                upbound_replenishment_quantity = capacity * 3
+                if quantity > upbound_replenishment_quantity or quantity < 0:
+                    quantity = logistic_util.logistic_scale_and_shift(quantity, 0,
+                                                                                    upbound_replenishment_quantity)
+                # print("replenishment_quantity after sigmoid: ", replenishment_quantity)
+                if quantity > production_capacity:
+                    require_quantity = quantity - production_capacity
+                    quantity = production_capacity
+
                 self.decisions.append(quantity)
-            # the following is the original with candidate selection
-            # candidate_action = replenishment_data[1]
-            # quantity = replenishment.GP_evolve_S(state, self.referenceRule)
-            # index = 0
-            # min_dis = np.Infinity
-            # for i in range(len(candidate_action)):
-            #     dis = np.abs(quantity - candidate_action[i])
-            #     if dis < min_dis:
-            #         index = i
-            #         min_dis = dis
-            # self.decisions.append(candidate_action[index])
 
     def setReferenceRule(self, rule):
         self.referenceRule = rule
@@ -46,17 +50,7 @@ class ReplenishmentPhenoCharacterisation(PhenoCharacterisation.PhenoCharacterisa
             for state_retailer in state:
                 quantity = round(replenishment.GP_evolve_S(state_retailer, rule),2)
                 charlist.append(quantity)
-            # the following is the original with candidate selection
-            # candidate_action = replenishment_data[1]
-            # quantity = replenishment.GP_evolve_S(state, rule)
-            # index = 0
-            # min_dis = np.Infinity
-            # for i in range(len(candidate_action)):
-            #     dis = np.abs(quantity - candidate_action[i])
-            #     if dis < min_dis:
-            #         index = i
-            #         min_dis = dis
-            # charlist.append(candidate_action[index])
+
 
         return charlist
 

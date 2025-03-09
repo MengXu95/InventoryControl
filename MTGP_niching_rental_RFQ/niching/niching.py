@@ -105,7 +105,8 @@ class niching_clear:
             self.phenotypic_characristics.append(rentalPhenoCharacterisation)
             RFQ_predictDecisionSituation = RFQPredictDecisionSituation.RFQPredictDecisionSituation(self.decisionSituations[2])
             RFQ_predictPhenoCharacterisation = RFQPredictPhenoCharacterisation.RFQPredictPhenoCharacterisation(individual[2],
-                                                                                                  RFQ_predictDecisionSituation)
+                                                                                                  RFQ_predictDecisionSituation,
+                                                                                                  parameters['support_level'])
             self.phenotypic_characristics.append(RFQ_predictPhenoCharacterisation)
         else:
             # this is for also consider transshipment
