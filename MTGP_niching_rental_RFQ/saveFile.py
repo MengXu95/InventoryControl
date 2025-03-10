@@ -99,6 +99,19 @@ def save_each_gen_best_individual_meng(randomSeeds, dataSetName, best_ind_all_ge
                 routing_list.append(routing[i].name)
             individual.append(routing_list)
 
+        if len(best_ind) == 3:
+            routing = best_ind[1]
+            routing_list = []
+            for i in range(len(routing)):
+                routing_list.append(routing[i].name)
+            individual.append(routing_list)
+
+            RFQ_predict = best_ind[2]
+            RFQ_predict_list = []
+            for i in range(len(RFQ_predict)):
+                RFQ_predict_list.append(RFQ_predict[i].name)
+            individual.append(RFQ_predict_list)
+
         individual_dict.__setitem__(gen, individual)
 
     # Construct the directory and file path

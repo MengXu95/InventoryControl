@@ -42,6 +42,13 @@ class RFQPredictPhenoCharacterisation(PhenoCharacterisation.PhenoCharacterisatio
             state = RFQ_Predict_data[0]
             for state_retailer in state:
                 quantity = round(RFQPredict.GP_evolve_RFQ_predict(state_retailer, rule),2)
+
+                upbound_support_quantity = self.support_level * 2
+
+                if quantity <= 0 or quantity > upbound_support_quantity:
+                    quantity = logistic_util.logistic_scale_and_shift(quantity, 0,
+                                                                      upbound_support_quantity)
+
                 charlist.append(quantity)
             # the following is the original with candidate selection
             # candidate_action = replenishment_data[1]

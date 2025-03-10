@@ -998,6 +998,8 @@ class InvOptEnv:
         # run simulation
         state = self.reset()
         current_ep_reward = 0
+        current_ep_all_cost = [0., 0., 0., 0., 0.]
+        current_ep_all_cost = np.array(current_ep_all_cost)
 
         max_ep_len = self.epi_len  # max timesteps in one episode
         time_step = 0
@@ -1007,9 +1009,13 @@ class InvOptEnv:
 
             if len(individual) == 1:
                 replenishment_policy = individual[0]
-            else:
+            elif len(individual) == 2:
                 replenishment_policy = individual[0]
                 rental_policy = individual[1]
+            elif len(individual) == 3:
+                replenishment_policy = individual[0]
+                rental_policy = individual[1]
+                RFQ_predict_policy = individual[2]
 
             # ------- strategy 3 ---------------------
             # the action space of this one is the same as jinsheng
@@ -1020,21 +1026,46 @@ class InvOptEnv:
             transshipment_state = state[1]
             rental_state = state[
                 2]  # for each choice in rental_state: [current_rental, rental_price, rental_capacity, rental_month, total_rental_requirement]
+            RFQ_predict_state = state[3]
             total_rental_requirement = 0
             for each_transshipment_state in transshipment_state:
                 transshipment_quantity = 0
                 # transshipment_quantity = round(GP_evolve_R(each_transshipment_state, transshipment_policy), 2)
                 action_modified.append(transshipment_quantity)
+
             for each_replenishment_state in replenishment_state:
                 replenishment_quantity = round(GP_pair_S_test(each_replenishment_state, replenishment_policy), 2)
-                if replenishment_quantity < 0:
-                    replenishment_quantity = 0
-                # add by xu meng to consider rental
+                # print("replenishment_quantity: ", replenishment_quantity)
+
+                # Strategy 2 (sigmoid): constrain the replenishment quantity to [0, production_capacity]
+                # Strategy 2: performs better than Strategy 1 based on one run with popsize 200
                 production_capacity = each_replenishment_state[4]
+                capacity = each_replenishment_state[3]
+                upbound_replenishment_quantity = capacity * 3
+                if replenishment_quantity > upbound_replenishment_quantity or replenishment_quantity < 0:
+                    replenishment_quantity = logistic_util.logistic_scale_and_shift(replenishment_quantity, 0,
+                                                                                    upbound_replenishment_quantity)
+                # print("replenishment_quantity after sigmoid: ", replenishment_quantity)
                 if replenishment_quantity > production_capacity:
                     require_quantity = replenishment_quantity - production_capacity
                     total_rental_requirement = total_rental_requirement + require_quantity
                     replenishment_quantity = production_capacity
+
+                # Strategy 1 (original): constrain the replenishment quantity to [0, production_capacity]
+                # production_capacity = each_replenishment_state[4]
+                # capacity = each_replenishment_state[3]
+                # upbound_replenishment_quantity = capacity * 3
+                # if replenishment_quantity > upbound_replenishment_quantity:
+                #     replenishment_quantity = upbound_replenishment_quantity
+                # if replenishment_quantity < 0:
+                #     replenishment_quantity = 0
+                # # add by xu meng to consider rental
+                # if replenishment_quantity > production_capacity:
+                #     require_quantity = replenishment_quantity - production_capacity
+                #     total_rental_requirement = total_rental_requirement + require_quantity
+                #     replenishment_quantity = production_capacity
+
+                # total_rental_requirement = 0 # for testing the effectiveness of sigmoid
                 action_modified.append(replenishment_quantity)
 
             if len(individual) == 1:
@@ -1043,10 +1074,9 @@ class InvOptEnv:
                 # print("One tree and do not consider rental!")
             else:
                 rental_decisions = []
-                onlyRentalOne = True
+                onlyRentalOne = False
                 if onlyRentalOne:
                     # Strategy version 1.0: only rental one decision each time, for making rental decision and delete not enough rental choice, by xu meng 2024.12.2
-
                     current_rental = 0
                     if len(rental_state) > 0:
                         current_rental = rental_state[0][0]
@@ -1069,7 +1099,7 @@ class InvOptEnv:
                     all_rental_priority = []
                     for each_rental_state in rental_state:
                         each_rental_state.append(total_rental_requirement)
-                        rental_priority = GP_evolve_rental(each_rental_state, rental_policy)
+                        rental_priority = GP_pair_rental_test(each_rental_state, rental_policy)
                         all_rental_priority.append(rental_priority)
 
                     current_rental = 0
@@ -1087,17 +1117,40 @@ class InvOptEnv:
                         for each_rental_decision in rental_decisions:
                             rental_decision_capacity = self.rental_choice[each_rental_decision][1]
                             new_current_rental = new_current_rental + rental_decision_capacity
-
                     # if len(rental_decisions) > 1:
                     #     print("rental_decisions: ", rental_decisions)
-            rental_decisions = []
             action_modified.append(rental_decisions)
+
+            RFQ_predict_decisions = []
+            upbound_support_quantity = self.support_level * 2
+
+            # Strategy 2: performs better than Strategy 1 based on one run with popsize 200
+            for each_RFQ_predict_state in RFQ_predict_state:
+                RFQ_predict_quantity = round(GP_pair_RFQ_predict_test(each_RFQ_predict_state, RFQ_predict_policy), 2)
+                # print("RFQ_predict_quantity: ", RFQ_predict_quantity)
+                if RFQ_predict_quantity <= 0 or RFQ_predict_quantity > upbound_support_quantity:
+                    RFQ_predict_quantity = logistic_util.logistic_scale_and_shift(RFQ_predict_quantity, 0,
+                                                                                  upbound_support_quantity)
+                RFQ_predict_decisions.append(RFQ_predict_quantity)
+
+                # Strategy 1
+                # for each_RFQ_predict_state in RFQ_predict_state:
+                #     RFQ_predict_quantity = round(GP_evolve_RFQ_predict(each_RFQ_predict_state, RFQ_predict_policy), 2)
+                #     # print("RFQ_predict_quantity: ", RFQ_predict_quantity)
+                #     if RFQ_predict_quantity <= 0:
+                #         RFQ_predict_quantity = 0
+                #     if RFQ_predict_quantity > upbound_support_quantity:
+                #         RFQ_predict_quantity = upbound_support_quantity
+                #     RFQ_predict_decisions.append(RFQ_predict_quantity)
+
+            action_modified.append(RFQ_predict_decisions)
+
             # ------- strategy 3 ---------------------
             if states is not None:
                 states.append(state)
 
             # the original
-            state, reward, done, _ = self.step_value(action_modified)
+            state, reward, done, all_cost = self.step_value(action_modified)
             # todo: to stop bad run and save training time by mengxu 2024.8.27
             # state, reward, done = None, np.nan, False
             # result = self.run_with_timeout(self.step_value, 0.01, action_modified)
@@ -1114,11 +1167,16 @@ class InvOptEnv:
 
             time_step += 1
             current_ep_reward += reward
+            all_cost = np.array(all_cost)
+            current_ep_all_cost += all_cost
 
             # break; if the episode is over
             if done:
                 break
 
-        fitness = -current_ep_reward/max_ep_len
-        return fitness
+        fitness = -current_ep_reward / max_ep_len
+        # print("sum_outbound: ", round(sum_outbound,2), "   , fitness: ", round(fitness,2))
+        all_cost_final = np.array(current_ep_all_cost)  # Convert list to NumPy array
+        all_cost_fit = all_cost_final / max_ep_len
+        return fitness, all_cost_fit
 

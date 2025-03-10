@@ -139,8 +139,8 @@ def GPFC_main(dataset_name, seed, randomSeed_ngen):
     return min_fitness,best, best_ind_all_gen, min_all_cost
 
 
-POP_SIZE = 200
-NGEN = 50
+POP_SIZE = 20
+NGEN = 5
 CXPB = 0.8
 MUTPB = 0.15
 REPPB = 0.05
