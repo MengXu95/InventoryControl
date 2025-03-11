@@ -3,13 +3,15 @@ import CCGP_niching.GPFC as CCGPmain_niching
 import MTGP_niching.GPFC as GPmain_niching
 import MTGP_niching_rental.GPFC as GPmain_niching_rental
 import MTGP_niching_rental_RFQ.GPFC as GPmain_niching_rental_RFQ
+import MTGP_niching_rental_RFQ.testRuleMTGP as testRuleMTGP_rental_RFQ
+import MTGP_niching_rental_RFQ_price.GPFC as GPmain_niching_rental_RFQ_price
+import MTGP_niching_rental_RFQ_price.testRuleMTGP as testRuleMTGP_rental_RFQ_price
 import CCGP_niching_rental.GPFC as CCGPmain_niching_rental
 import MTGP_niching_rental_original.GPFC as GPmain_niching_rental_original
 import CCGP_niching_rental_original.GPFC as CCGPmain_niching_rental_original
 import PSO_rental.PSO_main as PSO_main_rental
 import DRL.DRL_main as DRL_main
 import MTGP_niching.testRuleMTGP as testRuleMTGP
-import MTGP_niching_rental_RFQ.testRuleMTGP as testRuleMTGP_rental_RFQ
 import CCGP_niching.testRuleCCGP as testRuleCCGP
 import DRL.testRuleDRL as testRuleDRL
 import sSPolicy.trainRulesSPolicy as trainRulesSPolicy
@@ -46,6 +48,12 @@ if __name__ == '__main__':
     elif algo == 'testRuleMTGP_rental_RFQ':
         print('----------testRuleMTGP_rental_RFQ----------')
         testRuleMTGP_rental_RFQ.main(dataset_name, seed)
+    elif algo == 'MTGP_niching_rental_RFQ_price':
+        print('----------MTGP_niching_rental_RFQ_price----------')
+        GPmain_niching_rental_RFQ_price.main(dataset_name, seed)
+    elif algo == 'testRuleMTGP_rental_RFQ_price':
+        print('----------testRuleMTGP_rental_RFQ_price----------')
+        testRuleMTGP_rental_RFQ_price.main(dataset_name, seed)
     elif algo == 'MTGP_niching_rental_2':
         for i in range(3):
             print('----------MTGP_niching_rental_'+str(i)+'_----------')
