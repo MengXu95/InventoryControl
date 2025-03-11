@@ -67,7 +67,7 @@ def main(dataset_name, run):
         'Run': [run for x in range(len(test_fitness))],
         'Generation': [x for x in range(len(test_fitness))],
         'RepRuleSize': [x for x in replenishment_rule_size],
-        'RenRuleSize': [x for x in rental_rule_size],
+        'RentRuleSize': [x for x in rental_rule_size],
         'RFQRuleSize': [x for x in RFQ_predict_rule_size],
         'TestFitness': [x for x in test_fitness],
         'PCDiversity': [x for x in PC_diversity],
