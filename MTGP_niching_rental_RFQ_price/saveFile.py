@@ -148,6 +148,29 @@ def save_individual_to_txt(randomSeeds, dataSetName,individuals): # save individ
 
     return
 
+def save_best_individual_to_txt_for_DemoTest(bestInd): # save individual as txt by mengxu
+    # Construct the directory and file path
+    directory = f'C:/Users/I3Nexus/Desktop/InventoryPolicy/'
+    file_path_replenishment_policy = os.path.join(directory, f'replenishment_policy.txt')
+    file_path_rental_policy = os.path.join(directory, f'rental_policy.txt')
+    file_path_RFQ_predict_policy = os.path.join(directory, f'RFQ_predict_policy.txt')
+
+    # Create the directory if it does not exist
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    # Write data to the file
+    with open(file_path_replenishment_policy, 'w') as file:
+        file.write(str(bestInd[0]) + '\n')
+
+    with open(file_path_rental_policy, 'w') as file:
+        file.write(str(bestInd[1]) + '\n')
+
+    with open(file_path_RFQ_predict_policy, 'w') as file:
+        file.write(str(bestInd[2]) + '\n')
+
+    return
+
 def clear_individual_each_gen_to_txt(randomSeeds, dataSetName): # save individual as txt by mengxu
     # Construct the directory and file path
     directory = f'./MTGP_niching_rental_RFQ_price/train/scenario_{dataSetName}/'

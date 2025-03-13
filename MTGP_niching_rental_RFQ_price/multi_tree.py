@@ -45,14 +45,15 @@ def init_primitives_replenishment(pset):
 
     pset.addTerminal(str('INL'))  # inventory level
     pset.addTerminal(str('PHC'))  # per unit holding cost
-    pset.addTerminal(str('PLSC'))  # per unit lost sales cost
+    pset.addTerminal(str('PLSC')) # per unit lost sales cost
     pset.addTerminal(str('INC'))  # inventory capacities
     pset.addTerminal(str('FOC'))  # Fixed order costs per order
+    pset.addTerminal(str('PUOC')) # Per unit order cost
     pset.addTerminal(str('PIP'))  # pipeline: the previous quantity we ordered and arrived at this time
     pset.addTerminal(str('FC1'))  # forcast 1 for example L = 2
     pset.addTerminal(str('FC2'))  # forcast 2 for example L = 2
-    pset.addTerminal(str('PTC'))  # per unit cost transshipment
-    pset.addTerminal(str('FTC'))  # fixed cost per transshipment
+    # pset.addTerminal(str('PTC'))  # per unit cost transshipment
+    # pset.addTerminal(str('FTC'))  # fixed cost per transshipment
 
 def init_primitives_transshipment(pset):
     # add function
@@ -77,7 +78,7 @@ def init_primitives_transshipment(pset):
     # site 2 related
     pset.addTerminal(str('INL2'))  # inventory level
     pset.addTerminal(str('PHC2'))  # per unit holding cost
-    pset.addTerminal(str('PLSC2'))  # per unit lost sales cost
+    pset.addTerminal(str('PLSC2')) # per unit lost sales cost
     pset.addTerminal(str('INC2'))  # inventory capacities
     pset.addTerminal(str('FOC2'))  # Fixed order costs per order
     pset.addTerminal(str('PIP2'))  # pipeline: the previous quantity we ordered and arrived at this time
@@ -99,11 +100,11 @@ def init_primitives_rental(pset):
     pset.addPrimitive(protected_sqrt, 1)
     pset.addPrimitive(np.square, 1)
 
-    pset.addTerminal(str('CRENT'))  # total current rental
-    pset.addTerminal(str('RP'))  # rental price per rental choice
+    pset.addTerminal(str('CRENT')) # total current rental
+    pset.addTerminal(str('RP'))    # rental price per rental choice
     pset.addTerminal(str('RCAP'))  # rental capacity per rental choice
     pset.addTerminal(str('RDUR'))  # rental duration per rental choice
-    pset.addTerminal(str('TREQ'))  # total inventory requirement from all sites
+    pset.addTerminal(str('TREQ'))  # total inventory requirement
 
 
 def init_primitives_RFQ_predict(pset):
@@ -118,7 +119,7 @@ def init_primitives_RFQ_predict(pset):
     pset.addPrimitive(np.square, 1)
 
     pset.addTerminal(str('RFQ'))  # EFQ demand
-    pset.addTerminal(str('TUD'))  # inventory level of our company
+    pset.addTerminal(str('TUD'))  # Time until deadline
 
 
 def lf(x): # add by mengxu 2022.11.08

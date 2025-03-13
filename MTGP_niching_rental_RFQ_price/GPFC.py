@@ -138,7 +138,7 @@ def GPFC_main(dataset_name, seed, randomSeed_ngen):
     return min_fitness,best, best_ind_all_gen, min_all_cost
 
 
-POP_SIZE = 20
+POP_SIZE = 200
 NGEN = 5
 CXPB = 0.8
 MUTPB = 0.15
@@ -158,14 +158,10 @@ USE_BroodRecombination = True
 # create the shop floor instance
 ins_each_gen = 1 # added by mengxu followed the advice of Meng 2022.11.01
 def main(dataset_name, seed):
-# if __name__ == "__main__":
-#     dataset_name = str(sys.argv[1])
-#     seed = int(sys.argv[2])
     random.seed(int(seed))
     np.random.seed(int(seed))
     randomSeed_ngen = []
     for i in range((NGEN + 1)):
-    # for i in range((ngen+1)*ins_each_gen): # the *ins_each_gen is added by mengxu followed the advice of Meng 2022.11.01
         randomSeed_ngen.append(np.random.randint(2000000000))
     saveFile.clear_individual_each_gen_to_txt(seed, dataset_name)
     start = time.time()
@@ -176,6 +172,7 @@ def main(dataset_name, seed):
     saveFile.saveMinFitness(seed, dataset_name, min_fitness)
     saveFile.saveMinAllCost(seed, dataset_name, min_all_cost)
     saveFile.saveRunningTime(seed, dataset_name, running_time)
+    saveFile.save_best_individual_to_txt_for_DemoTest(best_ind_all_gen[-1])
     print("min_all_cost: ")
     print(min_all_cost)
     print(min_fitness)

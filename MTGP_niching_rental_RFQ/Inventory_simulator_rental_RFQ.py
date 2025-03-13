@@ -805,15 +805,6 @@ class InvOptEnv:
                 state_rental.append(each_rental_state)
             self.state.append(state_rental)
 
-            state_RFQ_predict = []
-            for retailer_index in range(len(self.retailers)):
-                retailer = self.retailers[retailer_index]
-                state_RFQ_predict_retailer = np.array(
-                    [self.urgent_RFQ_demand_records[retailer_index][self.current_period - 2],
-                     retailer.inv_level])  # only suitable for LT = 2
-                state_RFQ_predict.append(state_RFQ_predict_retailer)
-            self.state.append(state_RFQ_predict)
-
             return self.state, reward, terminate, all_cost
 
 

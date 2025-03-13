@@ -3,53 +3,458 @@ Best individuals from each gen:
 Gen: 0
 Individual:
 Tree 0:
-maximum(square(protected_sqrt('PTC')), 'FTC')
+add(subtract('PTC', 'INL'), protected_div('FC2', 'FOC'))
 Tree 1:
-add('RP', 'RDUR')
+protected_sqrt(protected_div('RCAP', protected_div('CRENT', 'RP')))
 Tree 2:
-protected_div(subtract(protected_sqrt(subtract('RFQ', 'TUD')), maximum(minimum('TUD', 'TUD'), protected_div('TUD', 'TUD'))), maximum(square(maximum('TUD', 'TUD')), minimum(minimum('TUD', 'TUD'), square('TUD'))))
+protected_div('RFQ', 'TUD')
 
 Gen: 1
 Individual:
 Tree 0:
-maximum(square(protected_sqrt('PTC')), 'FTC')
+add(subtract('PTC', 'INL'), protected_div('FC2', 'FOC'))
 Tree 1:
-add('RP', 'RDUR')
+protected_sqrt(protected_div('RCAP', protected_div('CRENT', 'RP')))
 Tree 2:
-protected_div(subtract(protected_sqrt(subtract('RFQ', 'TUD')), maximum(minimum('TUD', 'TUD'), protected_div('TUD', 'TUD'))), maximum(square(maximum('TUD', 'TUD')), minimum(minimum('TUD', 'TUD'), square('TUD'))))
+protected_div('RFQ', 'TUD')
 
 Gen: 2
 Individual:
 Tree 0:
-maximum(square(protected_sqrt('PTC')), 'FTC')
+maximum('PTC', 'PIP')
 Tree 1:
-add('RP', 'RDUR')
+maximum(square(maximum(minimum(protected_sqrt('RDUR'), protected_sqrt('RCAP')), maximum(multiply('RP', 'RDUR'), protected_div('CRENT', 'RP')))), protected_div(minimum(minimum(add('RP', 'RCAP'), subtract('RDUR', 'RDUR')), protected_div(subtract('RP', 'CRENT'), maximum('RCAP', 'CRENT'))), protected_sqrt(maximum(add('RP', 'CRENT'), add('RP', 'RDUR')))))
 Tree 2:
-protected_div(subtract(protected_sqrt(subtract('RFQ', 'TUD')), maximum(minimum('TUD', 'TUD'), protected_div('TUD', 'TUD'))), maximum(square(maximum('TUD', 'TUD')), minimum(minimum('TUD', 'TUD'), 'TUD')))
+maximum(maximum('TUD', 'TUD'), 'RFQ')
 
 Gen: 3
 Individual:
 Tree 0:
-maximum(square(protected_sqrt('PTC')), 'FTC')
+maximum('PTC', minimum(maximum(add('FOC', 'PIP'), multiply('PIP', 'INC')), square(protected_sqrt('PHC'))))
 Tree 1:
-add('RP', 'RDUR')
+maximum(square(maximum(minimum(protected_sqrt('RDUR'), protected_sqrt('RCAP')), maximum(multiply('RP', 'RDUR'), protected_div('CRENT', 'RP')))), protected_div(minimum(minimum(add('RP', 'RCAP'), subtract('RDUR', 'RDUR')), protected_div(subtract('RP', 'CRENT'), maximum('RCAP', 'CRENT'))), protected_sqrt(maximum(add('RP', 'CRENT'), add('RP', 'RDUR')))))
 Tree 2:
-protected_div(subtract(protected_sqrt(subtract('RFQ', 'TUD')), maximum(minimum('TUD', 'TUD'), protected_div('TUD', 'TUD'))), maximum(square(maximum('TUD', 'TUD')), minimum(minimum('TUD', 'TUD'), square('TUD'))))
+maximum(maximum('TUD', 'TUD'), 'RFQ')
 
 Gen: 4
 Individual:
 Tree 0:
-maximum(square(protected_sqrt('PTC')), 'FTC')
+maximum('PTC', minimum(protected_div('FC1', 'PLSC'), add('PHC', 'FTC')))
 Tree 1:
-add('RP', 'RDUR')
+maximum(square(maximum(minimum(protected_sqrt('RDUR'), protected_sqrt('RCAP')), maximum(multiply('RP', 'RDUR'), protected_div('CRENT', 'RP')))), protected_div(minimum(minimum(add('RP', 'RCAP'), subtract('RDUR', 'RDUR')), protected_div(subtract('RP', 'CRENT'), maximum('RCAP', 'CRENT'))), protected_sqrt(maximum(add('RP', 'CRENT'), add('RP', 'RDUR')))))
 Tree 2:
-protected_div(subtract(protected_sqrt(subtract('RFQ', 'TUD')), maximum(minimum('TUD', 'TUD'), protected_div('TUD', 'TUD'))), maximum(square(maximum('TUD', 'TUD')), minimum(minimum('TUD', 'TUD'), 'TUD')))
+maximum(maximum(add('RFQ', 'TUD'), 'TUD'), multiply('TUD', protected_div('RFQ', 'RFQ')))
 
 Gen: 5
 Individual:
 Tree 0:
-maximum(square(protected_sqrt('PTC')), 'FTC')
+maximum('PTC', minimum(protected_div('FC1', 'PLSC'), add('PHC', 'FTC')))
 Tree 1:
-add('RP', 'RDUR')
+maximum(square(maximum(minimum(protected_sqrt('RDUR'), protected_sqrt('RCAP')), maximum(multiply('RP', 'RDUR'), protected_div('CRENT', 'RP')))), protected_div(minimum(minimum(add('RP', 'RCAP'), subtract('RDUR', 'RDUR')), protected_div(subtract('RP', 'CRENT'), maximum('RCAP', 'CRENT'))), protected_sqrt(maximum(add('RP', 'CRENT'), add('RP', 'RDUR')))))
 Tree 2:
-protected_div(subtract(protected_sqrt(subtract('RFQ', 'TUD')), maximum(minimum('TUD', 'TUD'), protected_div('TUD', 'TUD'))), maximum(square(maximum('TUD', 'TUD')), minimum(minimum('TUD', 'TUD'), 'TUD')))
+maximum(maximum(add('RFQ', 'TUD'), 'TUD'), multiply('TUD', protected_div('RFQ', 'RFQ')))
+
+Gen: 6
+Individual:
+Tree 0:
+maximum('PTC', minimum(protected_div('FC1', 'PLSC'), add('PHC', 'FTC')))
+Tree 1:
+maximum(square(maximum(minimum(protected_sqrt('RDUR'), protected_sqrt('RCAP')), maximum(multiply('RP', 'RDUR'), protected_div('CRENT', 'RP')))), protected_div(minimum(minimum(add('RP', 'RCAP'), subtract('RDUR', 'RDUR')), protected_div(subtract('RP', 'CRENT'), maximum('RCAP', 'CRENT'))), protected_sqrt(maximum(add('RP', 'CRENT'), add('RP', 'RDUR')))))
+Tree 2:
+maximum(maximum(add('RFQ', 'TUD'), 'TUD'), multiply('TUD', protected_div('RFQ', 'RFQ')))
+
+Gen: 7
+Individual:
+Tree 0:
+maximum('PTC', minimum(protected_div('FC1', 'PLSC'), add('PHC', 'FTC')))
+Tree 1:
+maximum(square(maximum(minimum(protected_sqrt('RDUR'), protected_sqrt('RCAP')), maximum(multiply('RP', 'RDUR'), protected_div('CRENT', 'RP')))), protected_div(minimum(minimum(add('RP', 'RCAP'), subtract('RDUR', 'RDUR')), protected_div(subtract('RP', 'CRENT'), maximum('RCAP', 'CRENT'))), protected_sqrt(maximum(add('RP', 'CRENT'), add('RP', 'RDUR')))))
+Tree 2:
+maximum(maximum(add('RFQ', 'TUD'), 'TUD'), multiply('TUD', protected_div('RFQ', 'RFQ')))
+
+Gen: 8
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract('FOC', add(subtract('FOC', 'FTC'), 'PTC'))))
+Tree 1:
+maximum('RCAP', 'CRENT')
+Tree 2:
+add(maximum('TUD', 'RFQ'), protected_sqrt(maximum(square(maximum('TUD', 'TUD')), minimum(minimum('TUD', 'TUD'), minimum(minimum('TUD', 'TUD'), 'RFQ')))))
+
+Gen: 9
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract('FOC', add(subtract('FOC', 'FTC'), 'PTC'))))
+Tree 1:
+maximum('RCAP', 'CRENT')
+Tree 2:
+add(maximum('TUD', 'RFQ'), protected_sqrt(maximum(square(maximum('TUD', 'TUD')), minimum(minimum('TUD', 'TUD'), minimum(minimum('TUD', 'TUD'), 'RFQ')))))
+
+Gen: 10
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract('FOC', add('PTC', square(maximum(minimum('FC2', 'PLSC'), add('PHC', 'PTC')))))))
+Tree 1:
+maximum('RCAP', 'CRENT')
+Tree 2:
+add(maximum('TUD', 'RFQ'), 'RFQ')
+
+Gen: 11
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract('FOC', add('PTC', subtract(square('FTC'), square('PHC'))))))
+Tree 1:
+maximum('RCAP', 'CRENT')
+Tree 2:
+add(maximum('TUD', 'RFQ'), maximum(add('RFQ', 'TUD'), 'TUD'))
+
+Gen: 12
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract('FOC', add('PTC', subtract(square(add('FC2', 'INL')), square('PHC'))))))
+Tree 1:
+maximum('RCAP', 'CRENT')
+Tree 2:
+add(maximum('TUD', 'RFQ'), maximum(add('RFQ', 'TUD'), 'TUD'))
+
+Gen: 13
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), minimum(protected_div('INC', add('PTC', 'PLSC')), protected_sqrt('FC2'))))
+Tree 1:
+maximum(minimum('RCAP', 'CRENT'), protected_div('TREQ', 'CRENT'))
+Tree 2:
+add(maximum('TUD', 'RFQ'), add('RFQ', 'TUD'))
+
+Gen: 14
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract('FOC', add('PTC', subtract(square(add('FC2', 'INL')), square('PTC'))))))
+Tree 1:
+maximum('RCAP', 'CRENT')
+Tree 2:
+add(maximum('TUD', 'RFQ'), maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD'))
+
+Gen: 15
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract(add('PHC', 'PIP'), add('PTC', subtract(square('FTC'), square('PHC'))))))
+Tree 1:
+maximum('RCAP', 'RCAP')
+Tree 2:
+add(maximum('TUD', 'RFQ'), maximum(add('RFQ', maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD')), 'TUD'))
+
+Gen: 16
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract('FOC', square(maximum(maximum('FTC', 'FC1'), square('INL'))))))
+Tree 1:
+maximum(minimum('RCAP', 'CRENT'), protected_div('TREQ', 'CRENT'))
+Tree 2:
+add(maximum('TUD', 'RFQ'), add(add('RFQ', 'TUD'), 'TUD'))
+
+Gen: 17
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract('FOC', add('PTC', subtract(square(add('FC2', 'INL')), square('PTC'))))))
+Tree 1:
+maximum('RCAP', 'CRENT')
+Tree 2:
+add(maximum('TUD', 'RFQ'), maximum(add(add('RFQ', 'TUD'), 'TUD'), 'TUD'))
+
+Gen: 18
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract(add('PHC', 'PIP'), add('PTC', subtract(square('FTC'), square('PHC'))))))
+Tree 1:
+maximum('RCAP', 'RCAP')
+Tree 2:
+add(maximum('TUD', 'TUD'), maximum(add(add('RFQ', 'TUD'), maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD')), 'TUD'))
+
+Gen: 19
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract(add(subtract(square('INL'), square('PTC')), 'PIP'), add('PTC', subtract(square('FTC'), square('PHC'))))))
+Tree 1:
+maximum('RCAP', 'RCAP')
+Tree 2:
+add(maximum('TUD', 'TUD'), maximum(add(add('RFQ', 'TUD'), maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD')), 'TUD'))
+
+Gen: 20
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract('FOC', square(maximum(maximum('FTC', 'FC1'), square('INL'))))))
+Tree 1:
+minimum(protected_div('RCAP', 'TREQ'), protected_sqrt('CRENT'))
+Tree 2:
+add(maximum(maximum(add('RFQ', maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD')), 'TUD'), 'RFQ'), add(add('RFQ', 'TUD'), 'TUD'))
+
+Gen: 21
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract(add(subtract(square('INL'), 'PTC'), 'PIP'), add('PTC', subtract(square('FTC'), square('PHC'))))))
+Tree 1:
+maximum('RCAP', 'RCAP')
+Tree 2:
+add(maximum('TUD', 'TUD'), maximum(add(add('RFQ', 'TUD'), maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD')), 'TUD'))
+
+Gen: 22
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract(add('PHC', 'PIP'), add('PTC', subtract(square('PHC'), square('PTC'))))))
+Tree 1:
+maximum('RCAP', 'RCAP')
+Tree 2:
+add(maximum('TUD', 'TUD'), maximum(add(maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD'), maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD')), 'TUD'))
+
+Gen: 23
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract(add('PTC', subtract('PTC', 'PHC')), 'PTC')))
+Tree 1:
+maximum('RCAP', 'RCAP')
+Tree 2:
+add(maximum('TUD', 'TUD'), maximum(add(maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD'), maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD')), 'TUD'))
+
+Gen: 24
+Individual:
+Tree 0:
+protected_sqrt(maximum('PTC', subtract(add('PHC', square('PTC')), 'PTC')))
+Tree 1:
+maximum(protected_sqrt(protected_sqrt('RCAP')), 'RCAP')
+Tree 2:
+add(maximum('TUD', 'TUD'), maximum(add(add('RFQ', 'TUD'), maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD')), 'TUD'))
+
+Gen: 25
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), square('PHC')))
+Tree 1:
+maximum(multiply(minimum(protected_div(subtract(protected_sqrt('RP'), minimum('RDUR', 'TREQ')), square(maximum('CRENT', 'TREQ'))), minimum(protected_div(add('CRENT', 'CRENT'), minimum('RP', 'RCAP')), protected_sqrt(protected_sqrt('RDUR')))), 'RCAP'), 'CRENT')
+Tree 2:
+add(maximum('TUD', add(add('RFQ', 'TUD'), maximum('TUD', 'RFQ'))), maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD'))
+
+Gen: 26
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract(add('PIP', subtract('PTC', 'PHC')), 'PTC')))
+Tree 1:
+maximum('RCAP', 'RCAP')
+Tree 2:
+add(maximum('TUD', 'TUD'), maximum(add(maximum(add(maximum('TUD', 'RFQ'), add(maximum('TUD', 'RFQ'), 'TUD')), 'TUD'), maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD')), 'TUD'))
+
+Gen: 27
+Individual:
+Tree 0:
+protected_sqrt(subtract(add(square('PTC'), 'PHC'), add(minimum('PTC', square('PTC')), 'FTC')))
+Tree 1:
+maximum('RCAP', 'CRENT')
+Tree 2:
+add(maximum('TUD', 'RFQ'), maximum(add(add(add('RFQ', 'TUD'), 'TUD'), 'TUD'), 'TUD'))
+
+Gen: 28
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract(add(square('PTC'), subtract('PIP', square('PHC'))), 'PHC')))
+Tree 1:
+maximum('RCAP', 'TREQ')
+Tree 2:
+add(maximum(protected_sqrt(maximum(square(maximum('TUD', add('RFQ', 'TUD'))), minimum(minimum('TUD', 'TUD'), minimum(minimum('TUD', 'TUD'), 'RFQ')))), 'RFQ'), maximum(add(maximum(maximum(add('TUD', 'TUD'), 'TUD'), 'RFQ'), 'TUD'), 'TUD'))
+
+Gen: 29
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract(add(subtract(square('INL'), subtract(add('PHC', 'PIP'), square('PTC'))), 'PIP'), add('PTC', subtract(square(square('PTC')), add('PTC', subtract(square('PHC'), square('PTC'))))))))
+Tree 1:
+maximum('RDUR', 'RCAP')
+Tree 2:
+add(maximum('TUD', 'TUD'), maximum(add(add('RFQ', 'TUD'), maximum(add(maximum(add('TUD', 'TUD'), 'RFQ'), 'RFQ'), 'TUD')), 'TUD'))
+
+Gen: 30
+Individual:
+Tree 0:
+protected_sqrt(maximum('PTC', subtract(add(subtract(square('PTC'), multiply(protected_sqrt(square('PHC')), protected_sqrt('FC1'))), 'PIP'), 'PTC')))
+Tree 1:
+maximum('RCAP', 'RCAP')
+Tree 2:
+add(maximum('TUD', 'TUD'), maximum(add(add('RFQ', 'TUD'), maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD')), 'TUD'))
+
+Gen: 31
+Individual:
+Tree 0:
+protected_sqrt(maximum('PTC', subtract(add(subtract(square('PTC'), multiply(protected_sqrt(square('PHC')), protected_sqrt('FC1'))), 'PIP'), 'PTC')))
+Tree 1:
+maximum('RCAP', 'RCAP')
+Tree 2:
+add(maximum('TUD', 'TUD'), maximum(add(add('RFQ', 'TUD'), maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD')), 'TUD'))
+
+Gen: 32
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract(add('PHC', 'PIP'), add(protected_sqrt(protected_sqrt(add('FOC', 'PHC'))), 'PTC'))))
+Tree 1:
+maximum('RCAP', subtract('CRENT', 'CRENT'))
+Tree 2:
+add(maximum('TUD', 'TUD'), maximum(add(maximum(add(maximum('TUD', maximum(add('TUD', 'TUD'), 'RFQ')), 'TUD'), 'TUD'), maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD')), protected_div(multiply('RFQ', 'TUD'), subtract('TUD', 'RFQ'))))
+
+Gen: 33
+Individual:
+Tree 0:
+protected_sqrt(maximum('PTC', subtract(add(subtract(square('PTC'), multiply(protected_sqrt(square('PHC')), protected_sqrt('FC1'))), 'PIP'), 'PTC')))
+Tree 1:
+maximum('RCAP', 'RCAP')
+Tree 2:
+add(maximum('TUD', 'TUD'), maximum(add(add('RFQ', 'TUD'), maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD')), 'TUD'))
+
+Gen: 34
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract(add('PHC', 'PTC'), subtract(add('PTC', 'PIP'), add(square('PTC'), 'PTC')))))
+Tree 1:
+maximum(subtract(protected_sqrt('RP'), minimum('RDUR', 'TREQ')), subtract('RCAP', 'RCAP'))
+Tree 2:
+add(maximum('TUD', 'TUD'), maximum(add(maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD'), maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD')), 'TUD'))
+
+Gen: 35
+Individual:
+Tree 0:
+protected_sqrt(subtract(add(square('PTC'), 'PHC'), 'FC1'))
+Tree 1:
+maximum('RCAP', subtract(protected_div('RDUR', 'RDUR'), 'RCAP'))
+Tree 2:
+add(maximum(maximum(add('TUD', 'TUD'), 'RFQ'), 'RFQ'), maximum(add(add(add('RFQ', 'TUD'), maximum('TUD', 'TUD')), 'TUD'), 'TUD'))
+
+Gen: 36
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract(add('PHC', 'PTC'), subtract(add('PTC', 'PIP'), add(square('PTC'), 'PTC')))))
+Tree 1:
+maximum(subtract(protected_sqrt('RP'), minimum('RDUR', 'TREQ')), subtract('RCAP', 'RCAP'))
+Tree 2:
+add(maximum('TUD', 'TUD'), maximum(add(maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD'), maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD')), 'TUD'))
+
+Gen: 37
+Individual:
+Tree 0:
+protected_sqrt(subtract(add(square('PTC'), protected_sqrt(add('PHC', 'PTC'))), 'FC1'))
+Tree 1:
+maximum('RCAP', subtract(protected_div('RDUR', 'RDUR'), 'RCAP'))
+Tree 2:
+add(maximum(maximum(add('TUD', 'TUD'), 'RFQ'), 'RFQ'), maximum(add(add(add('RFQ', 'TUD'), maximum('TUD', 'TUD')), 'TUD'), 'TUD'))
+
+Gen: 38
+Individual:
+Tree 0:
+protected_sqrt(maximum(square('PTC'), subtract(add('PHC', 'PIP'), add(add('PTC', 'PIP'), 'PTC'))))
+Tree 1:
+maximum('RCAP', subtract('CRENT', 'CRENT'))
+Tree 2:
+add(maximum('TUD', 'TUD'), maximum(add(maximum(add(maximum('TUD', maximum(add('TUD', 'TUD'), 'RFQ')), 'TUD'), 'TUD'), maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD')), protected_div(multiply('RFQ', 'TUD'), subtract('TUD', 'TUD'))))
+
+Gen: 39
+Individual:
+Tree 0:
+protected_sqrt(subtract(add(square('PTC'), protected_sqrt(add('PHC', 'PIP'))), 'FC1'))
+Tree 1:
+maximum('RCAP', subtract(protected_div('RDUR', 'RDUR'), 'RCAP'))
+Tree 2:
+add(maximum(maximum(add('TUD', 'TUD'), 'RFQ'), 'RFQ'), maximum(add(add(add('RFQ', 'TUD'), maximum('TUD', 'TUD')), 'TUD'), 'TUD'))
+
+Gen: 40
+Individual:
+Tree 0:
+protected_sqrt(subtract(add(square('PTC'), protected_sqrt(protected_sqrt('PIP'))), 'FC1'))
+Tree 1:
+maximum('RCAP', subtract(protected_div('RDUR', 'RDUR'), 'RCAP'))
+Tree 2:
+add(maximum(maximum(add('TUD', 'TUD'), 'RFQ'), 'RFQ'), maximum(add(add(add('RFQ', 'TUD'), maximum('TUD', 'TUD')), 'TUD'), 'TUD'))
+
+Gen: 41
+Individual:
+Tree 0:
+protected_sqrt(subtract(add(square('PTC'), protected_sqrt(protected_sqrt('PIP'))), 'FC1'))
+Tree 1:
+maximum('RCAP', subtract(protected_div('RDUR', 'RDUR'), 'RCAP'))
+Tree 2:
+add(maximum(maximum(add('TUD', 'TUD'), 'RFQ'), 'RFQ'), maximum(add(add(add('RFQ', 'TUD'), maximum('TUD', 'TUD')), 'TUD'), 'TUD'))
+
+Gen: 42
+Individual:
+Tree 0:
+protected_sqrt(subtract(add(square('PTC'), protected_sqrt(add('PHC', protected_div('FC2', 'INL')))), 'FC1'))
+Tree 1:
+maximum('RCAP', subtract(protected_div('RDUR', 'RDUR'), 'RCAP'))
+Tree 2:
+add(maximum(maximum(add('TUD', 'TUD'), 'RFQ'), 'RFQ'), maximum(add(add(add('RFQ', 'TUD'), maximum('TUD', 'TUD')), 'TUD'), 'TUD'))
+
+Gen: 43
+Individual:
+Tree 0:
+protected_sqrt(subtract(add(square('PTC'), protected_sqrt(add('PHC', protected_sqrt(subtract('FOC', 'PTC'))))), 'FC1'))
+Tree 1:
+maximum('RCAP', subtract(protected_div('RDUR', 'RDUR'), 'RCAP'))
+Tree 2:
+add(maximum(maximum(add('TUD', 'TUD'), 'RFQ'), 'RFQ'), maximum(maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD'), 'TUD'))
+
+Gen: 44
+Individual:
+Tree 0:
+protected_sqrt(subtract(square('PTC'), 'FC1'))
+Tree 1:
+maximum('RCAP', subtract(protected_div('CRENT', 'CRENT'), 'RCAP'))
+Tree 2:
+add(maximum(maximum(add('TUD', 'TUD'), 'RFQ'), 'RFQ'), maximum(add(add(add('RFQ', 'TUD'), 'RFQ'), 'TUD'), 'TUD'))
+
+Gen: 45
+Individual:
+Tree 0:
+protected_sqrt(subtract(add(square('PTC'), protected_sqrt(add('PHC', protected_sqrt(add(square('PTC'), 'PIP'))))), 'FC1'))
+Tree 1:
+maximum('RCAP', subtract(protected_div('RDUR', 'RDUR'), 'RCAP'))
+Tree 2:
+add(maximum(maximum(add('TUD', 'TUD'), 'RFQ'), 'RFQ'), maximum(maximum(add(maximum('TUD', 'RFQ'), 'TUD'), 'TUD'), 'TUD'))
+
+Gen: 46
+Individual:
+Tree 0:
+protected_sqrt(subtract(subtract(add(square('PTC'), protected_sqrt(add('PHC', 'PHC'))), 'FC1'), 'PHC'))
+Tree 1:
+maximum('RCAP', subtract('RCAP', 'RCAP'))
+Tree 2:
+add(maximum(maximum(add('TUD', 'RFQ'), 'RFQ'), 'RFQ'), maximum(add(add(add(add('RFQ', 'TUD'), 'TUD'), maximum('TUD', 'TUD')), 'TUD'), 'TUD'))
+
+Gen: 47
+Individual:
+Tree 0:
+protected_sqrt(subtract(square('PTC'), 'FC1'))
+Tree 1:
+maximum('RCAP', subtract(protected_div('CRENT', 'RDUR'), 'RCAP'))
+Tree 2:
+add(maximum(maximum(add('TUD', 'TUD'), 'RFQ'), 'RFQ'), maximum(add(add(add('RFQ', 'TUD'), maximum('TUD', minimum(maximum('RFQ', 'TUD'), maximum('TUD', 'TUD')))), 'TUD'), 'TUD'))
+
+Gen: 48
+Individual:
+Tree 0:
+protected_sqrt(subtract(add(subtract(add(square('PTC'), protected_sqrt(protected_sqrt(subtract('FOC', 'PTC')))), 'FC1'), protected_sqrt(add('PIP', protected_div('FC2', 'PTC')))), 'FC1'))
+Tree 1:
+maximum('RCAP', subtract(protected_div(subtract(protected_div('RDUR', 'RDUR'), 'RCAP'), 'RDUR'), minimum(add(protected_sqrt(maximum('RDUR', 'CRENT')), multiply(subtract('CRENT', 'TREQ'), minimum('RP', 'TREQ'))), add(square(maximum('RDUR', 'TREQ')), protected_div(multiply('RCAP', 'RCAP'), subtract('CRENT', 'RCAP'))))))
+Tree 2:
+add(maximum(maximum(add('TUD', 'TUD'), 'RFQ'), 'RFQ'), maximum(add(add(add('RFQ', 'TUD'), maximum('TUD', 'TUD')), 'TUD'), 'TUD'))
+
+Gen: 49
+Individual:
+Tree 0:
+protected_sqrt(subtract(add(square('PTC'), protected_sqrt(add('PIP', multiply('PHC', protected_sqrt('PTC'))))), 'FC1'))
+Tree 1:
+maximum('RCAP', subtract('RCAP', protected_div('RDUR', 'RDUR')))
+Tree 2:
+add(maximum(maximum(add('TUD', 'TUD'), 'RFQ'), 'RFQ'), maximum(add(maximum(maximum(add('TUD', 'TUD'), 'RFQ'), 'RFQ'), 'TUD'), 'TUD'))
+
+Gen: 50
+Individual:
+Tree 0:
+protected_sqrt(subtract(subtract(add(square('PTC'), protected_sqrt(square(protected_sqrt('FOC')))), 'FC1'), 'FC1'))
+Tree 1:
+maximum(subtract(protected_div(subtract(minimum('RP', 'CRENT'), 'RCAP'), 'RDUR'), 'RCAP'), subtract(protected_div('CRENT', 'CRENT'), 'RCAP'))
+Tree 2:
+add(maximum(maximum(add('TUD', 'TUD'), 'RFQ'), 'RFQ'), maximum(add(add(add('RFQ', 'TUD'), maximum('TUD', minimum(maximum('RFQ', 'RFQ'), maximum('TUD', 'TUD')))), 'TUD'), 'TUD'))

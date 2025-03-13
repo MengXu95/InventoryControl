@@ -67,16 +67,18 @@ def treeNode_S_test(tree, index, data):
         return data[3],1
     elif tree[index] == 'FOC':
         return data[4],1
-    elif tree[index] == 'PIP':
+    elif tree[index] == 'PUOC':
         return data[5],1
-    elif tree[index] == 'FC1':
+    elif tree[index] == 'PIP':
         return data[6],1
-    elif tree[index] == 'FC2':
+    elif tree[index] == 'FC1':
         return data[7],1
-    elif tree[index] == 'PTC':
+    elif tree[index] == 'FC2':
         return data[8],1
-    elif tree[index] == 'FTC':
+    elif tree[index] == 'PTC':
         return data[9],1
+    elif tree[index] == 'FTC':
+        return data[10],1
 
 def GP_evolve_S(data, tree_S): # genetic programming evolved sequencing rule
     inventory_replenishment, length_tree = treeNode_S(tree_S, 0, data)
@@ -123,16 +125,18 @@ def treeNode_S(tree, index, data):
             return data[3],1
         elif tree[index].name == 'FOC':
             return data[4],1
-        elif tree[index].name == 'PIP':
+        elif tree[index].name == 'PUOC':
             return data[5],1
-        elif tree[index].name == 'FC1':
+        elif tree[index].name == 'PIP':
             return data[6],1
-        elif tree[index].name == 'FC2':
+        elif tree[index].name == 'FC1':
             return data[7],1
-        elif tree[index].name == 'PTC':
+        elif tree[index].name == 'FC2':
             return data[8],1
-        elif tree[index].name == 'FTC':
+        elif tree[index].name == 'PTC':
             return data[9],1
+        elif tree[index].name == 'FTC':
+            return data[10],1
 
 def protected_div(left, right):
     with np.errstate(divide='ignore', invalid='ignore'):

@@ -184,7 +184,7 @@ class TeckwahDemand:
 
 class Retailer:
     def __init__(self, demand_records, number, f,
-                 ini_inv, holding, lost_sales, L, LT, capacity, production_capacity, fixed_order,
+                 ini_inv, holding, lost_sales, L, LT, capacity, production_capacity, fixed_order, per_unit_order,
                  per_trans_item, per_trans_order, supplierSupport, RFQ_happen_pro = -1.0):  # Each retailer has its own number 0,1,2,... f is its forecast
         self.ini_inv = ini_inv
         self.L = L
@@ -199,55 +199,30 @@ class Retailer:
         self.production_capacity = production_capacity[number]
         self.demand_list = demand_records  # Historical demand records
         self.fixed_order_cost = fixed_order[number]  # Fixed cost for placing an order
+        self.per_unit_order_cost = per_unit_order[number]  # Fixed cost for placing an order
         self.transshipment_cost = per_trans_item
         self.fixed_order_transshipment_cost = per_trans_order
         self.action = 0  # Order qty
         self.supplierSupport = supplierSupport # Historical support records
         self.RFQ_happen_pro = RFQ_happen_pro
+        self.current_rentals = []
 
     def reset(self, f):
         self.inv_level = self.ini_inv[self.number]
         self.pipeline = [0] * (self.LT - 1)
         self.forecast = [f(self.number, t) for t in range(1, self.L + 1)]  # Forecast for time t+1
 
-    def order_arrival(self, demand, rental_available):  # Get next state after pipeline inv arrives and demand is realized
-        self.inv_level = min(self.capacity,
+    def order_arrival(self, demand, total_current_rental):  # Get next state after pipeline inv arrives and demand is realized
+        self.inv_level = min(self.capacity+total_current_rental,
                              self.inv_level + self.pipeline[0])  # Pipeline arrives, cannot exceed storage capacity
         self.inv_level -= demand
 
         if self.inv_level < 0:
-            if np.absolute(self.inv_level) < rental_available:
-                self.inv_level = 0
-                rental_available = rental_available - np.absolute(self.inv_level)
-            else:
-                self.inv_level = self.inv_level + rental_available
-                rental_available = 0
-        if rental_available < 0:
-            print("Error! rental_available should not be smaller than 0!!!")
+            self.inv_level = 0
         # Update pipeline
         self.pipeline = np.concatenate((self.pipeline[1:], [self.action]))
-        return rental_available
 
-    def urgent_RFQ_order_arrival(self, RFQ_demand, rental_available, predict_support_price, true_support_price):  # Get next state after pipeline inv arrives and demand is realized
-        self.inv_level = min(self.capacity,
-                             self.inv_level)  # Pipeline arrives, cannot exceed storage capacity
-        self.inv_level -= RFQ_demand
 
-        predict_error = 0
-
-        if self.inv_level < 0:
-            if np.absolute(self.inv_level) < rental_available:
-                self.inv_level = 0
-                rental_available = rental_available - np.absolute(self.inv_level)
-            else:
-                self.inv_level = self.inv_level + rental_available
-                rental_available = 0
-                self.inv_level = 0
-                predict_error = np.abs(predict_support_price - true_support_price)
-        if rental_available < 0:
-            print("Error! rental_available should not be smaller than 0!!!")
-
-        return rental_available, predict_error
 
 class TimeoutException(Exception):
     pass
@@ -281,6 +256,7 @@ class InvOptEnv:
         self.capacity = parameters['capacity']
         self.production_capacity = parameters['production_capacity']
         self.fixed_order = parameters['fixed_order']
+        self.per_unit_order = parameters['per_unit_order']
         self.per_trans_item = parameters['per_trans_item']
         self.per_trans_order = parameters['per_trans_order']
         self.RFQ_deadline_level = parameters['RFQ_deadline_level']
@@ -288,7 +264,6 @@ class InvOptEnv:
         self.partial_information_visibility = parameters['partial_information_visibility']
         # add by xu meng 2024.12.2
         self.rental_choice = parameters['rental_choice']
-        self.current_rentals = []
 
         if self.demand_level == None:#use teckwah dataset
             self.demand_records = parameters['demand_test']
@@ -319,7 +294,7 @@ class InvOptEnv:
             self.supplierSupport = SupplierSupport(seed+i, self.demand_level * 3)
             self.retailers.append(Retailer(self.demand_records[i], i, self.rd.f,
                                            self.ini_inv, self.holding, self.lost_sales,
-                                           self.L, self.LT, self.capacity, self.production_capacity, self.fixed_order,
+                                           self.L, self.LT, self.capacity, self.production_capacity, self.fixed_order, self.per_unit_order,
                                            self.per_trans_item, self.per_trans_order,
                                            self.supplierSupport, self.RFQ_happen_pro))
 
@@ -331,7 +306,7 @@ class InvOptEnv:
             state_replenishment_retailer = np.array([
                 retailer.inv_level, retailer.holding_cost,
                 retailer.lost_sales_cost, retailer.capacity,
-                retailer.fixed_order_cost, retailer.pipeline[0],  # only suitable for LT = 2
+                retailer.fixed_order_cost, retailer.per_unit_order_cost, retailer.pipeline[0],  # only suitable for LT = 2
                 retailer.forecast[0], retailer.forecast[1],
                 retailer.transshipment_cost, retailer.fixed_order_transshipment_cost
             ])  # only suitable for LT = 2
@@ -361,20 +336,33 @@ class InvOptEnv:
         self.state.append(state_transshipment)
 
         state_rental = []
-        total_current_rental = 0
-        if len(self.current_rentals) != 0:
-            total_current_rental = sum(each_current_rental[1] for each_current_rental in self.current_rentals)
-            # Filter and update the current rentals, mainly for rental length
-            self.current_rentals = [
-                [each[0], each[1], each[2] - 1] if each[2] > 1 else each
-                for each in self.current_rentals
-                if each[2] != 1
-            ]
-        for each_rental_choice in self.rental_choice:
-            each_rental_state = [total_current_rental, each_rental_choice[0], each_rental_choice[1],
-                                 each_rental_choice[2]]
-            state_rental.append(each_rental_state)
+        for retailer in self.retailers:
+            state_rental_retailer = []
+            total_current_rental = 0
+            if len(retailer.current_rentals) != 0:
+                total_current_rental = sum(each_current_rental[1] for each_current_rental in retailer.current_rentals)
+                # Filter and update the current rentals, mainly for rental length
+                retailer.current_rentals = [
+                    [each[0], each[1], each[2] - 1] if each[2] > 1 else each
+                    for each in retailer.current_rentals
+                    if each[2] != 1
+                ]
+            for each_rental_choice in self.rental_choice:
+                each_rental_state = [total_current_rental, each_rental_choice[0], each_rental_choice[1],
+                                     each_rental_choice[2]]
+                state_rental_retailer.append(each_rental_state)
+            state_rental.append(state_rental_retailer)
         self.state.append(state_rental)
+
+        state_RFQ_predict = []
+        for retailer_index in range(len(self.retailers)):
+            retailer = self.retailers[retailer_index]
+            state_RFQ_predict_retailer = np.array(
+                [self.urgent_RFQ_demand_records[retailer_index][self.current_period - 2],
+                 self.urgent_RFQ_TUD_records[retailer_index][self.current_period - 2]])  # only suitable for LT = 2
+            state_RFQ_predict.append(state_RFQ_predict_retailer)
+        self.state.append(state_RFQ_predict)
+
 
     def timeout_handler(self):
         raise TimeoutException("Operation timed out!")
@@ -412,7 +400,7 @@ class InvOptEnv:
             state_replenishment_retailer = np.array([retailer.inv_level, retailer.holding_cost,
                                                      retailer.lost_sales_cost, retailer.capacity,
                                                      retailer.production_capacity,
-                                                     retailer.fixed_order_cost, retailer.pipeline[0],
+                                                     retailer.fixed_order_cost, retailer.per_unit_order_cost, retailer.pipeline[0],
                                                      # only suitable for LT = 2
                                                      retailer.forecast[0], retailer.forecast[1],
                                                      retailer.transshipment_cost,
@@ -441,19 +429,22 @@ class InvOptEnv:
         self.state.append(state_transshipment)
 
         state_rental = []
-        total_current_rental = 0
-        if len(self.current_rentals) != 0:
-            total_current_rental = sum(each_current_rental[1] for each_current_rental in self.current_rentals)
-            # Filter and update the current rentals, mainly for rental length
-            self.current_rentals = [
-                [each[0], each[1], each[2] - 1] if each[2] > 1 else each
-                for each in self.current_rentals
-                if each[2] != 1
-            ]
-        for each_rental_choice in self.rental_choice:
-            each_rental_state = [total_current_rental, each_rental_choice[0], each_rental_choice[1],
-                                 each_rental_choice[2]]
-            state_rental.append(each_rental_state)
+        for retailer in self.retailers:
+            state_rental_retailer = []
+            total_current_rental = 0
+            if len(retailer.current_rentals) != 0:
+                total_current_rental = sum(each_current_rental[1] for each_current_rental in retailer.current_rentals)
+                # Filter and update the current rentals, mainly for rental length
+                retailer.current_rentals = [
+                    [each[0], each[1], each[2] - 1] if each[2] > 1 else each
+                    for each in retailer.current_rentals
+                    if each[2] != 1
+                ]
+            for each_rental_choice in self.rental_choice:
+                each_rental_state = [total_current_rental, each_rental_choice[0], each_rental_choice[1],
+                                     each_rental_choice[2]]
+                state_rental_retailer.append(each_rental_state)
+            state_rental.append(state_rental_retailer)
         self.state.append(state_rental)
 
         state_RFQ_predict= []
@@ -468,19 +459,18 @@ class InvOptEnv:
         if len(self.retailers) == 2:
             all_cost = []
 
-            # Update inv levels and pipelines
-            total_current_rental = 0
-            if len(self.current_rentals) != 0:
-                total_current_rental = sum(each_current_rental[1] for each_current_rental in self.current_rentals)
-                # Filter and update the current rentals, mainly for rental length
-                self.current_rentals = [
-                    [each[0], each[1], each[2] - 1] if each[2] > 1 else each
-                    for each in self.current_rentals
-                    if each[2] != 1
-                ]
-            rental_available = total_current_rental
             for retailer, demand in zip(self.retailers, self.demand_records):
-                rental_available = retailer.order_arrival(demand[self.current_period - 2], rental_available)  # -2 not -1
+                # Update inv levels and pipelines
+                total_current_rental = 0
+                if len(retailer.current_rentals) != 0:
+                    total_current_rental = sum(each_current_rental[1] for each_current_rental in retailer.current_rentals)
+                    # Filter and update the current rentals, mainly for rental length
+                    retailer.current_rentals = [
+                        [each[0], each[1], each[2] - 1] if each[2] > 1 else each
+                        for each in retailer.current_rentals
+                        if each[2] != 1
+                    ]
+                retailer.order_arrival(demand[self.current_period - 2], total_current_rental)  # -2 not -1
 
             # this is for handle urgent RFQ demand
             total_predict_error = 0
@@ -494,17 +484,16 @@ class InvOptEnv:
                         predict_error = np.abs(predict_support_price - true_support_price)
                     else:
                         predict_error = 0
-                    rental_available, support_cost = retailer.urgent_RFQ_order_arrival(
-                        urgent_RFQ_demand[self.current_period - 2], rental_available, predict_support_price, true_support_price)  # -2 not -1
                     total_predict_error += predict_error
 
             # Update rental decision and calculate rental cost, new for Strategy version 2.0
             rental_cost = 0
             rental_decisions = action_modified[-2]  # currently each time only rental one choice
-            for each_rental_decision in rental_decisions:
-                rental_decision = self.rental_choice[each_rental_decision]
-                self.current_rentals.append(rental_decision)
-                rental_cost = rental_cost + rental_decision[0]
+            for rental_decisions_retailer, retailer in zip(rental_decisions, self.retailers):
+                for each_rental_decision in rental_decisions_retailer:
+                    rental_decision = self.rental_choice[each_rental_decision]
+                    retailer.current_rentals.append(rental_decision)
+                    rental_cost = rental_cost + rental_decision[0]
 
             # # Update rental decision and calculate rental cost, old for Strategy version 1.0
             # rental_decision = self.rental_choice[action_modified[-1]]  # currently each time only rental one choice
@@ -525,10 +514,10 @@ class InvOptEnv:
             # Calculate sum of order, holding, lost sales costs
             for i, retailer in enumerate(self.retailers):  # Iterate through retailers
                 retailer.action = action_modified[i + 1]  # Qty ordered by retailer
-                if retailer.action > retailer.production_capacity:
-                    retailer.action = retailer.production_capacity
+                if retailer.action > retailer.capacity:
+                    retailer.action = retailer.capacity
                 # Get order costs
-                order_cost += (retailer.action > 0) * retailer.fixed_order_cost
+                order_cost += retailer.action * retailer.per_unit_order_cost + (retailer.action > 0) * retailer.fixed_order_cost
                 # Do transshipment
                 if retailer.number == 0:
                     retailer.inv_level -= trans
@@ -568,7 +557,7 @@ class InvOptEnv:
                 state_replenishment_retailer = np.array([retailer.inv_level, retailer.holding_cost,
                                                          retailer.lost_sales_cost, retailer.capacity,
                                                          retailer.production_capacity,
-                                                         retailer.fixed_order_cost, retailer.pipeline[0],
+                                                         retailer.fixed_order_cost, retailer.per_unit_order_cost, retailer.pipeline[0],
                                                          # only suitable for LT = 2
                                                          retailer.forecast[0], retailer.forecast[1],
                                                          retailer.transshipment_cost,
@@ -597,20 +586,25 @@ class InvOptEnv:
             self.state.append(state_transshipment)
 
             state_rental = []
-            total_current_rental = 0
-            if len(self.current_rentals) != 0:
-                total_current_rental = sum(each_current_rental[1] for each_current_rental in self.current_rentals)
-                # Filter and update the current rentals, mainly for rental length
-                self.current_rentals = [
-                    [each[0], each[1], each[2] - 1] if each[2] > 1 else each
-                    for each in self.current_rentals
-                    if each[2] != 1
-                ]
-            for each_rental_choice in self.rental_choice:
-                each_rental_state = [total_current_rental, each_rental_choice[0], each_rental_choice[1],
-                                     each_rental_choice[2]]
-                state_rental.append(each_rental_state)
+            for retailer in self.retailers:
+                state_rental_retailer = []
+                total_current_rental = 0
+                if len(retailer.current_rentals) != 0:
+                    total_current_rental = sum(
+                        each_current_rental[1] for each_current_rental in retailer.current_rentals)
+                    # Filter and update the current rentals, mainly for rental length
+                    retailer.current_rentals = [
+                        [each[0], each[1], each[2] - 1] if each[2] > 1 else each
+                        for each in retailer.current_rentals
+                        if each[2] != 1
+                    ]
+                for each_rental_choice in self.rental_choice:
+                    each_rental_state = [total_current_rental, each_rental_choice[0], each_rental_choice[1],
+                                         each_rental_choice[2]]
+                    state_rental_retailer.append(each_rental_state)
+                state_rental.append(state_rental_retailer)
             self.state.append(state_rental)
+
 
             state_RFQ_predict = []
             for retailer_index in range(len(self.retailers)):
@@ -631,46 +625,44 @@ class InvOptEnv:
             all_cost = []
 
             # Update inv levels and pipelines
-            total_current_rental = 0
-            if len(self.current_rentals) != 0:
-                total_current_rental = sum(each_current_rental[1] for each_current_rental in self.current_rentals)
-                # Filter and update the current rentals, mainly for rental length
-                self.current_rentals = [
-                    [each[0], each[1], each[2] - 1] if each[2] > 1 else each
-                    for each in self.current_rentals
-                    if each[2] != 1
-                ]
-            rental_available = total_current_rental
             for retailer, demand in zip(self.retailers, self.demand_records):
-                rental_available = retailer.order_arrival(demand[self.current_period - 2],
-                                                          rental_available)  # -2 not -1
-
-            # Update rental decision and calculate rental cost, new for Strategy version 2.0
-            rental_cost = 0
-            rental_decisions = action_modified[-1]  # currently each time only rental one choice
-            for each_rental_decision in rental_decisions:
-                rental_decision = self.rental_choice[each_rental_decision]
-                self.current_rentals.append(rental_decision)
-                rental_cost = rental_cost + rental_decision[0]
+                # Update inv levels and pipelines
+                total_current_rental = 0
+                if len(retailer.current_rentals) != 0:
+                    total_current_rental = sum(
+                        each_current_rental[1] for each_current_rental in retailer.current_rentals)
+                    # Filter and update the current rentals, mainly for rental length
+                    retailer.current_rentals = [
+                        [each[0], each[1], each[2] - 1] if each[2] > 1 else each
+                        for each in retailer.current_rentals
+                        if each[2] != 1
+                    ]
+                retailer.order_arrival(demand[self.current_period - 2], total_current_rental)  # -2 not -1
 
             # this is for handle urgent RFQ demand
             total_predict_error = 0
             RFQ_predict_decisions = action_modified[-1]
             for RFQ_predict_price, retailer, urgent_RFQ_demand, urgent_RFQ_TUD in zip(
-                    RFQ_predict_decisions, self.retailers, self.urgent_RFQ_demand_records,
-                    self.urgent_RFQ_TUD_records):
+                    RFQ_predict_decisions, self.retailers, self.urgent_RFQ_demand_records, self.urgent_RFQ_TUD_records):
                 if urgent_RFQ_demand[self.current_period - 2] > 0:  # urgent_RFQ happen
-                    true_support_price = retailer.supplierSupport.compute_true_price(urgent_RFQ_demand[self.current_period - 2],
-                                                                                     urgent_RFQ_TUD[self.current_period - 2])
+                    true_support_price = retailer.supplierSupport.compute_true_price(
+                        urgent_RFQ_demand[self.current_period - 2], urgent_RFQ_TUD[self.current_period - 2])
                     predict_support_price = RFQ_predict_price
                     if self.partial_information_visibility:
                         predict_error = np.abs(predict_support_price - true_support_price)
                     else:
                         predict_error = 0
-                    rental_available, support_cost = retailer.urgent_RFQ_order_arrival(
-                        urgent_RFQ_demand[self.current_period - 2], rental_available, predict_support_price,
-                        true_support_price)  # -2 not -1
                     total_predict_error += predict_error
+
+            # Update rental decision and calculate rental cost, new for Strategy version 2.0
+            rental_cost = 0
+            rental_decisions = action_modified[-2]  # currently each time only rental one choice
+            for rental_decisions_retailer, retailer in zip(rental_decisions, self.retailers):
+                for each_rental_decision in rental_decisions_retailer:
+                    rental_decision = self.rental_choice[each_rental_decision]
+                    retailer.current_rentals.append(rental_decision)
+                    rental_cost = rental_cost + rental_decision[0]
+
 
             # # Update rental decision and calculate rental cost, old for Strategy version 1.0
             # rental_decision = self.rental_choice[action_modified[-1]]  # currently each time only rental one choice
@@ -706,8 +698,10 @@ class InvOptEnv:
             # Calculate sum of order, holding, lost sales costs
             for i, retailer in enumerate(self.retailers):  # Iterate through retailers
                 retailer.action = action_modified[i + 3]  # Qty ordered by retailer
+                if retailer.action > retailer.capacity:
+                    retailer.action = retailer.capacity
                 # Get order costs
-                order_cost += (retailer.action > 0) * retailer.fixed_order_cost
+                order_cost += retailer.action * retailer.per_unit_order_cost + (retailer.action > 0) * retailer.fixed_order_cost
                 # Do transshipment
                 if retailer.number == 0:
                     retailer.inv_level = retailer.inv_level - trans01 - trans02
@@ -746,7 +740,7 @@ class InvOptEnv:
             for retailer in self.retailers:
                 state_replenishment_retailer = np.array([retailer.inv_level, retailer.holding_cost,
                                                          retailer.lost_sales_cost, retailer.capacity,
-                                                         retailer.fixed_order_cost, retailer.pipeline[0],
+                                                         retailer.fixed_order_cost, retailer.per_unit_order_cost,  retailer.pipeline[0],
                                                          # only suitable for LT = 2
                                                          retailer.forecast[0], retailer.forecast[1],
                                                          retailer.transshipment_cost,
@@ -775,19 +769,23 @@ class InvOptEnv:
             self.state.append(state_transshipment)
 
             state_rental = []
-            total_current_rental = 0
-            if len(self.current_rentals) != 0:
-                total_current_rental = sum(each_current_rental[1] for each_current_rental in self.current_rentals)
-                # Filter and update the current rentals, mainly for rental length
-                self.current_rentals = [
-                    [each[0], each[1], each[2] - 1] if each[2] > 1 else each
-                    for each in self.current_rentals
-                    if each[2] != 1
-                ]
-            for each_rental_choice in self.rental_choice:
-                each_rental_state = [total_current_rental, each_rental_choice[0], each_rental_choice[1],
-                                     each_rental_choice[2]]
-                state_rental.append(each_rental_state)
+            for retailer in self.retailers:
+                state_rental_retailer = []
+                total_current_rental = 0
+                if len(retailer.current_rentals) != 0:
+                    total_current_rental = sum(
+                        each_current_rental[1] for each_current_rental in retailer.current_rentals)
+                    # Filter and update the current rentals, mainly for rental length
+                    retailer.current_rentals = [
+                        [each[0], each[1], each[2] - 1] if each[2] > 1 else each
+                        for each in retailer.current_rentals
+                        if each[2] != 1
+                    ]
+                for each_rental_choice in self.rental_choice:
+                    each_rental_state = [total_current_rental, each_rental_choice[0], each_rental_choice[1],
+                                         each_rental_choice[2]]
+                    state_rental_retailer.append(each_rental_state)
+                state_rental.append(state_rental_retailer)
             self.state.append(state_rental)
 
             state_RFQ_predict = []
@@ -835,9 +833,9 @@ class InvOptEnv:
             # get transshipment state for all pairs of sites/retailers
             replenishment_state = state[0]
             transshipment_state = state[1]
-            rental_state = state[2] # for each choice in rental_state: [current_rental, rental_price, rental_capacity, rental_month, total_rental_requirement]
+            rental_states = state[2] # each retailer has its own rental_state, and for each choice in rental_state: [current_rental, rental_price, rental_capacity, rental_month, total_rental_requirement]
             RFQ_predict_state = state[3]
-            total_rental_requirement = 0
+            total_rental_requirements = []
             for each_transshipment_state in transshipment_state:
                 transshipment_quantity = 0
                 # transshipment_quantity = round(GP_evolve_R(each_transshipment_state, transshipment_policy), 2)
@@ -849,16 +847,18 @@ class InvOptEnv:
 
                 # Strategy 2 (sigmoid): constrain the replenishment quantity to [0, production_capacity]
                 # Strategy 2: performs better than Strategy 1 based on one run with popsize 200
-                production_capacity = each_replenishment_state[4]
+                # production_capacity = each_replenishment_state[4]
                 capacity = each_replenishment_state[3]
                 upbound_replenishment_quantity = capacity * 3
                 if replenishment_quantity > upbound_replenishment_quantity or replenishment_quantity < 0:
                     replenishment_quantity = logistic_util.logistic_scale_and_shift(replenishment_quantity, 0, upbound_replenishment_quantity)
                 # print("replenishment_quantity after sigmoid: ", replenishment_quantity)
-                if replenishment_quantity > production_capacity:
-                    require_quantity = replenishment_quantity - production_capacity
-                    total_rental_requirement = total_rental_requirement + require_quantity
-                    replenishment_quantity = production_capacity
+                if replenishment_quantity > capacity:
+                    require_quantity = replenishment_quantity - capacity
+                    replenishment_quantity = capacity
+                    total_rental_requirements.append(require_quantity)
+                else:
+                    total_rental_requirements.append(0)
 
                 # Strategy 1 (original): constrain the replenishment quantity to [0, production_capacity]
                 # production_capacity = each_replenishment_state[4]
@@ -879,56 +879,69 @@ class InvOptEnv:
 
             if len(individual) == 1:
                 # rental_decision = -1
-                rental_decisions = []
+                rental_decisions_all = []
+                for retailer in self.retailers:
+                    rental_decisions = []
+                    rental_decisions_all.append(rental_decisions)
                 # print("One tree and do not consider rental!")
             else:
-                rental_decisions = []
+                rental_decisions_all = []
                 onlyRentalOne = False
                 if onlyRentalOne:
                 # Strategy version 1.0: only rental one decision each time, for making rental decision and delete not enough rental choice, by xu meng 2024.12.2
-                    current_rental = 0
-                    if len(rental_state) > 0:
-                        current_rental = rental_state[0][0]
-                    if current_rental < total_rental_requirement:
-                        all_rental_priority = []
-                        for each_rental_state in rental_state:
-                            each_rental_state.append(total_rental_requirement)
-                            current_rental = each_rental_state[0]
-                            rental_capacity = each_rental_state[2]
-                            if current_rental+rental_capacity < total_rental_requirement:
-                                rental_priority = np.inf
-                            else:
-                                rental_priority = GP_evolve_rental(each_rental_state, rental_policy)
-                            all_rental_priority.append(rental_priority)
-                        # Get the index of the minimal value
-                        rental_decision = all_rental_priority.index(min(all_rental_priority))
-                        rental_decisions.append(rental_decision)
+                    for i in range(len(rental_states)):
+                        rental_decisions = []
+                        rental_state = rental_states[i]
+                        rental_requirement = total_rental_requirements[i]
+                        current_rental = 0
+                        if len(rental_state) > 0:
+                            current_rental = rental_state[0][0]
+                        if current_rental < rental_requirement:
+                            all_rental_priority = []
+                            for each_rental_state in rental_state:
+                                each_rental_state.append(rental_requirement)
+                                current_rental = each_rental_state[0]
+                                rental_capacity = each_rental_state[2]
+                                if current_rental+rental_capacity < rental_requirement:
+                                    rental_priority = np.inf
+                                else:
+                                    rental_priority = GP_evolve_rental(each_rental_state, rental_policy)
+                                all_rental_priority.append(rental_priority)
+                            # Get the index of the minimal value
+                            rental_decision = all_rental_priority.index(min(all_rental_priority))
+                            rental_decisions.append(rental_decision)
+                        rental_decisions_all.append(rental_decisions)
                 else:
                     # Strategy version 2.0: only rental n decision each time, by xu meng 2025.1.10
-                    all_rental_priority = []
-                    for each_rental_state in rental_state:
-                        each_rental_state.append(total_rental_requirement)
-                        rental_priority = GP_evolve_rental(each_rental_state, rental_policy)
-                        all_rental_priority.append(rental_priority)
+                    for i in range(len(rental_states)):
+                        rental_decisions = []
+                        rental_state = rental_states[i]
+                        rental_requirement = total_rental_requirements[i]
+                        all_rental_priority = []
+                        for each_rental_state in rental_state:
+                            each_rental_state.append(rental_requirement)
+                            rental_priority = GP_evolve_rental(each_rental_state, rental_policy)
+                            all_rental_priority.append(rental_priority)
 
-                    current_rental = 0
-                    if len(rental_state) > 0:
-                        current_rental = rental_state[0][0]
-                    new_current_rental = current_rental
-                    try_times = 0
-                    while new_current_rental < total_rental_requirement and try_times < 5:
-                        try_times = try_times + 1
-                        # Get the index of the minimal value
-                        rental_decision = all_rental_priority.index(min(all_rental_priority))
-                        all_rental_priority[rental_decision] = np.inf
-                        rental_decisions.append(rental_decision)
+                        current_rental = 0
+                        if len(rental_state) > 0:
+                            current_rental = rental_state[0][0]
+                        new_current_rental = current_rental
+                        try_times = 0
+                        while new_current_rental < rental_requirement and try_times < 5:
+                            try_times = try_times + 1
+                            # Get the index of the minimal value
+                            rental_decision = all_rental_priority.index(min(all_rental_priority))
+                            all_rental_priority[rental_decision] = np.inf
+                            rental_decisions.append(rental_decision)
 
-                        for each_rental_decision in rental_decisions:
-                            rental_decision_capacity = self.rental_choice[each_rental_decision][1]
-                            new_current_rental = new_current_rental + rental_decision_capacity
+                            for each_rental_decision in rental_decisions:
+                                rental_decision_capacity = self.rental_choice[each_rental_decision][1]
+                                new_current_rental = new_current_rental + rental_decision_capacity
+                        rental_decisions_all.append(rental_decisions)
                     # if len(rental_decisions) > 1:
                     #     print("rental_decisions: ", rental_decisions)
-                action_modified.append(rental_decisions)
+                action_modified.append(rental_decisions_all)
 
                 RFQ_predict_decisions = []
                 upbound_support_price = self.demand_level * 5 #todo: need double-check
@@ -938,7 +951,7 @@ class InvOptEnv:
                     RFQ_predict_price = round(GP_evolve_RFQ_predict(each_RFQ_predict_state, RFQ_predict_policy), 2)
                     # print("RFQ_predict_quantity: ", RFQ_predict_quantity)
                     if RFQ_predict_price <= 0 or RFQ_predict_price > upbound_support_price:
-                        RFQ_predict_quantity = logistic_util.logistic_scale_and_shift(RFQ_predict_price, 0, upbound_support_price)
+                        RFQ_predict_price = logistic_util.logistic_scale_and_shift(RFQ_predict_price, 0, upbound_support_price)
                     RFQ_predict_decisions.append(RFQ_predict_price)
 
 
@@ -1017,10 +1030,10 @@ class InvOptEnv:
             # get transshipment state for all pairs of sites/retailers
             replenishment_state = state[0]
             transshipment_state = state[1]
-            rental_state = state[
-                2]  # for each choice in rental_state: [current_rental, rental_price, rental_capacity, rental_month, total_rental_requirement]
+            rental_states = state[
+                2]  # each retailer has its own rental_state, and for each choice in rental_state: [current_rental, rental_price, rental_capacity, rental_month, total_rental_requirement]
             RFQ_predict_state = state[3]
-            total_rental_requirement = 0
+            total_rental_requirements = []
             for each_transshipment_state in transshipment_state:
                 transshipment_quantity = 0
                 # transshipment_quantity = round(GP_evolve_R(each_transshipment_state, transshipment_policy), 2)
@@ -1032,17 +1045,19 @@ class InvOptEnv:
 
                 # Strategy 2 (sigmoid): constrain the replenishment quantity to [0, production_capacity]
                 # Strategy 2: performs better than Strategy 1 based on one run with popsize 200
-                production_capacity = each_replenishment_state[4]
+                #production_capacity = each_replenishment_state[4]
                 capacity = each_replenishment_state[3]
                 upbound_replenishment_quantity = capacity * 3
                 if replenishment_quantity > upbound_replenishment_quantity or replenishment_quantity < 0:
                     replenishment_quantity = logistic_util.logistic_scale_and_shift(replenishment_quantity, 0,
                                                                                     upbound_replenishment_quantity)
                 # print("replenishment_quantity after sigmoid: ", replenishment_quantity)
-                if replenishment_quantity > production_capacity:
-                    require_quantity = replenishment_quantity - production_capacity
-                    total_rental_requirement = total_rental_requirement + require_quantity
-                    replenishment_quantity = production_capacity
+                if replenishment_quantity > capacity:
+                    require_quantity = replenishment_quantity - capacity
+                    replenishment_quantity = capacity
+                    total_rental_requirements.append(require_quantity)
+                else:
+                    total_rental_requirements.append(0)
 
                 # Strategy 1 (original): constrain the replenishment quantity to [0, production_capacity]
                 # production_capacity = each_replenishment_state[4]
@@ -1063,56 +1078,69 @@ class InvOptEnv:
 
             if len(individual) == 1:
                 # rental_decision = -1
-                rental_decisions = []
+                rental_decisions_all = []
+                for retailer in self.retailers:
+                    rental_decisions = []
+                    rental_decisions_all.append(rental_decisions)
                 # print("One tree and do not consider rental!")
             else:
-                rental_decisions = []
+                rental_decisions_all = []
                 onlyRentalOne = False
                 if onlyRentalOne:
                     # Strategy version 1.0: only rental one decision each time, for making rental decision and delete not enough rental choice, by xu meng 2024.12.2
-                    current_rental = 0
-                    if len(rental_state) > 0:
-                        current_rental = rental_state[0][0]
-                    if current_rental < total_rental_requirement:
-                        all_rental_priority = []
-                        for each_rental_state in rental_state:
-                            each_rental_state.append(total_rental_requirement)
-                            current_rental = each_rental_state[0]
-                            rental_capacity = each_rental_state[2]
-                            if current_rental + rental_capacity < total_rental_requirement:
-                                rental_priority = np.inf
-                            else:
-                                rental_priority = GP_pair_rental_test(each_rental_state, rental_policy)
-                            all_rental_priority.append(rental_priority)
-                        # Get the index of the minimal value
-                        rental_decision = all_rental_priority.index(min(all_rental_priority))
-                        rental_decisions.append(rental_decision)
+                    for i in range(len(rental_states)):
+                        rental_decisions = []
+                        rental_state = rental_states[i]
+                        rental_requirement = total_rental_requirements[i]
+                        current_rental = 0
+                        if len(rental_state) > 0:
+                            current_rental = rental_state[0][0]
+                        if current_rental < rental_requirement:
+                            all_rental_priority = []
+                            for each_rental_state in rental_state:
+                                each_rental_state.append(rental_requirement)
+                                current_rental = each_rental_state[0]
+                                rental_capacity = each_rental_state[2]
+                                if current_rental + rental_capacity < rental_requirement:
+                                    rental_priority = np.inf
+                                else:
+                                    rental_priority = GP_pair_rental_test(each_rental_state, rental_policy)
+                                all_rental_priority.append(rental_priority)
+                            # Get the index of the minimal value
+                            rental_decision = all_rental_priority.index(min(all_rental_priority))
+                            rental_decisions.append(rental_decision)
+                        rental_decisions_all.append(rental_decisions)
                 else:
                     # Strategy version 2.0: only rental n decision each time, by xu meng 2025.1.10
-                    all_rental_priority = []
-                    for each_rental_state in rental_state:
-                        each_rental_state.append(total_rental_requirement)
-                        rental_priority = GP_pair_rental_test(each_rental_state, rental_policy)
-                        all_rental_priority.append(rental_priority)
+                    for i in range(len(rental_states)):
+                        rental_decisions = []
+                        rental_state = rental_states[i]
+                        rental_requirement = total_rental_requirements[i]
+                        all_rental_priority = []
+                        for each_rental_state in rental_state:
+                            each_rental_state.append(rental_requirement)
+                            rental_priority = GP_pair_rental_test(each_rental_state, rental_policy)
+                            all_rental_priority.append(rental_priority)
 
-                    current_rental = 0
-                    if len(rental_state) > 0:
-                        current_rental = rental_state[0][0]
-                    new_current_rental = current_rental
-                    try_times = 0
-                    while new_current_rental < total_rental_requirement and try_times < 5:
-                        try_times = try_times + 1
-                        # Get the index of the minimal value
-                        rental_decision = all_rental_priority.index(min(all_rental_priority))
-                        all_rental_priority[rental_decision] = np.inf
-                        rental_decisions.append(rental_decision)
+                        current_rental = 0
+                        if len(rental_state) > 0:
+                            current_rental = rental_state[0][0]
+                        new_current_rental = current_rental
+                        try_times = 0
+                        while new_current_rental < rental_requirement and try_times < 5:
+                            try_times = try_times + 1
+                            # Get the index of the minimal value
+                            rental_decision = all_rental_priority.index(min(all_rental_priority))
+                            all_rental_priority[rental_decision] = np.inf
+                            rental_decisions.append(rental_decision)
 
-                        for each_rental_decision in rental_decisions:
-                            rental_decision_capacity = self.rental_choice[each_rental_decision][1]
-                            new_current_rental = new_current_rental + rental_decision_capacity
+                            for each_rental_decision in rental_decisions:
+                                rental_decision_capacity = self.rental_choice[each_rental_decision][1]
+                                new_current_rental = new_current_rental + rental_decision_capacity
+                        rental_decisions_all.append(rental_decisions)
                     # if len(rental_decisions) > 1:
                     #     print("rental_decisions: ", rental_decisions)
-            action_modified.append(rental_decisions)
+                action_modified.append(rental_decisions_all)
 
             RFQ_predict_decisions = []
             upbound_support_price = self.demand_level * 5  # todo: need double-check

@@ -17,12 +17,15 @@ class ScenarioDesign_rental_RFQ_price():
     def get_parameter(self, seed=0):
 
         #the following is for PSO, must have [0,0,0], represents do not rental
-        rental_choice = [[40, 100, 1], [160, 500, 1], [200, 700, 1],
-                         [20, 100, 6], [80, 500, 6], [100, 700, 6]]
+        # rental_choice = [[40, 100, 1], [160, 500, 1], [200, 700, 1],
+        #                  [20, 100, 6], [80, 500, 6], [100, 700, 6]]
 
         # the following is for GP
         # rental_choice = [[40, 100, 1], [160, 500, 1], [200, 700, 1],
         #                 [20, 100, 6], [80, 500, 6], [100, 700, 6]]
+
+        rental_choice = [[100, 40, 2], [200, 100, 2], [300, 180, 2],
+                         [240, 40, 6], [540, 100, 6], [840, 180, 6]]
 
         if self.scenario == "teckwah_training":
             # Calculated values
@@ -38,6 +41,7 @@ class ScenarioDesign_rental_RFQ_price():
             capacity = [50000, 50000]  # Inventory capacities
             production_capacity = [500, 500]  # Production capacities
             fixed_order = [1000, 800]  # Fixed order costs per order
+            per_unit_order = [1, 1]  # Per unit order costs
             per_trans_item = 1  # Per unit cost for transshipment (either direction)
             per_trans_order = 10  # Fixed cost per transshipment (either direction)
             partial_information_visibility = True
@@ -58,6 +62,7 @@ class ScenarioDesign_rental_RFQ_price():
                 'capacity': capacity,
                 'production_capacity': production_capacity,
                 'fixed_order': fixed_order,
+                'per_unit_order': per_unit_order,
                 'per_trans_item': per_trans_item,
                 'per_trans_order': per_trans_order,
                 'rental_choice': rental_choice,
@@ -93,6 +98,7 @@ class ScenarioDesign_rental_RFQ_price():
             capacity = [50000, 50000]  # Inventory capacities
             production_capacity = [500, 500]  # Production capacities
             fixed_order = [1000, 800]  # Fixed order costs per order
+            per_unit_order = [1, 1]  # Fixed order costs per order
             per_trans_item = 1  # Per unit cost for transshipment (either direction)
             per_trans_order = 10  # Fixed cost per transshipment (either direction)
             partial_information_visibility = True
@@ -112,6 +118,7 @@ class ScenarioDesign_rental_RFQ_price():
                 'capacity': capacity,
                 'production_capacity': production_capacity,
                 'fixed_order': fixed_order,
+                'per_unit_order': per_unit_order,
                 'per_trans_item': per_trans_item,
                 'per_trans_order': per_trans_order,
                 'rental_choice': rental_choice,
@@ -155,6 +162,7 @@ class ScenarioDesign_rental_RFQ_price():
             production_capacity = [c/5 for c in capacity]  # Production capacities
             #production_capacity = [c/50 for c in capacity]  # Production capacities
             fixed_order = [20] * num_retailer  # Fixed order costs per order
+            per_unit_order = [1, 1]  # Fixed order costs per order
             per_trans_item = 1  # Per unit cost for transshipment (either direction)
             per_trans_order = 10  # Fixed cost per transshipment (either direction)
             partial_information_visibility = True
@@ -175,6 +183,7 @@ class ScenarioDesign_rental_RFQ_price():
                 'capacity': capacity,
                 'production_capacity': production_capacity,
                 'fixed_order': fixed_order,
+                'per_unit_order': per_unit_order,
                 'per_trans_item': per_trans_item,
                 'per_trans_order': per_trans_order,
                 'rental_choice': rental_choice,
@@ -205,6 +214,7 @@ class ScenarioDesign_rental_RFQ_price():
             capacity = [50000, 50000]  # Inventory capacities
             production_capacity = [500, 500]  # Production capacities
             fixed_order = [1000, 800]  # Fixed order costs per order
+            per_unit_order = [1, 1]  # Fixed order costs per order
             per_trans_item = 1  # Per unit cost for transshipment (either direction)
             per_trans_order = 10  # Fixed cost per transshipment (either direction)
             partial_information_visibility = True
@@ -221,6 +231,7 @@ class ScenarioDesign_rental_RFQ_price():
                 'capacity': capacity,
                 'production_capacity': production_capacity,
                 'fixed_order': fixed_order,
+                'per_unit_order': per_unit_order,
                 'per_trans_item': per_trans_item,
                 'per_trans_order': per_trans_order,
                 'rental_choice': rental_choice,
@@ -254,6 +265,7 @@ class ScenarioDesign_rental_RFQ_price():
             capacity = [50000, 50000]  # Inventory capacities
             production_capacity = [500, 500]  # Production capacities
             fixed_order = [1000, 800]  # Fixed order costs per order
+            per_unit_order = [1, 1]  # Fixed order costs per order
             per_trans_item = 1  # Per unit cost for transshipment (either direction)
             per_trans_order = 10  # Fixed cost per transshipment (either direction)
             partial_information_visibility = True
@@ -271,6 +283,7 @@ class ScenarioDesign_rental_RFQ_price():
                 'capacity': capacity,
                 'production_capacity': production_capacity,
                 'fixed_order': fixed_order,
+                'per_unit_order': per_unit_order,
                 'per_trans_item': per_trans_item,
                 'per_trans_order': per_trans_order,
                 'rental_choice': rental_choice,
@@ -311,6 +324,7 @@ class ScenarioDesign_rental_RFQ_price():
             capacity = [5 * demand_level] * num_retailer  # Inventory capacities
             production_capacity = [c / 50 for c in capacity]  # Production capacities
             fixed_order = [20] * num_retailer  # Fixed order costs per order
+            per_unit_order = [1, 1]  # Fixed order costs per order
             per_trans_item = 1  # Per unit cost for transshipment (either direction)
             per_trans_order = 10  # Fixed cost per transshipment (either direction)
             partial_information_visibility = True
@@ -328,6 +342,7 @@ class ScenarioDesign_rental_RFQ_price():
                 'capacity': capacity,
                 'production_capacity': production_capacity,
                 'fixed_order': fixed_order,
+                'per_unit_order': per_unit_order,
                 'per_trans_item': per_trans_item,
                 'per_trans_order': per_trans_order,
                 'rental_choice': rental_choice,
