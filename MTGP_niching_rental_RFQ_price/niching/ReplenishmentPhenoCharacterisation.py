@@ -23,16 +23,13 @@ class ReplenishmentPhenoCharacterisation(PhenoCharacterisation.PhenoCharacterisa
 
                 # Strategy 2 (sigmoid): constrain the replenishment quantity to [0, production_capacity]
                 # Strategy 2: performs better than Strategy 1 based on one run with popsize 200
-                production_capacity = state_retailer[4]
+                #production_capacity = state_retailer[4]
                 capacity = state_retailer[3]
                 upbound_replenishment_quantity = capacity * 3
                 if quantity > upbound_replenishment_quantity or quantity < 0:
                     quantity = logistic_util.logistic_scale_and_shift(quantity, 0,
                                                                                     upbound_replenishment_quantity)
                 # print("replenishment_quantity after sigmoid: ", replenishment_quantity)
-                if quantity > production_capacity:
-                    require_quantity = quantity - production_capacity
-                    quantity = production_capacity
 
                 self.decisions.append(quantity)
 
@@ -58,10 +55,6 @@ class ReplenishmentPhenoCharacterisation(PhenoCharacterisation.PhenoCharacterisa
                 if quantity > upbound_replenishment_quantity or quantity < 0:
                     quantity = logistic_util.logistic_scale_and_shift(quantity, 0,
                                                                       upbound_replenishment_quantity)
-                # print("replenishment_quantity after sigmoid: ", replenishment_quantity)
-                if quantity > production_capacity:
-                    require_quantity = quantity - production_capacity
-                    quantity = production_capacity
 
                 charlist.append(quantity)
 

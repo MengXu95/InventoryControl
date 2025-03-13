@@ -142,7 +142,7 @@ class broodPop:
         # Calculate the threshold
         self.threshold = lower_bound_dis + scaling_factor * mad
 
-        print(f"MAD: {mad}, Threshold: {self.threshold}")
+        # print(f"MAD: {mad}, Threshold: {self.threshold}")
 
     # def adjustThreshold(self, unique_population_dis):
     #     if self.threshold is None:
@@ -220,21 +220,39 @@ class broodPop:
         new_population_dis = []
 
         for ind in population:
-            replenishment_charList = self.nich.phenotypic_characristics[0].characterise(ind[0])
-            rental_charList = self.nich.phenotypic_characristics[1].characterise(ind[1])
-            RFQ_predict_charList = self.nich.phenotypic_characristics[2].characterise(ind[2])
+            if len(ind) == 2:
+                replenishment_charList = self.nich.phenotypic_characristics[0].characterise(ind[0])
+                rental_charList = self.nich.phenotypic_characristics[1].characterise(ind[1])
 
-            # Will ignore rental cause rental decisions are always feasible,
-            # but replenishment and RFQ predict might not be feasible
-            replenishment_dis = self.nich.phenotypic_characristics[0].distance(replenishment_charList,
-                                                                               self.nich.phenotypic_characristics[0].decisions)
-            RFQ_predict_dis = self.nich.phenotypic_characristics[2].distance(RFQ_predict_charList,
-                                                                               self.nich.phenotypic_characristics[2].decisions)
+                # Will ignore rental cause rental decisions are always feasible,
+                # but replenishment and RFQ predict might not be feasible
+                replenishment_dis = self.nich.phenotypic_characristics[0].distance(replenishment_charList,
+                                                                                   self.nich.phenotypic_characristics[
+                                                                                       0].decisions)
 
-            total_dis = (replenishment_dis + RFQ_predict_dis)/(2*len(RFQ_predict_charList))
-            if total_dis < self.MAX_VALUE:
-                new_population.append(ind)
-                new_population_dis.append(total_dis)
+                total_dis = replenishment_dis/len(replenishment_charList)
+                if total_dis < self.MAX_VALUE:
+                    new_population.append(ind)
+                    new_population_dis.append(total_dis)
+            elif len(ind) == 3:
+                replenishment_charList = self.nich.phenotypic_characristics[0].characterise(ind[0])
+                rental_charList = self.nich.phenotypic_characristics[1].characterise(ind[1])
+                RFQ_predict_charList = self.nich.phenotypic_characristics[2].characterise(ind[2])
+
+                # Will ignore rental cause rental decisions are always feasible,
+                # but replenishment and RFQ predict might not be feasible
+                replenishment_dis = self.nich.phenotypic_characristics[0].distance(replenishment_charList,
+                                                                                   self.nich.phenotypic_characristics[0].decisions)
+                RFQ_predict_dis = self.nich.phenotypic_characristics[2].distance(RFQ_predict_charList,
+                                                                                   self.nich.phenotypic_characristics[2].decisions)
+
+                total_dis = (replenishment_dis + RFQ_predict_dis)/(2*len(RFQ_predict_charList))
+                if total_dis < self.MAX_VALUE:
+                    new_population.append(ind)
+                    new_population_dis.append(total_dis)
+            else:
+                print("Error in brood recombination!")
+
 
         unique_population, unique_population_dis, other_population = self.sortPopBasedonPopDis(new_population, new_population_dis)
 
@@ -246,7 +264,7 @@ class broodPop:
 
         self.adjustThreshold(unique_population_dis)
         # self.adjustThreshold(unique_population_dis[0], unique_population_dis[-1])
-        print("Threshold: ", self.threshold)
+        # print("Threshold: ", self.threshold)
 
         clip_index = len(unique_population_dis)
         for i in range(len(unique_population_dis)-1):
@@ -261,7 +279,7 @@ class broodPop:
         unique_population, unique_population_dis = unique_population[:clip_index], unique_population_dis[:clip_index]
         other_population = other_population + unique_population[clip_index:]
         print("unique_population length: ", len(unique_population))
-        print("unique_population_dis length: ", len(unique_population_dis))
+        # print("unique_population_dis length: ", len(unique_population_dis))
         # print("other_population length: ", len(other_population))
 
         if size is not None:

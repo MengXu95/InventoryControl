@@ -139,7 +139,7 @@ def GPFC_main(dataset_name, seed, randomSeed_ngen):
 
 
 POP_SIZE = 200
-NGEN = 5
+NGEN = 50
 CXPB = 0.8
 MUTPB = 0.15
 REPPB = 0.05
@@ -148,12 +148,12 @@ TOURNSIZE = 5
 MAX_HEIGHT = 8
 REP = mt  # individual representation {mt (multi-tree) or vt (vector-tree)}
 #still only two trees, but one for replenishment, one for rental, no transshipment
-N_TREES = 3
+N_TREES = 2
 rd = {}
 DIFF_PSET = True
 seedRotate = True # added by mengxu 2022.10.13
 USE_Niching = True
-USE_BroodRecombination = True
+USE_BroodRecombination = False
 
 # create the shop floor instance
 ins_each_gen = 1 # added by mengxu followed the advice of Meng 2022.11.01
