@@ -11,7 +11,7 @@ class broodPop:
         self.nich = None
         self.initialReferencePoint(dataset_name, referenceInd)
         self.keyRegionRadius = np.inf
-        self.threshold = None
+        self.threshold = np.inf
         self.MAX_VALUE = np.inf
 
     def initialReferencePoint(self, dataset_name, referenceInd):
@@ -141,76 +141,7 @@ class broodPop:
 
         # Calculate the threshold
         self.threshold = lower_bound_dis + scaling_factor * mad
-
-        # print(f"MAD: {mad}, Threshold: {self.threshold}")
-
-    # def adjustThreshold(self, unique_population_dis):
-    #     if self.threshold is None:
-    #         self.threshold = np.median(unique_population_dis)  # Use mean for better representation
-    #     else:
-    #         lower_bound_dis = unique_population_dis[0]
-    #         upper_bound_dis = unique_population_dis[-1]
-    #
-    #         mean_val = np.mean(unique_population_dis)
-    #         median_val = np.median(unique_population_dis)
-    #         std_val = np.std(unique_population_dis)  # Standard deviation to measure spread
-    #
-    #         for i in range(len(unique_population_dis)):
-    #             ref = unique_population_dis[i]
-    #             new_ref = np.abs(ref - median_val)
-    #             unique_population_dis[i] = new_ref
-    #
-    #         std_val = np.median(unique_population_dis)
-    #         # std_val = np.std(unique_population_dis)
-    #         print("std_val: ", std_val)
-    #
-    #         # Define a dynamic gap based on standard deviation
-    #         gap = max(std_val, 20)  # Ensure gap is not too small to avoid instability
-    #
-    #         # Scaling factor to control threshold adjustment
-    #         scaling_factor = min(1, max(0.1, 1 - (1 / (1 + gap))))
-    #
-    #         new_threshold = lower_bound_dis + scaling_factor * gap
-    #
-    #         # Smooth transition to avoid sudden changes
-    #         alpha = 0.7  # Weight for previous threshold (adjustable)
-    #         self.threshold = alpha * self.threshold + (1 - alpha) * new_threshold
-
-    # def adjustThreshold(self, unique_population_dis):
-    #     if self.threshold == None:
-    #         self.threshold = np.median(unique_population_dis)
-    #     else:
-    #         lower_bound_dis = unique_population_dis[0]
-    #         upper_bound_dis = unique_population_dis[-1]
-    #         # gap = upper_bound_dis - lower_bound_dis
-    #         medium = np.median(unique_population_dis)
-    #         gap = medium - lower_bound_dis
-    #
-    #         if gap < 1e-3:  # If gap is too small, keep the threshold stable
-    #             self.threshold = (self.threshold + medium) / 2
-    #         else:
-    #             scaling_factor = min(1, max(0.1, 1 - (1 / (1 + gap))))  # Adjust scaling based on gap
-    #             new_threshold = lower_bound_dis + scaling_factor * gap
-    #
-    #             # Smooth transition from previous threshold to avoid sudden changes
-    #             alpha = 0.7  # Weight for previous threshold (adjustable)
-    #             self.threshold = alpha * self.threshold + (1 - alpha) * new_threshold
-
-    # def adjustThreshold(self, lower_bound_dis, upper_bound_dis):
-    #     if self.threshold == None:
-    #         self.threshold = (lower_bound_dis + upper_bound_dis)/2
-    #     else:
-    #         gap = upper_bound_dis - lower_bound_dis
-    #
-    #         if gap < 1e-3:  # If gap is too small, keep the threshold stable
-    #             self.threshold = (self.threshold + lower_bound_dis + upper_bound_dis) / 3
-    #         else:
-    #             scaling_factor = min(1, max(0.1, 1 - (1 / (1 + gap))))  # Adjust scaling based on gap
-    #             new_threshold = lower_bound_dis + scaling_factor * (upper_bound_dis - lower_bound_dis)
-    #
-    #             # Smooth transition from previous threshold to avoid sudden changes
-    #             alpha = 0.7  # Weight for previous threshold (adjustable)
-    #             self.threshold = alpha * self.threshold + (1 - alpha) * new_threshold
+        self.keyRegionRadius = scaling_factor * mad
 
 
     def shrinkPopToSizeBasedOnRadius(self, population, size=None):
@@ -254,56 +185,65 @@ class broodPop:
                 print("Error in brood recombination!")
 
 
-        unique_population, unique_population_dis, other_population = self.sortPopBasedonPopDis(new_population, new_population_dis)
+        removeDup = True
+        print("removeDup: ", removeDup)
+        unique_population, unique_population_dis, other_population = self.sortPopBasedonPopDis(new_population, new_population_dis, removeDup)
+
+        adjustThres = True
+        print("adjustThres: ", adjustThres)
+        if adjustThres:
+            self.adjustThreshold(unique_population_dis)
+        else:
+            self.threshold = np.inf
 
 
-        # upper_bound_dis = -1
-        # for dis in unique_population_dis:
-        #     if dis > upper_bound_dis and dis != np.inf:
-        #         upper_bound_dis = dis
-
-        self.adjustThreshold(unique_population_dis)
-        # self.adjustThreshold(unique_population_dis[0], unique_population_dis[-1])
-        # print("Threshold: ", self.threshold)
 
         clip_index = len(unique_population_dis)
-        for i in range(len(unique_population_dis)-1):
-            dis = unique_population_dis[i]
-            dis_next = unique_population_dis[i+1]
-            if self.threshold > unique_population_dis[0] and dis <= self.threshold and dis_next > self.threshold:
-                clip_index = i+1
+
+        # Find the index where the threshold is crossed
+        for i in range(len(unique_population_dis) - 1):
+            if self.threshold > unique_population_dis[0] and unique_population_dis[i] <= self.threshold < \
+                    unique_population_dis[i + 1]:
+                clip_index = i + 1
                 break
 
-        print("Clip_index percentage: ", clip_index/len(unique_population_dis))
+        # Compute and display the clip percentage
+        clip_percentage = clip_index / len(unique_population_dis)
+        print(f"Clip_index percentage: {clip_percentage:.2%}")
 
-        unique_population, unique_population_dis = unique_population[:clip_index], unique_population_dis[:clip_index]
-        other_population = other_population + unique_population[clip_index:]
-        print("unique_population length: ", len(unique_population))
-        # print("unique_population_dis length: ", len(unique_population_dis))
-        # print("other_population length: ", len(other_population))
+        # Split the population based on the determined clip index
+        new_unique_population, new_unique_population_dis = unique_population[:clip_index], unique_population_dis[:clip_index]
+        other_unique_population = unique_population[clip_index:]
+
+        # Print the sizes of the resulting subsets
+        print(f"Unique population length: {len(new_unique_population)}")
+        print(f"Other unique population length: {len(other_unique_population)}")
+
 
         if size is not None:
-            if len(unique_population) >= size:
-                np.random.shuffle(unique_population)
-                new_pop = unique_population[:size]
-                self.keyRegionRadius = unique_population_dis[size-1]
+            if len(new_unique_population) >= size:
+                np.random.shuffle(new_unique_population)
+                new_pop = new_unique_population[:size]
+            elif len(new_unique_population) + len(other_unique_population) >= size:
+                np.random.shuffle(other_unique_population)
+                new_pop = new_unique_population + other_unique_population[:(size-len(new_unique_population))]
             else:
-                new_pop = unique_population
-                self.keyRegionRadius = unique_population_dis[len(unique_population) - 1]
-                while len(new_pop) < size:
-                    index = np.random.randint(len(other_population))
-                    new_pop.append(other_population[index])
+                new_pop = new_unique_population
+                new_pop = new_pop + other_unique_population
+                np.random.shuffle(other_population)
+                new_pop = new_pop + other_population[:(size-len(new_pop))]
         else:
-            if len(unique_population) >= self.original_size:
-                np.random.shuffle(unique_population)
-                new_pop = unique_population[:self.original_size]
-                self.keyRegionRadius = unique_population_dis[self.original_size - 1]
+            if len(new_unique_population) >= self.original_size:
+                np.random.shuffle(new_unique_population)
+                new_pop = new_unique_population[:self.original_size]
+            elif len(new_unique_population) + len(other_unique_population) >= self.original_size:
+                np.random.shuffle(other_unique_population)
+                new_pop = unique_population + other_unique_population[:(self.original_size - len(unique_population))]
             else:
-                new_pop = unique_population
-                self.keyRegionRadius = unique_population_dis[len(unique_population) - 1]
-                while len(new_pop) < self.original_size:
-                    index = np.random.randint(len(other_population))
-                    new_pop.append(other_population[index])
+                new_pop = new_unique_population
+                new_pop = new_pop + other_unique_population
+                np.random.shuffle(other_population)
+                new_pop = new_pop + other_population[:(self.original_size - len(new_pop))]
         # print("key Region Radius: ", self.keyRegionRadius)
         return new_pop
 
@@ -378,7 +318,7 @@ class broodPop:
     #     return new_pop
 
 
-    def sortPopBasedonPopDis(self, population, population_dis):
+    def sortPopBasedonPopDis(self, population, population_dis, removeDup = True):
         # Combine population and population_dis into tuples
         combined = list(zip(population, population_dis))
 
@@ -392,7 +332,11 @@ class broodPop:
         population_sorted, population_dis_sorted = list(population_sorted), list(population_dis_sorted)
 
         # Remove duplicates based on population_dis_sorted
-        return self.removeDuplicates(population_sorted, population_dis_sorted)
+        if removeDup:
+            return self.removeDuplicates(population_sorted, population_dis_sorted)
+        else:
+            other_population = []
+            return population_sorted, population_dis_sorted, other_population
 
     def removeDuplicates(self, population_sorted, population_dis_sorted):
         unique_population = []

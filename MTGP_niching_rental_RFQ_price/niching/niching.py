@@ -21,7 +21,7 @@ class simulator_niching:
                 print("Error in get enough number of self.replenishment_decision_points)")
 
             np.random.shuffle(replenishment_decision_points)
-            subset_replenishment_decision_points = replenishment_decision_points[:20]
+            subset_replenishment_decision_points = replenishment_decision_points[:self.num_decision_points]
 
             decisionSituations.append(subset_replenishment_decision_points)
         elif len(self.decision_points) == 2: # consider both replenishment and rental
@@ -30,7 +30,7 @@ class simulator_niching:
                 print("Error in get enough number of self.replenishment_decision_points)")
 
             np.random.shuffle(replenishment_decision_points)
-            subset_replenishment_decision_points = replenishment_decision_points[:20]
+            subset_replenishment_decision_points = replenishment_decision_points[:self.num_decision_points]
             decisionSituations.append(subset_replenishment_decision_points)
 
             rental_decision_points = self.decision_points[1]
@@ -38,7 +38,7 @@ class simulator_niching:
                 print("Error in get enough number of self.replenishment_decision_points)")
 
             np.random.shuffle(rental_decision_points)
-            subset_rental_decision_points = rental_decision_points[:20]
+            subset_rental_decision_points = rental_decision_points[:self.num_decision_points]
             decisionSituations.append(subset_rental_decision_points)
         elif len(self.decision_points) == 3:  # consider replenishment, rental, and RFQ_predict
             replenishment_decision_points = self.decision_points[0]
@@ -46,7 +46,7 @@ class simulator_niching:
                 print("Error in get enough number of self.replenishment_decision_points)")
 
             np.random.shuffle(replenishment_decision_points)
-            subset_replenishment_decision_points = replenishment_decision_points[:20]
+            subset_replenishment_decision_points = replenishment_decision_points[:self.num_decision_points]
             decisionSituations.append(subset_replenishment_decision_points)
 
             rental_decision_points = self.decision_points[1]
@@ -54,7 +54,7 @@ class simulator_niching:
                 print("Error in get enough number of self.rental_decision_points)")
 
             np.random.shuffle(rental_decision_points)
-            subset_rental_decision_points = rental_decision_points[:20]
+            subset_rental_decision_points = rental_decision_points[:self.num_decision_points]
             decisionSituations.append(subset_rental_decision_points)
 
             RFQ_predict_decision_points = self.decision_points[2]
@@ -62,7 +62,7 @@ class simulator_niching:
                 print("Error in get enough number of self.RFQ_predict_decision_points)")
 
             np.random.shuffle(RFQ_predict_decision_points)
-            subset_RFQ_predict_decision_points = RFQ_predict_decision_points[:20]
+            subset_RFQ_predict_decision_points = RFQ_predict_decision_points[:self.num_decision_points]
             decisionSituations.append(subset_RFQ_predict_decision_points)
         # decisionSituations.append(subset_routingDecisionSituations) # this is for considering the transshipment value
         return decisionSituations
@@ -79,7 +79,7 @@ class niching_clear:
     def initial_phenoCharacterisation(self, parameters, individual):
         # create the environment instance for simulation
         self.phenotypic_characristics = []
-        env_niching = simulator_niching(parameters,20, individual)
+        env_niching = simulator_niching(parameters,10, individual)
         self.decisionSituations = env_niching.getDecisionSituations()
         if len(individual) == 1: # for the instances that only consider the replenishment rule
             replenishmentDecisionSituation = ReplenishmentDecisionSituation.ReplenishmentDecisionSituation(self.decisionSituations[0])
