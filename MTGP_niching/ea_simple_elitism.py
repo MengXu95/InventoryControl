@@ -7,6 +7,8 @@ from MTGP_niching.selection import selElitistAndTournament
 from MTGP_niching.niching.niching import niching_clear
 from Utils.PCDiversity import PCDiversityCalculator
 from Utils.ScenarioDesign import ScenarioDesign
+import MTGP_niching.replenishment as replenishment
+import MTGP_niching.transshipment as transshipment
 
 def varAnd(population, toolbox, cxpb, mutpb, reppb):
     offspring = [toolbox.clone(ind) for ind in population]
@@ -54,8 +56,22 @@ def sortPopulation(toolbox, population):
     # print(pop_fit)
     return populationCopy
 
+def valid_check(individual):
+    if len(individual)==1:
+        replenishment_policy = individual[0]
+        return replenishment.is_valid(replenishment_policy)
+    elif len(individual)==2:
+        replenishment_policy = individual[0]
+        transshipment_policy = individual[1]
+        is_valid = True
+        if not replenishment.is_valid(replenishment_policy):
+            is_valid = False
+        if not transshipment.is_valid(transshipment_policy):
+            is_valid = False
+        return is_valid
 
-def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate, use_niching, rd, stats=None,halloffame=None, verbose=__debug__, seed = __debug__, dataset_name=__debug__):
+
+def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate, use_niching, Check_policy_valid, rd, stats=None,halloffame=None, verbose=__debug__, seed = __debug__, dataset_name=__debug__):
     # initialise the random seed of each generation
     randomSeed_ngen = []
     for i in range((ngen + 1)):
@@ -81,7 +97,6 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
     for ind, fit in zip(invalid_ind, fitnesses):
         ind.fitness.values = fit
 
-
         
     pop_fit = [ind.fitness.values[0] for ind in population]
     min_fitness.append(min(pop_fit))
@@ -104,6 +119,16 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
     logbook.record(gen=0, nevals=len(population), **record)
     if verbose:
         print(logbook.stream)
+
+    # check valid number
+    if Check_policy_valid:
+        valid_number = 0
+        for ind in population:
+            is_valid = valid_check(ind)
+            if is_valid:
+                valid_number += 1
+        valid_percentage = valid_number / len(population)
+        print("Valid percentage: ", valid_percentage)
 
     # using niching to clear duplicated individual 2024.8.5
     PC_diversity_all = []
@@ -171,6 +196,16 @@ def eaSimple(population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate,
         # Replace the current population by the offspring
         population[:] = invalid_elite_ind + invalid_ind
         # population[:] = sorted_elite+offspring
+
+        # check valid number
+        if Check_policy_valid:
+            valid_number = 0
+            for ind in population:
+                is_valid = valid_check(ind)
+                if is_valid:
+                    valid_number += 1
+            valid_percentage = valid_number / len(population)
+            print("Valid percentage: ", valid_percentage)
 
         # modified by mengxu
         if halloffame is not None:

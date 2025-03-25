@@ -1,4 +1,3 @@
-import simpy
 from deap import base
 from deap import creator
 from deap import gp
@@ -10,6 +9,8 @@ import sys
 from MTGP_niching_rental_RFQ_price import saveFile
 import time
 from MTGP_niching_rental_RFQ_price.Inventory_simulator_rental_RFQ import *
+import MTGP_niching_rental_RFQ_price.replenishment as replenishment
+import MTGP_niching_rental_RFQ_price.rental as rental
 
 import numpy as np
 
@@ -42,29 +43,46 @@ def init_stats():
     stats.register("max", np.max)
     return stats
 
+def valid_check(individual):
+    if len(individual)==1:
+        replenishment_policy = individual[0]
+        return replenishment.is_valid(replenishment_policy)
+    elif len(individual)==2:
+        replenishment_policy = individual[0]
+        transshipment_policy = individual[1]
+        return replenishment.is_valid(replenishment_policy)
+
 def evaluate(individual,seed,parameters):
     # add by mengxu 2022.10.13 to add the training instances ===============================================
     # create the environment instance for simulation
     # Generate forecasts and demand
     # seed = rd['seed']
-    env = InvOptEnv(seed,parameters)
-    fitness, all_cost = env.run(individual)
-    all_cost = np.array(all_cost)
+    # if check valid
+    scores = [np.inf, np.inf, np.inf, np.inf, np.inf]
+    is_valid = True
+    if Check_policy_valid:
+        is_valid = valid_check(individual)
 
-    for i in range(ins_each_gen-1):
-        env.reset()
-        fitness_i, all_cost_i = env.run(individual)
-        all_cost_i = np.array(all_cost_i)
+    if is_valid:
+        env = InvOptEnv(seed,parameters)
+        fitness, all_cost = env.run(individual)
+        all_cost = np.array(all_cost)
 
-        fitness = fitness + fitness_i
-        all_cost = all_cost + all_cost_i
+        for i in range(ins_each_gen-1):
+            env.reset()
+            fitness_i, all_cost_i = env.run(individual)
+            all_cost_i = np.array(all_cost_i)
 
-    # spf.job_creator.final_output() #for check
-    fitness = fitness/ins_each_gen
-    all_cost = np.array(all_cost)
-    all_cost = all_cost / ins_each_gen
-    # scores = [fitness]
-    scores = all_cost
+            fitness = fitness + fitness_i
+            all_cost = all_cost + all_cost_i
+
+        # spf.job_creator.final_output() #for check
+        fitness = fitness/ins_each_gen
+        all_cost = np.array(all_cost)
+        all_cost = all_cost / ins_each_gen
+        # scores = [fitness]
+        scores = all_cost
+
     return scores
 
 
@@ -133,13 +151,13 @@ def GPFC_main(dataset_name, seed, randomSeed_ngen):
     stats = init_stats()
     hof = tools.HallOfFame(1)
     # seedRotate = False # added by mengxu 2022.10.13
-    pop, logbook, min_fitness, best_ind_all_gen, min_all_cost = ea_simple_elitism.eaSimple(randomSeed_ngen, pop, toolbox, CXPB, MUTPB, REPPB, ELITISM, NGEN, seedRotate, USE_Niching, USE_BroodRecombination, rd, stats, halloffame=hof, verbose=True, seed =seed, dataset_name=dataset_name)
+    pop, logbook, min_fitness, best_ind_all_gen, min_all_cost = ea_simple_elitism.eaSimple(randomSeed_ngen, pop, toolbox, CXPB, MUTPB, REPPB, ELITISM, NGEN, seedRotate, USE_Niching, USE_BroodRecombination, Check_policy_valid, rd, stats, halloffame=hof, verbose=True, seed =seed, dataset_name=dataset_name)
     best = hof[0]
     return min_fitness,best, best_ind_all_gen, min_all_cost
 
 
-POP_SIZE = 400
-NGEN = 50
+POP_SIZE = 20
+NGEN = 5
 CXPB = 0.8
 MUTPB = 0.15
 REPPB = 0.05
@@ -154,6 +172,7 @@ DIFF_PSET = True
 seedRotate = True # added by mengxu 2022.10.13
 USE_Niching = False
 USE_BroodRecombination = True
+Check_policy_valid = True
 
 # create the shop floor instance
 ins_each_gen = 1 # added by mengxu followed the advice of Meng 2022.11.01

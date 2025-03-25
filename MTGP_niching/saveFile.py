@@ -219,6 +219,20 @@ def save_TestResults_to_csv(randomSeeds, dataSetName, resultsDf):
 
     return
 
+def save_TestResults_secnario_sensitivity_analysis_to_csv(randomSeeds, scenario_dataSetName, dataSetName, resultsDf):
+
+    # Construct the directory and file path
+    directory = f'./MTGP_niching/train/scenario_{dataSetName}/test/'
+    file_path = os.path.join(directory, f'{randomSeeds}_{scenario_dataSetName}_testResults.csv')
+
+    # Create the directory if it does not exist
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    # Save the DataFrame to a CSV file
+    resultsDf.to_csv(file_path, index=False)
+
+    return
 
 def save_TestResults_final_gen_each_instance_to_csv(randomSeeds, dataSetName, resultsDf):
 

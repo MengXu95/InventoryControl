@@ -17,7 +17,7 @@ def main(dataset_name, run):
     scenarioDesign = ScenarioDesign_rental_RFQ_price(dataset_name)
     parameters = scenarioDesign.get_parameter()
 
-    num_instances = 20
+    num_instances = 100
     seed = 888
     seed_rotation = 88
     print('\nBegin testing GP for policy from each generation: ')
@@ -27,7 +27,8 @@ def main(dataset_name, run):
 
     replenishment_rule_size = []
     rental_rule_size = []
-    RFQ_predict_rule_size = []
+    if len(all_gen_individuals[0]) == 3:
+        RFQ_predict_rule_size = []
     test_fitness = []
     PC_diversity = []
     final_gen_each_instance = []
@@ -50,7 +51,8 @@ def main(dataset_name, run):
 
         replenishment_rule_size.append(len(individual[0]))
         rental_rule_size.append(len(individual[1]))
-        RFQ_predict_rule_size.append(len(individual[2]))
+        if len(all_gen_individuals[0]) == 3:
+            RFQ_predict_rule_size.append(len(individual[2]))
 
     for row in all_PC_diversity['PCdiversity']:
         PC_diversity.append(float(row))
@@ -65,10 +67,19 @@ def main(dataset_name, run):
         'Generation': [x for x in range(len(test_fitness))],
         'RepRuleSize': [x for x in replenishment_rule_size],
         'RentRuleSize': [x for x in rental_rule_size],
-        'RFQRuleSize': [x for x in RFQ_predict_rule_size],
         'TestFitness': [x for x in test_fitness],
         'PCDiversity': [x for x in PC_diversity],
-        })
+    })
+    if len(all_gen_individuals[0]) == 3:
+        df = pd.DataFrame({
+            'Run': [run for x in range(len(test_fitness))],
+            'Generation': [x for x in range(len(test_fitness))],
+            'RepRuleSize': [x for x in replenishment_rule_size],
+            'RentRuleSize': [x for x in rental_rule_size],
+            'RFQRuleSize': [x for x in RFQ_predict_rule_size],
+            'TestFitness': [x for x in test_fitness],
+            'PCDiversity': [x for x in PC_diversity],
+            })
 
     # save the test results df
     mtsave.save_TestResults_to_csv(run,dataset_name,df)

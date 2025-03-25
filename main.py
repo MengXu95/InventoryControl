@@ -48,10 +48,11 @@ if __name__ == '__main__':
     elif algo == 'testRuleMTGP_rental_RFQ':
         print('----------testRuleMTGP_rental_RFQ----------')
         testRuleMTGP_rental_RFQ.main(dataset_name, seed)
-    elif algo == 'MTGP_niching_rental_RFQ_price':
-        print('----------MTGP_niching_rental_RFQ_price----------')
+    # elif algo == 'MTGP_niching_rental_RFQ_price':
+    elif algo == 'redGP':
+        print('----------redGP----------')
         GPmain_niching_rental_RFQ_price.main(dataset_name, seed)
-    elif algo == 'testRuleMTGP_rental_RFQ_price':
+    elif algo == 'redGP-test':
         print('----------testRuleMTGP_rental_RFQ_price----------')
         testRuleMTGP_rental_RFQ_price.main(dataset_name, seed)
     elif algo == 'MTGP_niching_rental_2':
@@ -81,8 +82,17 @@ if __name__ == '__main__':
         print('----------DRL----------')
         DRL_main.main(dataset_name, seed)
     elif algo == 'testRuleMTGP':
-        print('----------testRuleMTGP----------')
-        testRuleMTGP.main(dataset_name, seed)
+        # print('----------testRuleMTGP----------')
+        # testRuleMTGP.main(dataset_name, seed)
+        print('----------testRuleMTGP-scenario-sensitivity-analysis----------')
+        # testRuleMTGP.main_scenario_sensitivity_analysis(dataset_name, dataset_name, seed)
+        for seed in range(4,31):
+            all_scenario_dataset_name = ['sN2h_1_5b2', 'sN2h_1_10b3', 'sN2h_5_10b5', 'sN2h_5_50b10',
+                                         'sN2h_10_50b2', 'sN2h_10_100b3', 'sN2h_50_100b5', 'sN2h_100_100b10',
+                                         'sN3h_1_5_10b2', 'sN3h_1_5_50b3', 'sN3h_5_10_50b5', 'sN3h_5_5_50b10',
+                                         'sN3h_10_50_50b2', 'sN3h_10_50_100b3', 'sN3h_50_50_50b5', 'sN3h_50_50_100b10']
+            for scenario_dataset_name in all_scenario_dataset_name:
+                testRuleMTGP.main_scenario_sensitivity_analysis(scenario_dataset_name, dataset_name, seed)
     elif algo == 'S2Demo':
         print('----------S2Demo----------')
         S2Demo.main(dataset_name, seed)

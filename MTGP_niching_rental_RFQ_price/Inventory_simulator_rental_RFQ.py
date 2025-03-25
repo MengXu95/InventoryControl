@@ -1012,12 +1012,13 @@ class InvOptEnv:
                 upbound_support_price = self.demand_level * 5 #todo: need double-check
 
                 # Strategy 2: performs better than Strategy 1 based on one run with popsize 200
-                for each_RFQ_predict_state in RFQ_predict_state:
-                    RFQ_predict_price = round(GP_evolve_RFQ_predict(each_RFQ_predict_state, RFQ_predict_policy), 2)
-                    # print("RFQ_predict_quantity: ", RFQ_predict_quantity)
-                    if RFQ_predict_price <= 0 or RFQ_predict_price > upbound_support_price:
-                        RFQ_predict_price = logistic_util.logistic_scale_and_shift(RFQ_predict_price, 0, upbound_support_price)
-                    RFQ_predict_decisions.append(RFQ_predict_price)
+                if len(individual) == 3:
+                    for each_RFQ_predict_state in RFQ_predict_state:
+                        RFQ_predict_price = round(GP_evolve_RFQ_predict(each_RFQ_predict_state, RFQ_predict_policy), 2)
+                        # print("RFQ_predict_quantity: ", RFQ_predict_quantity)
+                        if RFQ_predict_price <= 0 or RFQ_predict_price > upbound_support_price:
+                            RFQ_predict_price = logistic_util.logistic_scale_and_shift(RFQ_predict_price, 0, upbound_support_price)
+                        RFQ_predict_decisions.append(RFQ_predict_price)
 
 
                 #Strategy 1
@@ -1269,13 +1270,14 @@ class InvOptEnv:
             upbound_support_price = self.demand_level * 5  # todo: need double-check
 
             # Strategy 2: performs better than Strategy 1 based on one run with popsize 200
-            for each_RFQ_predict_state in RFQ_predict_state:
-                RFQ_predict_price = round(GP_pair_RFQ_predict_test(each_RFQ_predict_state, RFQ_predict_policy), 2)
-                # print("RFQ_predict_quantity: ", RFQ_predict_quantity)
-                if RFQ_predict_price <= 0 or RFQ_predict_price > upbound_support_price:
-                    RFQ_predict_price = logistic_util.logistic_scale_and_shift(RFQ_predict_price, 0,
-                                                                                  upbound_support_price)
-                RFQ_predict_decisions.append(RFQ_predict_price)
+            if len(individual) == 3:
+                for each_RFQ_predict_state in RFQ_predict_state:
+                    RFQ_predict_price = round(GP_pair_RFQ_predict_test(each_RFQ_predict_state, RFQ_predict_policy), 2)
+                    # print("RFQ_predict_quantity: ", RFQ_predict_quantity)
+                    if RFQ_predict_price <= 0 or RFQ_predict_price > upbound_support_price:
+                        RFQ_predict_price = logistic_util.logistic_scale_and_shift(RFQ_predict_price, 0,
+                                                                                      upbound_support_price)
+                    RFQ_predict_decisions.append(RFQ_predict_price)
 
                 # Strategy 1
                 # for each_RFQ_predict_state in RFQ_predict_state:

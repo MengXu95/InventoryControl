@@ -80,6 +80,8 @@ def treeNode_S_test(tree, index, data):
     elif tree[index] == 'FTC':
         return data[10],1
 
+
+
 def GP_evolve_S(data, tree_S): # genetic programming evolved sequencing rule
     inventory_replenishment, length_tree = treeNode_S(tree_S, 0, data)
     return inventory_replenishment
@@ -137,6 +139,62 @@ def treeNode_S(tree, index, data):
             return data[9],1
         elif tree[index].name == 'FTC':
             return data[10],1
+
+
+def is_valid(tree): # Returns Boolean indicating whether the tree is dimensionally valid
+    _, dims = treeNode_S_with_units(tree, 0)
+    is_valid = not np.array_equal(dims, np.array([np.inf,np.inf]))
+    #print(f"Tree: {self.gpTree}, is_valid: {is_valid}")
+    return is_valid
+def treeNode_S_with_units(tree, index):
+    if tree[index].arity == 2:
+        length_left, dim_left = treeNode_S_with_units(tree, index + 1)
+        length_right, dim_right = treeNode_S_with_units(tree, index + length_left + 1)
+        if tree[index].name == 'add':
+            if np.array_equal(dim_left, dim_right):  # Works even if both are inf
+                return length_left+length_right+1, dim_left
+            else:  # Dimension mismatch
+                return length_left+length_right+1, np.array([np.inf, np.inf])
+        elif tree[index].name == 'subtract':
+            if np.array_equal(dim_left, dim_right):  # Works even if both are inf
+                return length_left+length_right+1, dim_left
+            else:  # Dimension mismatch
+                return length_left+length_right+1, np.array([np.inf, np.inf])
+        elif tree[index].name == 'multiply':
+            return length_left+length_right+1, dim_left + dim_right if not np.array_equal(dim_right, np.array([np.inf,np.inf])) else np.array([np.inf,np.inf])
+        elif tree[index].name == 'protected_div':
+            return length_left+length_right+1, dim_left - dim_right if not np.array_equal(dim_right, np.array([np.inf,np.inf])) else np.array([np.inf,np.inf])
+        elif tree[index].name == 'maximum':
+            return length_left+length_right+1, dim_left if np.array_equal(dim_left, dim_right) else np.array([np.inf,np.inf])
+        elif tree[index].name == 'minimum':
+            return length_left+length_right+1, dim_left if np.array_equal(dim_left, dim_right) else np.array([np.inf,np.inf])
+    elif tree[index].arity == 1:
+        length_child, dim_child = treeNode_S_with_units(tree, index + 1)
+        return length_child+1, dim_child
+    elif tree[index].arity == 0:
+        #dims: [quantity, cost]
+        if tree[index].name == 'INL':
+            return 1,np.array([1,0])
+        elif tree[index].name == 'PHC':
+            return 1,np.array([0,1])
+        elif tree[index].name == 'PLSC':
+            return 1,np.array([0,1])
+        elif tree[index].name == 'INC':
+            return 1,np.array([1,0])
+        elif tree[index].name == 'FOC':
+            return 1,np.array([0,1])
+        elif tree[index].name == 'PUOC':
+            return 1,np.array([0,1])
+        elif tree[index].name == 'PIP':
+            return 1,np.array([1,0])
+        elif tree[index].name == 'FC1':
+            return 1,np.array([1,0])
+        elif tree[index].name == 'FC2':
+            return 1,np.array([1,0])
+        elif tree[index].name == 'PTC':
+            return 1,np.array([0,1])
+        elif tree[index].name == 'FTC':
+            return 1,np.array([0,1])
 
 def protected_div(left, right):
     with np.errstate(divide='ignore', invalid='ignore'):

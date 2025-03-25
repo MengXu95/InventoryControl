@@ -13,7 +13,8 @@ import random
 from MTGP_niching.Inventory_simulator import *
 
 import numpy as np
-
+import MTGP_niching.replenishment as replenishment
+import MTGP_niching.transshipment as transshipment
 
 
 def connectedness(cluster):
@@ -38,23 +39,43 @@ def init_stats():
     stats.register("max", np.max)
     return stats
 
+def valid_check(individual):
+    if len(individual)==1:
+        replenishment_policy = individual[0]
+        return replenishment.is_valid(replenishment_policy)
+    elif len(individual)==2:
+        replenishment_policy = individual[0]
+        transshipment_policy = individual[1]
+        is_valid = True
+        if not replenishment.is_valid(replenishment_policy):
+            is_valid = False
+        if not transshipment.is_valid(transshipment_policy):
+            is_valid = False
+        return is_valid
+
 def evaluate(individual,seed,parameters):
     # add by mengxu 2022.10.13 to add the training instances ===============================================
     # create the environment instance for simulation
     # Generate forecasts and demand
     # seed = rd['seed']
-    env = InvOptEnv(seed,parameters)
-    fitness = env.run(individual)
+    scores = [np.inf,]
+    is_valid = True
+    if Check_policy_valid:
+        is_valid = valid_check(individual)
 
-    for i in range(ins_each_gen-1):
-        env.reset()
-        fitness_i = env.run(individual)
+    if is_valid:
+        env = InvOptEnv(seed,parameters)
+        fitness = env.run(individual)
 
-        fitness = fitness + fitness_i
+        for i in range(ins_each_gen-1):
+            env.reset()
+            fitness_i = env.run(individual)
 
-    # spf.job_creator.final_output() #for check
-    fitness = fitness/ins_each_gen
-    scores = [fitness]
+            fitness = fitness + fitness_i
+
+        # spf.job_creator.final_output() #for check
+        fitness = fitness/ins_each_gen
+        scores = [fitness]
     return scores
 
 
@@ -123,9 +144,10 @@ rd = {}
 DIFF_PSET = True
 seedRotate = True # added by mengxu 2022.10.13
 USE_Niching = False
+Check_policy_valid = True
 
 # create the shop floor instance
-ins_each_gen = 2 # added by mengxu followed the advice of Meng 2022.11.01
+ins_each_gen = 1 # added by mengxu followed the advice of Meng 2022.11.01
 def main(dataset_name, seed):
 # if __name__ == "__main__":
 #     dataset_name = str(sys.argv[1])

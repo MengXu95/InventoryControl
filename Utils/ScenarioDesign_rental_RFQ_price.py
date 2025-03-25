@@ -162,7 +162,7 @@ class ScenarioDesign_rental_RFQ_price():
             production_capacity = [c/5 for c in capacity]  # Production capacities
             #production_capacity = [c/50 for c in capacity]  # Production capacities
             fixed_order = [20] * num_retailer  # Fixed order costs per order
-            per_unit_order = [1, 1]  # Fixed order costs per order
+            per_unit_order = [1] * num_retailer  # Fixed order costs per order
             per_trans_item = 1  # Per unit cost for transshipment (either direction)
             per_trans_order = 10  # Fixed cost per transshipment (either direction)
             partial_information_visibility = True

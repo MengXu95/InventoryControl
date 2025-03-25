@@ -4,34 +4,25 @@ import numpy as np
 from scipy.stats import wilcoxon
 
 # Algorithms and their associated colors
-algorithms = ["CCGP", "MTGP", "NichMTGP"]
+algorithms = ["GP", "redGPd", "redGPa"]
 colors = {
-    "CCGP": "blue",
-    "NichCCGP": "orange",
-    "MTGP": "green",
-    "NichMTGP": "red"
+    "GP": "blue",
+    "redGPa": "orange",
+    "redGPd": "green",
+    "redGP": "red"
 }
-workdir = "C:/Users/I3Nexus/Desktop/PaperInventoryManagement/Results/"
-folders = {algo: os.path.join(workdir, algo, "train") for algo in algorithms}
+workdir = "C:/Users/I3Nexus/Desktop/2025 paper/Paper1-AdaptiveContinuousSearchSpaceReduction/Results/"
+folders = {algo: os.path.join(workdir, algo) for algo in algorithms}
 
-# List of small scenarios
-# scenarios = ["sN2h_1_5b2", "sN2h_1_10b3", "sN2h_5_10b5", "sN2h_5_50b10",
-#              "sN2h_10_50b2", "sN2h_10_100b3", "sN2h_50_100b5", "sN2h_100_100b10",
-#              "sN3h_1_5_10b2", "sN3h_1_5_50b3", "sN3h_5_10_50b5", "sN3h_5_5_50b10",
-#              "sN3h_10_50_50b2", "sN3h_10_50_100b3", "sN3h_50_50_50b5", "sN3h_50_50_100b10"]
-# scenarios_type = 'small'
-# List of medium scenarios
-# scenarios = ["mN2h_1_5b2", "mN2h_1_10b3", "mN2h_5_10b5", "mN2h_5_50b10",
-#              "mN2h_10_50b2", "mN2h_10_100b3", "mN2h_50_100b5", "mN2h_100_100b10",
-#              "mN3h_1_5_10b2", "mN3h_1_5_50b3", "mN3h_5_10_50b5", "mN3h_5_5_50b10",
-#              "mN3h_10_50_50b2", "mN3h_10_50_100b3", "mN3h_50_50_50b5", "mN3h_50_50_100b10"]
-# scenarios_type = 'medium'
-# List of large scenarios
-scenarios = ["lN2h_1_5b2", "lN2h_1_10b3", "lN2h_5_10b5", "lN2h_5_50b10",
-             "lN2h_10_50b2", "lN2h_10_100b3", "lN2h_50_100b5", "lN2h_100_100b10",
-             "lN3h_1_5_10b2", "lN3h_1_5_50b3", "lN3h_5_10_50b5", "lN3h_5_5_50b10",
-             "lN3h_10_50_50b2", "lN3h_10_50_100b3", "lN3h_50_50_50b5", "lN3h_50_50_100b10"]
-scenarios_type = 'large'
+# List of scenarios
+scenarios = ["sN2h_1_5b2", "sN2h_1_5b3", "sN2h_1_5b5",
+             "sN2h_1_10b2", "sN2h_1_10b3", "sN2h_1_10b5",
+             "sN2h_5_10b2", "sN2h_5_10b3", "sN2h_5_10b5"]
+scenarios_type = 'small'
+# scenarios = ["lN3h_1_5_10b2", "lN3h_1_5_10b3", "lN3h_1_5_10b5",
+#              "lN3h_1_1_10b2", "lN3h_1_1_10b3", "lN3h_1_1_10b5",
+#              "lN3h_5_10_5b2", "lN3h_5_10_5b3", "lN3h_5_10_5b5"]
+# scenarios_type = 'large'
 
 runs = 30
 alpha = 0.05  # Significance level
@@ -42,7 +33,7 @@ data = {scenario: [] for scenario in scenarios}
 # Read the CSV files and store the data
 for algo, folder in folders.items():
     for scenario in scenarios:
-        for run in range(1, runs + 1):
+        for run in range(0, runs):
             file_path = os.path.join(folder, f'scenario_{scenario}/test/{run}_{scenario}_testResults.csv')
             df = pd.read_csv(file_path)
             gen = len(df['TestFitness'])

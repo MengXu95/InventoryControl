@@ -8,6 +8,16 @@ from Utils.FitnessDiversity import FitnessDiversityCalculator
 # from MTGP_niching_rental_RFQ_price.niching.niching import niching_clear
 from MTGP_niching_rental_RFQ_price.fitnessNiching import niching_clear
 from Utils.ScenarioDesign_rental_RFQ_price import ScenarioDesign_rental_RFQ_price
+import MTGP_niching_rental_RFQ_price.replenishment as replenishment
+import MTGP_niching_rental_RFQ_price.rental as rental
+def valid_check(individual):
+    if len(individual)==1:
+        replenishment_policy = individual[0]
+        return replenishment.is_valid(replenishment_policy)
+    elif len(individual)==2:
+        replenishment_policy = individual[0]
+        rental_policy = individual[1]
+        return replenishment.is_valid(replenishment_policy)
 
 def varAnd(population, toolbox, cxpb, mutpb, reppb):
     offspring = [toolbox.clone(ind) for ind in population]
@@ -56,7 +66,7 @@ def sortPopulation(toolbox, population):
     return populationCopy
 
 
-def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate, use_niching, USE_BroodRecombination, rd, stats=None,halloffame=None, verbose=__debug__, seed = __debug__, dataset_name=__debug__):
+def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, ngen, seedRotate, use_niching, USE_BroodRecombination, Check_policy_valid, rd, stats=None,halloffame=None, verbose=__debug__, seed = __debug__, dataset_name=__debug__):
     # initialise the random seed of each generation
     # randomSeed_ngen = []
     # for i in range((ngen + 1)):
@@ -118,6 +128,16 @@ def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, 
     # PC_diversity = calculator.calculate_diversity()
     # PC_diversity_all.append(PC_diversity)
     # print("PC diversity: " + str(PC_diversity))
+
+    # check valid number
+    if Check_policy_valid:
+        valid_number = 0
+        for ind in population:
+            is_valid = valid_check(ind)
+            if is_valid:
+                valid_number += 1
+        valid_percentage = valid_number/len(population)
+        print("Valid percentage: ", valid_percentage)
 
     # Strategy 2: using niching to clear duplicated individual 2025.3.7
     # This one performs better than Strategy 1 using PC as JSS
@@ -196,6 +216,16 @@ def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, 
         # Replace the current population by the offspring
         population[:] = invalid_elite_ind + invalid_ind
         # population[:] = sorted_elite+offspring
+
+        # check valid number
+        if Check_policy_valid:
+            valid_number = 0
+            for ind in population:
+                is_valid = valid_check(ind)
+                if is_valid:
+                    valid_number += 1
+            valid_percentage = valid_number / len(population)
+            print("Valid percentage: ", valid_percentage)
 
         # modified by mengxu
         if halloffame is not None:

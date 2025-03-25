@@ -5,8 +5,6 @@ import numpy as np
 from deap import gp, creator
 from deap import tools
 
-
-
 def init_primitives(pset):
     # add function
     pset.addPrimitive(np.add, 2)

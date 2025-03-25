@@ -46,8 +46,8 @@ class broodPop:
 
         unique_population, unique_population_dis, other_population = self.sortPopBasedonPopDis(new_population, new_population_dis)
 
-        print("unique_population length: ", len(unique_population))
-        print("unique_population_dis length: ", len(unique_population_dis))
+        # print("unique_population length: ", len(unique_population))
+        # print("unique_population_dis length: ", len(unique_population_dis))
 
         if size is not None:
             if len(unique_population) >= size:
@@ -69,7 +69,7 @@ class broodPop:
                 while len(new_pop) < self.original_size:
                     index = np.random.randint(len(other_population))
                     new_pop.append(other_population[index])
-        print("key Region Radius: ", self.keyRegionRadius)
+        # print("key Region Radius: ", self.keyRegionRadius)
         return new_pop
 
     # def adjustThreshold(self, unique_population_dis):
@@ -186,17 +186,15 @@ class broodPop:
 
 
         removeDup = True
-        print("removeDup: ", removeDup)
+        # print("removeDup: ", removeDup)
         unique_population, unique_population_dis, other_population = self.sortPopBasedonPopDis(new_population, new_population_dis, removeDup)
 
-        adjustThres = True
-        print("adjustThres: ", adjustThres)
+        adjustThres = False
+        # print("adjustThres: ", adjustThres)
         if adjustThres:
             self.adjustThreshold(unique_population_dis)
         else:
             self.threshold = np.inf
-
-
 
         clip_index = len(unique_population_dis)
 
@@ -209,15 +207,15 @@ class broodPop:
 
         # Compute and display the clip percentage
         clip_percentage = clip_index / len(unique_population_dis)
-        print(f"Clip_index percentage: {clip_percentage:.2%}")
+        # print(f"Clip_index percentage: {clip_percentage:.2%}")
 
         # Split the population based on the determined clip index
         new_unique_population, new_unique_population_dis = unique_population[:clip_index], unique_population_dis[:clip_index]
         other_unique_population = unique_population[clip_index:]
 
         # Print the sizes of the resulting subsets
-        print(f"Unique population length: {len(new_unique_population)}")
-        print(f"Other unique population length: {len(other_unique_population)}")
+        # print(f"Unique population length: {len(new_unique_population)}")
+        # print(f"Other unique population length: {len(other_unique_population)}")
 
 
         if size is not None:

@@ -202,6 +202,74 @@ def treeNode_R(tree, index, data):
         elif tree[index].name == 'FTC':
             return data[19],1
 
+def is_valid(tree): # Returns Boolean indicating whether the tree is dimensionally valid
+    _, dims = treeNode_R_with_units(tree, 0)
+    is_valid = not np.array_equal(dims, np.array([np.inf,np.inf]))
+    #print(f"Tree: {self.gpTree}, is_valid: {is_valid}")
+    return is_valid
+def treeNode_R_with_units(tree, index):
+    if tree[index].arity == 2:
+        length_left, dim_left = treeNode_R_with_units(tree, index + 1)
+        length_right, dim_right = treeNode_R_with_units(tree, index + length_left + 1)
+        if tree[index].name == 'add':
+            if np.array_equal(dim_left, dim_right):  # Works even if both are inf
+                return length_left + length_right + 1, dim_left
+            else:  # Dimension mismatch
+                return length_left + length_right + 1, np.array([np.inf, np.inf])
+        elif tree[index].name == 'subtract':
+            if np.array_equal(dim_left, dim_right):  # Works even if both are inf
+                return length_left + length_right + 1, dim_left
+            else:  # Dimension mismatch
+                return length_left + length_right + 1, np.array([np.inf, np.inf])
+        elif tree[index].name == 'multiply':
+            return length_left+length_right+1, dim_left + dim_right if not np.array_equal(dim_right, np.array([np.inf,np.inf])) else np.array([np.inf,np.inf])
+        elif tree[index].name == 'protected_div':
+            return length_left+length_right+1, dim_left - dim_right if not np.array_equal(dim_right, np.array([np.inf,np.inf])) else np.array([np.inf,np.inf])
+        elif tree[index].name == 'maximum':
+            return length_left+length_right+1, dim_left if np.array_equal(dim_left, dim_right) else np.array([np.inf,np.inf])
+        elif tree[index].name == 'minimum':
+            return length_left+length_right+1, dim_left if np.array_equal(dim_left, dim_right) else np.array([np.inf,np.inf])
+    elif tree[index].arity == 1:
+        length_child, dim_child = treeNode_R_with_units(tree, index + 1)
+        return length_child + 1, dim_child
+    elif tree[index].arity == 0:
+        if tree[index].name == 'INL1':
+            return 1,np.array([1,0])
+        elif tree[index].name == 'PHC1':
+            return 1,np.array([0,1])
+        elif tree[index].name == 'PLSC1':
+            return 1,np.array([0,1])
+        elif tree[index].name == 'INC1':
+            return 1,np.array([1,0])
+        elif tree[index].name == 'FOC1':
+            return 1,np.array([0,1])
+        elif tree[index].name == 'PIP1':
+            return 1,np.array([1,0])
+        elif tree[index].name == 'FC11':
+            return 1,np.array([1,0])
+        elif tree[index].name == 'FC12':
+            return 1,np.array([1,0])
+        elif tree[index].name == 'INL2':
+            return 1,np.array([1,0])
+        elif tree[index].name == 'PHC2':
+            return 1,np.array([0,1])
+        elif tree[index].name == 'PLSC2':
+            return 1,np.array([0,1])
+        elif tree[index].name == 'INC2':
+            return 1,np.array([1,0])
+        elif tree[index].name == 'FOC2':
+            return 1,np.array([0,1])
+        elif tree[index].name == 'PIP2':
+            return 1,np.array([1,0])
+        elif tree[index].name == 'FC21':
+            return 1,np.array([1,0])
+        elif tree[index].name == 'FC22':
+            return 1,np.array([1,0])
+        elif tree[index].name == 'PTC':
+            return 1,np.array([0,1])
+        elif tree[index].name == 'FTC':
+            return 1,np.array([0,1])
+
 
 def protected_div(left, right):
     with np.errstate(divide='ignore', invalid='ignore'):

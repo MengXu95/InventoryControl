@@ -79,17 +79,23 @@ def isFunction1(node):
 
 
 if __name__ == "__main__":
-    dataSetName = 'lN2h_1_5b2'
-    seedOfRun = 4
+    dataSetName = 'sN2h_1_5b2'
+    seedOfRun = 5
 
     # Load the best individual from all generations
-    with open('../MTGP_niching/train/scenario_' + str(dataSetName) + '/' + str(
-            seedOfRun) + '_meng_individual_' + dataSetName + '.pkl', "rb") as fileName_individual:
+    with open('C:/Users/I3Nexus/Desktop/PaperInventoryManagement/Results/NichMTGP/train/scenario_sN2h_1_5b2/1_meng_individual_sN2h_1_5b2.pkl', "rb") as fileName_individual:
         dict_best_MTGP_individuals = pickle.load(fileName_individual)
 
-    individual = dict_best_MTGP_individuals.get(len(dict_best_MTGP_individuals) - 1)
-    replenishment_rule_tree = individual[0]
-    transshipment_rule_tree = individual[1]
+    # individual = dict_best_MTGP_individuals.get(len(dict_best_MTGP_individuals) - 1)
+    # replenishment_rule_tree = individual[0]
+    # transshipment_rule_tree = individual[1]
+
+    replenishment_rule_tree = dict_best_MTGP_individuals.get(1)[0]
+
+    with open('C:/Users/I3Nexus/PycharmProjects/InventoryControl/MTGP_niching/train/scenario_' + str(dataSetName) + '/same_unit_rule/' + str(
+            seedOfRun) + '_meng_individual_' + dataSetName + '.pkl', "rb") as fileName_individual:
+        dict_best_MTGP_individuals = pickle.load(fileName_individual)
+    transshipment_rule_tree = dict_best_MTGP_individuals.get(14)[1]
 
 
     # Define a function to beautify the graph with different colors for leaf and non-leaf nodes

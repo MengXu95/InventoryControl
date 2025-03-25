@@ -1,0 +1,168 @@
+import os
+import pandas as pd
+import numpy as np
+from scipy.stats import wilcoxon
+
+# Algorithms and their associated colors
+algorithms = ["GP", "redGPd", "redGPa"]
+colors = {
+    "GP": "blue",
+    "redGPa": "orange",
+    "redGPd": "green",
+    "redGP": "red"
+}
+workdir = "C:/Users/I3Nexus/Desktop/2025 paper/Paper1-AdaptiveContinuousSearchSpaceReduction/Results/"
+folders = {algo: os.path.join(workdir, algo) for algo in algorithms}
+
+# List of scenarios
+scenarios = ["sN2h_1_5b2", "sN2h_1_5b3", "sN2h_1_5b5",
+             "sN2h_1_10b2", "sN2h_1_10b3", "sN2h_1_10b5",
+             "sN2h_5_10b2", "sN2h_5_10b3", "sN2h_5_10b5"]
+scenarios_type = 'small'
+# scenarios = ["lN3h_1_5_10b2", "lN3h_1_5_10b3", "lN3h_1_5_10b5",
+#              "lN3h_1_1_10b2", "lN3h_1_1_10b3", "lN3h_1_1_10b5",
+#              "lN3h_5_10_5b2", "lN3h_5_10_5b3", "lN3h_5_10_5b5"]
+# scenarios_type = 'large'
+
+runs = 30
+alpha = 0.05  # Significance level
+
+# Initialize a dictionary to hold data for all algorithms and scenarios
+data = {scenario: [] for scenario in scenarios}
+
+# Read the CSV files and store the data
+for algo, folder in folders.items():
+    for scenario in scenarios:
+        for run in range(runs):
+            file_path = os.path.join(folder, f'scenario_{scenario}/{run}_min_fitness{scenario}.npy')
+            if os.path.exists(file_path):
+                fitness_values = np.load(file_path)
+                for i, value in enumerate(fitness_values):
+                    data[scenario].append({'Algorithm': algo, 'Run': run, 'Gen': i, 'TrainFitness': value})
+
+for scenario in data:
+    test_fitness_values = [entry['TrainFitness'] for entry in data[scenario]]
+    worst_value = max(test_fitness_values) if len(test_fitness_values) > 0 else np.nan
+
+    for entry in data[scenario]:
+        if np.isnan(entry['TrainFitness']):
+            entry['TrainFitness'] = worst_value
+
+    test_fitness_values = [entry['TrainFitness'] for entry in data[scenario]]
+    median_value = np.median(test_fitness_values)
+
+    # for entry in data[scenario]:
+    #     if entry['TestFitness'] > median_value * 1.5:
+    #         entry['TestFitness'] = median_value * 1.5
+
+
+# Wilcoxon Test
+def perform_wilcoxon_test(scenario_data, algorithms):
+    results = []
+    for i, algo1 in enumerate(algorithms):
+        for algo2 in algorithms[i + 1:]:
+            data_algo1 = scenario_data[scenario_data['Algorithm'] == algo1]['TrainFitness']
+            data_algo2 = scenario_data[scenario_data['Algorithm'] == algo2]['TrainFitness']
+
+            if len(data_algo1) == len(data_algo2):  # Ensure the data lengths match
+                stat, p_value = wilcoxon(data_algo1, data_algo2)
+                median_algo1 = data_algo1.median()
+                median_algo2 = data_algo2.median()
+
+                if p_value < alpha:
+                    # Determine the better algorithm based on the median value
+                    if median_algo1 < median_algo2:
+                        better_algo = algo1
+                    else:
+                        better_algo = algo2
+                else:
+                    better_algo = "No significant difference"
+
+                results.append({
+                    'Algorithm 1': algo1,
+                    'Algorithm 2': algo2,
+                    'p-value': p_value,
+                    'Better Algorithm': better_algo,
+                    'Median Algo 1': median_algo1,
+                    'Median Algo 2': median_algo2
+                })
+            else:
+                results.append({
+                    'Algorithm 1': algo1,
+                    'Algorithm 2': algo2,
+                    'p-value': np.nan,
+                    'Better Algorithm': "N/A",
+                    'Median Algo 1': np.nan,
+                    'Median Algo 2': np.nan
+                })
+    return results
+
+
+# Calculate mean and std
+def calculate_mean_std(data, algorithms):
+    mean_std_results = []
+    for scenario in scenarios:
+        scenario_data = pd.DataFrame(data[scenario])
+        for algo in algorithms:
+            algo_data = scenario_data[scenario_data['Algorithm'] == algo]['TrainFitness']
+            mean_value = algo_data.mean()
+            std_value = algo_data.std()
+            mean_std_results.append({
+                'Scenario': scenario,
+                'Algorithm': algo,
+                'Mean': mean_value,
+                'Standard Deviation': std_value
+            })
+    return mean_std_results
+
+def calculate_mean_std_easy_for_table(data, algorithms):
+    mean_std_results = []
+    for scenario in scenarios:
+        scenario_data = pd.DataFrame(data[scenario])
+        for algo in algorithms:
+            algo_data = scenario_data[scenario_data['Algorithm'] == algo]['TrainFitness']
+            mean_value = algo_data.mean()
+            best_value = algo_data.min()
+            std_value = algo_data.std()
+            mean_std_results.append({
+                'Scenario': scenario,
+                'Algorithm': algo,
+                'Mean': str(round(mean_value,2))+'('+str(round(std_value,2))+')',
+                'Best': round(best_value,2)
+            })
+    return mean_std_results
+
+# Perform Wilcoxon test and calculate mean/std
+wilcoxon_results = {}
+mean_std_results = calculate_mean_std(data, algorithms)
+mean_std_results_easy_for_table = calculate_mean_std_easy_for_table(data, algorithms)
+
+for scenario in scenarios:
+    scenario_data = pd.DataFrame(data[scenario])
+    results = perform_wilcoxon_test(scenario_data, algorithms)
+    wilcoxon_results[scenario] = results
+
+# Save Wilcoxon results to a CSV file
+wilcoxon_rows = []
+for scenario, results in wilcoxon_results.items():
+    for result in results:
+        wilcoxon_rows.append([scenario] + list(result.values()))
+
+wilcoxon_results_df = pd.DataFrame(wilcoxon_rows,
+                                   columns=['Scenario', 'Algorithm 1', 'Algorithm 2', 'p-value', 'Better Algorithm',
+                                            'Median Algo 1', 'Median Algo 2'])
+wilcoxon_results_df.to_csv(os.path.join(workdir, "wilcoxon_train_results_" + scenarios_type + ".csv"), index=False)
+
+# Save Mean/Std results to a CSV file
+mean_std_df = pd.DataFrame(mean_std_results, columns=['Scenario', 'Algorithm', 'Mean', 'Standard Deviation'])
+mean_std_df.to_csv(os.path.join(workdir, "train_mean_std_results_" + scenarios_type + ".csv"), index=False)
+
+mean_std_df_easy_for_table = pd.DataFrame(mean_std_results_easy_for_table, columns=['Scenario', 'Algorithm', 'Mean', 'Best'])
+mean_std_df_easy_for_table.to_csv(os.path.join(workdir, "train_mean_std_results_easy_for_table_" + scenarios_type + ".csv"), index=False)
+
+# Print the results (optional)
+for scenario, results in wilcoxon_results.items():
+    print(f"Scenario: {scenario}")
+    for result in results:
+        print(result)
+    print("\n")

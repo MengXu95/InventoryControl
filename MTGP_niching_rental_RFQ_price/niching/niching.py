@@ -90,9 +90,11 @@ class niching_clear:
                 self.decisionSituations[0])
             replenishmentPhenoCharacterisation = ReplenishmentPhenoCharacterisation.ReplenishmentPhenoCharacterisation(
                 individual[0], replenishmentDecisionSituation)
+            # print("replenishmentDecisionSituation decision point:", len(self.decisionSituations[0]))
             self.phenotypic_characristics.append(replenishmentPhenoCharacterisation)
             rentalDecisionSituation = RentalDecisionSituation.RentalDecisionSituation(self.decisionSituations[1])
             rentalPhenoCharacterisation = RentalPhenoCharacterisation.RentalPhenoCharacterisation(individual[1], rentalDecisionSituation)
+            # print("rentalDecisionSituation decision point:", len(self.decisionSituations[1]))
             self.phenotypic_characristics.append(rentalPhenoCharacterisation)
         elif len(individual) == 3: # for the instances that consider both the replenishment and transshipment
             replenishmentDecisionSituation = ReplenishmentDecisionSituation.ReplenishmentDecisionSituation(
