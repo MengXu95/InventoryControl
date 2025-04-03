@@ -160,14 +160,17 @@ def save_best_individual_to_txt_for_DemoTest(bestInd): # save individual as txt 
         os.makedirs(directory)
 
     # Write data to the file
-    with open(file_path_replenishment_policy, 'w') as file:
-        file.write(str(bestInd[0]) + '\n')
+    if len(bestInd) >= 1:
+        with open(file_path_replenishment_policy, 'w') as file:
+            file.write(str(bestInd[0]) + '\n')
 
-    with open(file_path_rental_policy, 'w') as file:
-        file.write(str(bestInd[1]) + '\n')
+    if len(bestInd) >= 2:
+        with open(file_path_rental_policy, 'w') as file:
+            file.write(str(bestInd[1]) + '\n')
 
-    with open(file_path_RFQ_predict_policy, 'w') as file:
-        file.write(str(bestInd[2]) + '\n')
+    if len(bestInd) >= 3:
+        with open(file_path_RFQ_predict_policy, 'w') as file:
+            file.write(str(bestInd[2]) + '\n')
 
     return
 
