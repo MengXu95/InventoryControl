@@ -17,7 +17,6 @@ def GP_pair_RFQ_predict_test(state, tree_S): #data is the state
     RFQ_predict_priority,length_tree = treeNode_RFQ_predict_test(tree_S, 0, state)  # todo: actually, this should be used for sequencing rule
     return RFQ_predict_priority
 
-
 def treeNode_RFQ_predict_test(tree, index, data):
     if tree[index] == 'add':
         left, length_left = treeNode_RFQ_predict_test(tree, index + 1, data)
@@ -66,6 +65,48 @@ def treeNode_RFQ_predict_test(tree, index, data):
 def GP_evolve_RFQ_predict(data, tree_S): # genetic programming evolved sequencing rule
     RFQ_predict_priority,length_tree = treeNode_RFQ_predict(tree_S, 0, data)
     return RFQ_predict_priority
+
+def is_valid(tree): # Returns Boolean indicating whether the tree is dimensionally valid
+    _, dims = treeNode_RFQ_predict_with_units(tree, 0)
+    is_valid = not np.array_equal(dims, np.array([np.inf,np.inf]))
+    #print(f"Tree: {self.gpTree}, is_valid: {is_valid}")
+    return is_valid
+
+def treeNode_RFQ_predict_with_units(tree, index):
+    if tree[index].arity == 2:
+        length_left, dim_left = treeNode_RFQ_predict_with_units(tree, index + 1)
+        length_right, dim_right = treeNode_RFQ_predict_with_units(tree, index + length_left + 1)
+        if tree[index].name == 'add':
+            if np.array_equal(dim_left, dim_right):  # Works even if both are inf
+                return length_left + length_right + 1, dim_left
+            else:  # Dimension mismatch
+                return length_left + length_right + 1, np.array([np.inf, np.inf])
+        elif tree[index].name == 'subtract':
+            if np.array_equal(dim_left, dim_right):  # Works even if both are inf
+                return length_left + length_right + 1, dim_left
+            else:  # Dimension mismatch
+                return length_left + length_right + 1, np.array([np.inf, np.inf])
+        elif tree[index].name == 'multiply':
+            return length_left + length_right + 1, dim_left + dim_right if not np.array_equal(dim_right, np.array(
+                [np.inf, np.inf])) else np.array([np.inf, np.inf])
+        elif tree[index].name == 'protected_div':
+            return length_left + length_right + 1, dim_left - dim_right if not np.array_equal(dim_right, np.array(
+                [np.inf, np.inf])) else np.array([np.inf, np.inf])
+        elif tree[index].name == 'maximum':
+            return length_left + length_right + 1, dim_left if np.array_equal(dim_left, dim_right) else np.array(
+                [np.inf, np.inf])
+        elif tree[index].name == 'minimum':
+            return length_left + length_right + 1, dim_left if np.array_equal(dim_left, dim_right) else np.array(
+                [np.inf, np.inf])
+    elif tree[index].arity == 1:
+        length_child, dim_child = treeNode_RFQ_predict_with_units(tree, index + 1)
+        return length_child + 1, dim_child
+    elif tree[index].arity == 0:
+        if tree[index].name == 'RFQ':
+            return 1,np.array([1,0])
+        elif tree[index].name == 'TUD':
+            return 1,np.array([0,1])
+
 
 def treeNode_RFQ_predict(tree, index, data):
     if tree[index].arity == 2:

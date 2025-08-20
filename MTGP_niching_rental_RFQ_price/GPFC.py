@@ -11,6 +11,7 @@ import time
 from MTGP_niching_rental_RFQ_price.Inventory_simulator_rental_RFQ import *
 import MTGP_niching_rental_RFQ_price.replenishment as replenishment
 import MTGP_niching_rental_RFQ_price.rental as rental
+import MTGP_niching_rental_RFQ_price.RFQ_price_predict as RFQ_price_predict
 
 import numpy as np
 
@@ -44,13 +45,22 @@ def init_stats():
     return stats
 
 def valid_check(individual):
-    if len(individual)==1:
-        replenishment_policy = individual[0]
-        return replenishment.is_valid(replenishment_policy)
-    elif len(individual)==2:
-        replenishment_policy = individual[0]
-        transshipment_policy = individual[1]
-        return replenishment.is_valid(replenishment_policy)
+    replenishment_policy = individual[0]
+    return replenishment.is_valid(replenishment_policy)
+    # if len(individual)==1:
+    #     replenishment_policy = individual[0]
+    #     return replenishment.is_valid(replenishment_policy)
+    # elif len(individual)==2:
+    #     replenishment_policy = individual[0]
+    #     rental_policy = individual[1]
+    #     valid = replenishment.is_valid(replenishment_policy) and rental.is_valid(rental_policy)
+    #     return valid
+    # elif len(individual)==3:
+    #     replenishment_policy = individual[0]
+    #     rental_policy = individual[1]
+    #     RFQ_predict_policy = individual[2]
+    #     valid = replenishment.is_valid(replenishment_policy) and rental.is_valid(rental_policy) and RFQ_price_predict.is_valid(RFQ_predict_policy)
+    #     return valid
 
 def evaluate(individual,seed,parameters):
     # add by mengxu 2022.10.13 to add the training instances ===============================================
@@ -156,7 +166,7 @@ def GPFC_main(dataset_name, seed, randomSeed_ngen):
     return min_fitness,best, best_ind_all_gen, min_all_cost
 
 
-POP_SIZE = 20
+POP_SIZE = 400
 NGEN = 5
 CXPB = 0.8
 MUTPB = 0.15
@@ -166,13 +176,13 @@ TOURNSIZE = 5
 MAX_HEIGHT = 8
 REP = mt  # individual representation {mt (multi-tree) or vt (vector-tree)}
 #still only two trees, but one for replenishment, one for rental, no transshipment
-N_TREES = 2
+N_TREES = 3
 rd = {}
 DIFF_PSET = True
-seedRotate = True # added by mengxu 2022.10.13
+seedRotate = False # added by mengxu 2022.10.13
 USE_Niching = False
 USE_BroodRecombination = True
-Check_policy_valid = True
+Check_policy_valid = False
 
 # create the shop floor instance
 ins_each_gen = 1 # added by mengxu followed the advice of Meng 2022.11.01
@@ -191,7 +201,7 @@ def main(dataset_name, seed):
     saveFile.saveMinFitness(seed, dataset_name, min_fitness)
     saveFile.saveMinAllCost(seed, dataset_name, min_all_cost)
     saveFile.saveRunningTime(seed, dataset_name, running_time)
-    # saveFile.save_best_individual_to_txt_for_DemoTest(best_ind_all_gen[-1])
+    saveFile.save_best_individual_to_txt_for_DemoTest(best_ind_all_gen[-1])
     print("min_all_cost: ")
     print(min_all_cost)
     print(min_fitness)

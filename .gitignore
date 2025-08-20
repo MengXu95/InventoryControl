@@ -1,0 +1,25 @@
+
+WP11Demo/
+*.xlsx
+
+# PyInstaller build directories
+Sanwa/build/
+Sanwa/dist/
+*.spec
+
+
+# Virtual environment directory
+.venv/
+env/
+venv/
+
+# PyInstaller build directories
+/build/
+/dist/
+
+# Python temporary files
+__pycache__/
+*.pyc
+*.npy
+*.csv
+

@@ -68,11 +68,56 @@ def treeNode_rental_test(tree, index, data):
     elif tree[index] == 'TREQ':
         return data[4],1
 
-
 def GP_evolve_rental(data, tree_S): # genetic programming evolved sequencing rule
     rental_priority,length_tree = treeNode_rental(tree_S, 0, data)
     return rental_priority
 
+def is_valid(tree): # Returns Boolean indicating whether the tree is dimensionally valid
+    _, dims = treeNode_rental_with_units(tree, 0)
+    is_valid = not np.array_equal(dims, np.array([np.inf,np.inf]))
+    #print(f"Tree: {self.gpTree}, is_valid: {is_valid}")
+    return is_valid
+
+def treeNode_rental_with_units(tree, index):
+    if tree[index].arity == 2:
+        length_left, dim_left = treeNode_rental_with_units(tree, index + 1)
+        length_right, dim_right = treeNode_rental_with_units(tree, index + length_left + 1)
+        if tree[index].name == 'add':
+            if np.array_equal(dim_left, dim_right):  # Works even if both are inf
+                return length_left + length_right + 1, dim_left
+            else:  # Dimension mismatch
+                return length_left + length_right + 1, np.array([np.inf, np.inf, np.inf])
+        elif tree[index].name == 'subtract':
+            if np.array_equal(dim_left, dim_right):  # Works even if both are inf
+                return length_left + length_right + 1, dim_left
+            else:  # Dimension mismatch
+                return length_left + length_right + 1, np.array([np.inf, np.inf, np.inf])
+        elif tree[index].name == 'multiply':
+            return length_left + length_right + 1, dim_left + dim_right if not np.array_equal(dim_right, np.array(
+                [np.inf, np.inf, np.inf])) else np.array([np.inf, np.inf, np.inf])
+        elif tree[index].name == 'protected_div':
+            return length_left + length_right + 1, dim_left - dim_right if not np.array_equal(dim_right, np.array(
+                [np.inf, np.inf, np.inf])) else np.array([np.inf, np.inf, np.inf])
+        elif tree[index].name == 'maximum':
+            return length_left + length_right + 1, dim_left if np.array_equal(dim_left, dim_right) else np.array(
+                [np.inf, np.inf, np.inf])
+        elif tree[index].name == 'minimum':
+            return length_left + length_right + 1, dim_left if np.array_equal(dim_left, dim_right) else np.array(
+                [np.inf, np.inf, np.inf])
+    elif tree[index].arity == 1:
+        length_child, dim_child = treeNode_rental_with_units(tree, index + 1)
+        return length_child + 1, dim_child
+    elif tree[index].arity == 0:
+        if tree[index].name == 'CRENT':
+            return 1,np.array([1,0,0])
+        elif tree[index].name == 'RP':
+            return 1,np.array([0,1,0])
+        elif tree[index].name == 'RCAP':
+            return 1,np.array([1,0,0])
+        elif tree[index].name == 'RDUR':
+            return 1,np.array([0,0,1])
+        elif tree[index].name == 'TREQ':
+            return 1,np.array([1,0,0])
 def treeNode_rental(tree, index, data):
     if tree[index].arity == 2:
         left, length_left = treeNode_rental(tree, index + 1, data)
