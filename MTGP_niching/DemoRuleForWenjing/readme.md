@@ -6,7 +6,7 @@ This package provides three modules for optimizing business decisions using gene
 
 1. **Replenishment Policy Module** (`replenishment_policy.py`) - Determines optimal order quantities for individual retailers
 2. **Transshipment Policy Module** (`transshipment_policy.py`) - Determines optimal transfer quantities between retailer pairs
-3. **Price Prediction Policy Module** (`price_predict_policy.py`) - Predicts prices based on request for quote (RFQ) and time until delivery (TUD)
+3. **Cost Prediction Policy Module** (`cost_predict_policy.py`) - Predicts outsourcing cost based on request for quote (RFQ) and time until delivery (TUD)
 
 All modules use expression tree evaluation to calculate decisions based on state variables and support complex mathematical operations with overflow protection.
 
