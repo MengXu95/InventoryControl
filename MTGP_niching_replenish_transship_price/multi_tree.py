@@ -226,7 +226,6 @@ def wrap(func, *args, **kwargs):
 
 def xmate_three_tree(ind1, ind2):
     i1 = random.randrange(len(ind1))
-    #todo: I think this is not same with my MTGP, as only the same type of tree can be used to do crossover
     ind1[i1], ind2[i1] = gp.cxOnePoint(ind1[i1], ind2[i1])
 
     # #exchange the other two tree

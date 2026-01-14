@@ -2,7 +2,8 @@ import numpy as np
 import statistics
 
 from MTGP_niching_replenish_transship_price.niching.niching import simulator_niching, niching_clear
-from Utils.ScenarioDesign_rental_RFQ_price import ScenarioDesign_rental_RFQ_price
+from Utils.ScenarioDesign_replenish_transship_price import ScenarioDesign_replenish_transship_price
+
 
 class broodPop:
     def __init__(self, original_size, dataset_name, referenceInd, brood_times=5, **kwargs):
@@ -16,7 +17,7 @@ class broodPop:
 
     def initialReferencePoint(self, dataset_name, referenceInd):
         # get parameters for the given dataset/scenario
-        scenarioDesign = ScenarioDesign_rental_RFQ_price(dataset_name)
+        scenarioDesign = ScenarioDesign_replenish_transship_price(dataset_name)
         parameters = scenarioDesign.get_parameter()
 
         self.nich = niching_clear(0, 1)
@@ -29,30 +30,56 @@ class broodPop:
         new_population_dis = []
 
         for ind in population:
-            replenishment_charList = self.nich.phenotypic_characristics[0].characterise(ind[0])
-            rental_charList = self.nich.phenotypic_characristics[1].characterise(ind[1])
-            RFQ_predict_charList = self.nich.phenotypic_characristics[2].characterise(ind[2])
+            if len(ind) == 1:
+                # Only replenishment
+                replenishment_charList = self.nich.phenotypic_characristics[0].characterise(ind[0])
+                replenishment_dis = self.nich.phenotypic_characristics[0].distance(
+                    replenishment_charList, self.nich.phenotypic_characristics[0].decisions)
+                total_dis = replenishment_dis / len(replenishment_charList)
 
-            # Will ignore rental cause rental decisions are always feasible,
-            # but replenishment and RFQ predict might not be feasible
-            replenishment_dis = self.nich.phenotypic_characristics[0].distance(replenishment_charList,
-                                                                               self.nich.phenotypic_characristics[0].decisions)
-            RFQ_predict_dis = self.nich.phenotypic_characristics[2].distance(RFQ_predict_charList,
-                                                                               self.nich.phenotypic_characristics[2].decisions)
-            total_dis = (replenishment_dis+RFQ_predict_dis)/2
+            elif len(ind) == 2:
+                # Replenishment + Transshipment
+                replenishment_charList = self.nich.phenotypic_characristics[0].characterise(ind[0])
+                transshipment_charList = self.nich.phenotypic_characristics[1].characterise(ind[1])
+
+                replenishment_dis = self.nich.phenotypic_characristics[0].distance(
+                    replenishment_charList, self.nich.phenotypic_characristics[0].decisions)
+                transshipment_dis = self.nich.phenotypic_characristics[1].distance(
+                    transshipment_charList, self.nich.phenotypic_characristics[1].decisions)
+
+                total_dis = (replenishment_dis + transshipment_dis) / (
+                        len(replenishment_charList) + len(transshipment_charList))
+
+            elif len(ind) == 3:
+                # Replenishment + Transshipment + RFQ Predict
+                replenishment_charList = self.nich.phenotypic_characristics[0].characterise(ind[0])
+                transshipment_charList = self.nich.phenotypic_characristics[1].characterise(ind[1])
+                RFQ_predict_charList = self.nich.phenotypic_characristics[2].characterise(ind[2])
+
+                replenishment_dis = self.nich.phenotypic_characristics[0].distance(
+                    replenishment_charList, self.nich.phenotypic_characristics[0].decisions)
+                transshipment_dis = self.nich.phenotypic_characristics[1].distance(
+                    transshipment_charList, self.nich.phenotypic_characristics[1].decisions)
+                RFQ_predict_dis = self.nich.phenotypic_characristics[2].distance(
+                    RFQ_predict_charList, self.nich.phenotypic_characristics[2].decisions)
+
+                total_dis = (replenishment_dis + transshipment_dis + RFQ_predict_dis) / (
+                        len(replenishment_charList) + len(transshipment_charList) + len(RFQ_predict_charList))
+            else:
+                print("Error in brood recombination!")
+                continue
+
             if total_dis < self.MAX_VALUE:
                 new_population.append(ind)
                 new_population_dis.append(total_dis)
 
-        unique_population, unique_population_dis, other_population = self.sortPopBasedonPopDis(new_population, new_population_dis)
-
-        # print("unique_population length: ", len(unique_population))
-        # print("unique_population_dis length: ", len(unique_population_dis))
+        unique_population, unique_population_dis, other_population = self.sortPopBasedonPopDis(
+            new_population, new_population_dis)
 
         if size is not None:
             if len(unique_population) >= size:
                 new_pop = unique_population[:size]
-                self.keyRegionRadius = unique_population_dis[size-1]
+                self.keyRegionRadius = unique_population_dis[size - 1]
             else:
                 new_pop = unique_population
                 self.keyRegionRadius = unique_population_dis[len(unique_population) - 1]
@@ -69,41 +96,8 @@ class broodPop:
                 while len(new_pop) < self.original_size:
                     index = np.random.randint(len(other_population))
                     new_pop.append(other_population[index])
-        # print("key Region Radius: ", self.keyRegionRadius)
+
         return new_pop
-
-    # def adjustThreshold(self, unique_population_dis):
-    #     if self.threshold is None:
-    #         self.threshold = np.mean(unique_population_dis)  # Use mean for better representation
-    #     else:
-    #         lower_bound_dis = unique_population_dis[0]
-    #         upper_bound_dis = unique_population_dis[-1]
-    #
-    #         mean_val = np.mean(unique_population_dis)
-    #         std_val = np.std(unique_population_dis)  # Standard deviation to measure spread
-    #
-    #         # Set upper and lower bounds for std_val to prevent extreme influence
-    #         max_std_factor = (upper_bound_dis - lower_bound_dis) * 0.5  # Limit std effect to 50% of range
-    #         std_val = np.clip(std_val, 1e-3, max_std_factor)  # Ensure stability
-    #
-    #         # Define a dynamic gap using std but controlled
-    #         gap = max(std_val, (upper_bound_dis - lower_bound_dis) * 0.1)  # Ensure at least 10% of range
-    #
-    #         # Scaling factor to control threshold adjustment
-    #         scaling_factor = min(1, max(0.1, 1 - (1 / (1 + gap))))
-    #
-    #         new_threshold = lower_bound_dis + scaling_factor * gap
-    #
-    #         # Smooth transition to avoid sudden changes
-    #         alpha = 0.7  # Weight for previous threshold (adjustable)
-    #         self.threshold = alpha * self.threshold + (1 - alpha) * new_threshold
-
-
-    # def adjustThreshold(self, unique_population_dis):
-    #     # Calculate Median Absolute Deviation (MAD)
-    #     median_val_original = np.median(unique_population_dis)
-    #     # Calculate the threshold
-    #     self.threshold = median_val_original
 
     def adjustThreshold(self, unique_population_dis):
         """
@@ -143,7 +137,6 @@ class broodPop:
         self.threshold = lower_bound_dis + scaling_factor * mad
         self.keyRegionRadius = scaling_factor * mad
 
-
     def shrinkPopToSizeBasedOnRadius(self, population, size=None):
         bestInd = population[0]
         self.nich.calculate_phenoCharacterisation(bestInd)
@@ -151,46 +144,56 @@ class broodPop:
         new_population_dis = []
 
         for ind in population:
-            if len(ind) == 2:
+            if len(ind) == 1:
+                # Only replenishment
                 replenishment_charList = self.nich.phenotypic_characristics[0].characterise(ind[0])
-                rental_charList = self.nich.phenotypic_characristics[1].characterise(ind[1])
+                replenishment_dis = self.nich.phenotypic_characristics[0].distance(
+                    replenishment_charList, self.nich.phenotypic_characristics[0].decisions)
+                total_dis = replenishment_dis / len(replenishment_charList)
 
-                # Will ignore rental cause rental decisions are always feasible,
-                # but replenishment and RFQ predict might not be feasible
-                replenishment_dis = self.nich.phenotypic_characristics[0].distance(replenishment_charList,
-                                                                                   self.nich.phenotypic_characristics[
-                                                                                       0].decisions)
+            elif len(ind) == 2:
+                # Replenishment + Transshipment
+                replenishment_charList = self.nich.phenotypic_characristics[0].characterise(ind[0])
+                transshipment_charList = self.nich.phenotypic_characristics[1].characterise(ind[1])
 
-                total_dis = replenishment_dis/len(replenishment_charList)
-                if total_dis < self.MAX_VALUE:
-                    new_population.append(ind)
-                    new_population_dis.append(total_dis)
+                # Calculate distance for both replenishment and transshipment
+                replenishment_dis = self.nich.phenotypic_characristics[0].distance(
+                    replenishment_charList, self.nich.phenotypic_characristics[0].decisions)
+                transshipment_dis = self.nich.phenotypic_characristics[1].distance(
+                    transshipment_charList, self.nich.phenotypic_characristics[1].decisions)
+
+                total_dis = (replenishment_dis + transshipment_dis) / (
+                        len(replenishment_charList) + len(transshipment_charList))
+
             elif len(ind) == 3:
+                # Replenishment + Transshipment + RFQ Predict
                 replenishment_charList = self.nich.phenotypic_characristics[0].characterise(ind[0])
-                rental_charList = self.nich.phenotypic_characristics[1].characterise(ind[1])
+                transshipment_charList = self.nich.phenotypic_characristics[1].characterise(ind[1])
                 RFQ_predict_charList = self.nich.phenotypic_characristics[2].characterise(ind[2])
 
-                # Will ignore rental cause rental decisions are always feasible,
-                # but replenishment and RFQ predict might not be feasible
-                replenishment_dis = self.nich.phenotypic_characristics[0].distance(replenishment_charList,
-                                                                                   self.nich.phenotypic_characristics[0].decisions)
-                RFQ_predict_dis = self.nich.phenotypic_characristics[2].distance(RFQ_predict_charList,
-                                                                                   self.nich.phenotypic_characristics[2].decisions)
+                # Calculate distances for replenishment, transshipment, and RFQ predict
+                replenishment_dis = self.nich.phenotypic_characristics[0].distance(
+                    replenishment_charList, self.nich.phenotypic_characristics[0].decisions)
+                transshipment_dis = self.nich.phenotypic_characristics[1].distance(
+                    transshipment_charList, self.nich.phenotypic_characristics[1].decisions)
+                RFQ_predict_dis = self.nich.phenotypic_characristics[2].distance(
+                    RFQ_predict_charList, self.nich.phenotypic_characristics[2].decisions)
 
-                total_dis = (replenishment_dis + RFQ_predict_dis)/(2*len(RFQ_predict_charList))
-                if total_dis < self.MAX_VALUE:
-                    new_population.append(ind)
-                    new_population_dis.append(total_dis)
+                total_dis = (replenishment_dis + transshipment_dis + RFQ_predict_dis) / (
+                        len(replenishment_charList) + len(transshipment_charList) + len(RFQ_predict_charList))
             else:
                 print("Error in brood recombination!")
+                continue
 
+            if total_dis < self.MAX_VALUE:
+                new_population.append(ind)
+                new_population_dis.append(total_dis)
 
         removeDup = True
-        # print("removeDup: ", removeDup)
-        unique_population, unique_population_dis, other_population = self.sortPopBasedonPopDis(new_population, new_population_dis, removeDup)
+        unique_population, unique_population_dis, other_population = self.sortPopBasedonPopDis(
+            new_population, new_population_dis, removeDup)
 
         adjustThres = False
-        # print("adjustThres: ", adjustThres)
         if adjustThres:
             self.adjustThreshold(unique_population_dis)
         else:
@@ -206,17 +209,12 @@ class broodPop:
                 break
 
         # Compute and display the clip percentage
-        clip_percentage = clip_index / len(unique_population_dis)
-        # print(f"Clip_index percentage: {clip_percentage:.2%}")
+        clip_percentage = clip_index / len(unique_population_dis) if len(unique_population_dis) > 0 else 0
 
         # Split the population based on the determined clip index
-        new_unique_population, new_unique_population_dis = unique_population[:clip_index], unique_population_dis[:clip_index]
+        new_unique_population = unique_population[:clip_index]
+        new_unique_population_dis = unique_population_dis[:clip_index]
         other_unique_population = unique_population[clip_index:]
-
-        # Print the sizes of the resulting subsets
-        # print(f"Unique population length: {len(new_unique_population)}")
-        # print(f"Other unique population length: {len(other_unique_population)}")
-
 
         if size is not None:
             if len(new_unique_population) >= size:
@@ -224,99 +222,29 @@ class broodPop:
                 new_pop = new_unique_population[:size]
             elif len(new_unique_population) + len(other_unique_population) >= size:
                 np.random.shuffle(other_unique_population)
-                new_pop = new_unique_population + other_unique_population[:(size-len(new_unique_population))]
+                new_pop = new_unique_population + other_unique_population[:(size - len(new_unique_population))]
             else:
                 new_pop = new_unique_population
                 new_pop = new_pop + other_unique_population
                 np.random.shuffle(other_population)
-                new_pop = new_pop + other_population[:(size-len(new_pop))]
+                new_pop = new_pop + other_population[:(size - len(new_pop))]
         else:
             if len(new_unique_population) >= self.original_size:
                 np.random.shuffle(new_unique_population)
                 new_pop = new_unique_population[:self.original_size]
             elif len(new_unique_population) + len(other_unique_population) >= self.original_size:
                 np.random.shuffle(other_unique_population)
-                new_pop = unique_population + other_unique_population[:(self.original_size - len(unique_population))]
+                new_pop = new_unique_population + other_unique_population[
+                    :(self.original_size - len(new_unique_population))]
             else:
                 new_pop = new_unique_population
                 new_pop = new_pop + other_unique_population
                 np.random.shuffle(other_population)
                 new_pop = new_pop + other_population[:(self.original_size - len(new_pop))]
-        # print("key Region Radius: ", self.keyRegionRadius)
+
         return new_pop
 
-
-    # def shrinkPopToSizeBasedOnRadius(self, population, size=None):
-    #     bestInd = population[0]
-    #     self.nich.calculate_phenoCharacterisation(bestInd)
-    #     new_population = []
-    #     new_population_dis = []
-    #
-    #     for ind in population:
-    #         replenishment_charList = self.nich.phenotypic_characristics[0].characterise(ind[0])
-    #         rental_charList = self.nich.phenotypic_characristics[1].characterise(ind[1])
-    #         RFQ_predict_charList = self.nich.phenotypic_characristics[2].characterise(ind[2])
-    #
-    #         # Will ignore rental cause rental decisions are always feasible,
-    #         # but replenishment and RFQ predict might not be feasible
-    #         replenishment_dis = self.nich.phenotypic_characristics[0].distance(replenishment_charList,
-    #                                                                            self.nich.phenotypic_characristics[0].decisions)
-    #         RFQ_predict_dis = self.nich.phenotypic_characristics[2].distance(RFQ_predict_charList,
-    #                                                                            self.nich.phenotypic_characristics[2].decisions)
-    #
-    #         total_dis = (replenishment_dis + RFQ_predict_dis)/(2*len(RFQ_predict_charList))
-    #         if total_dis < self.MAX_VALUE:
-    #             new_population.append(ind)
-    #             new_population_dis.append(total_dis)
-    #
-    #     unique_population, unique_population_dis, other_population = self.sortPopBasedonPopDis(new_population, new_population_dis)
-    #
-    #
-    #     # upper_bound_dis = -1
-    #     # for dis in unique_population_dis:
-    #     #     if dis > upper_bound_dis and dis != np.inf:
-    #     #         upper_bound_dis = dis
-    #
-    #     self.adjustThreshold(unique_population_dis)
-    #     # self.adjustThreshold(unique_population_dis[0], unique_population_dis[-1])
-    #     print("Threshold: ", self.threshold)
-    #
-    #     clip_index = int(np.min([self.original_size/2,len(unique_population_dis)]))
-    #     print("Clip_index: ", clip_index)
-    #
-    #     unique_population, unique_population_dis = unique_population[:clip_index], unique_population_dis[:clip_index]
-    #     other_population = other_population + unique_population[clip_index:]
-    #     print("unique_population length: ", len(unique_population))
-    #     print("unique_population_dis length: ", len(unique_population_dis))
-    #     # print("other_population length: ", len(other_population))
-    #
-    #     if size is not None:
-    #         if len(unique_population) >= size:
-    #             np.random.shuffle(unique_population)
-    #             new_pop = unique_population[:size]
-    #             self.keyRegionRadius = unique_population_dis[size-1]
-    #         else:
-    #             new_pop = unique_population
-    #             self.keyRegionRadius = unique_population_dis[len(unique_population) - 1]
-    #             while len(new_pop) < size:
-    #                 index = np.random.randint(len(other_population))
-    #                 new_pop.append(other_population[index])
-    #     else:
-    #         if len(unique_population) >= self.original_size:
-    #             np.random.shuffle(unique_population)
-    #             new_pop = unique_population[:self.original_size]
-    #             self.keyRegionRadius = unique_population_dis[self.original_size - 1]
-    #         else:
-    #             new_pop = unique_population
-    #             self.keyRegionRadius = unique_population_dis[len(unique_population) - 1]
-    #             while len(new_pop) < self.original_size:
-    #                 index = np.random.randint(len(other_population))
-    #                 new_pop.append(other_population[index])
-    #     # print("key Region Radius: ", self.keyRegionRadius)
-    #     return new_pop
-
-
-    def sortPopBasedonPopDis(self, population, population_dis, removeDup = True):
+    def sortPopBasedonPopDis(self, population, population_dis, removeDup=True):
         # Combine population and population_dis into tuples
         combined = list(zip(population, population_dis))
 

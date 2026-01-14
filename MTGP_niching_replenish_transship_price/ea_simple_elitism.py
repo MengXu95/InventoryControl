@@ -7,17 +7,18 @@ from MTGP_niching_replenish_transship_price.selection import selElitistAndTourna
 from Utils.FitnessDiversity import FitnessDiversityCalculator
 # from MTGP_niching_replenish_transship_price.niching.niching import niching_clear
 from MTGP_niching_replenish_transship_price.fitnessNiching import niching_clear
-from Utils.ScenarioDesign_rental_RFQ_price import ScenarioDesign_rental_RFQ_price
+from Utils.ScenarioDesign_replenish_transship_price import ScenarioDesign_replenish_transship_price
 import MTGP_niching_replenish_transship_price.replenishment as replenishment
-import MTGP_niching_replenish_transship_price.rental as rental
+import MTGP_niching_replenish_transship_price.transshipment as transshipment
+
 def valid_check(individual):
     if len(individual)==1:
         replenishment_policy = individual[0]
         return replenishment.is_valid(replenishment_policy)
     elif len(individual)==2:
         replenishment_policy = individual[0]
-        rental_policy = individual[1]
-        return replenishment.is_valid(replenishment_policy)
+        transshipment_policy = individual[1]
+        return replenishment.is_valid(replenishment_policy) and transshipment.is_valid(transshipment_policy)
 
 def varAnd(population, toolbox, cxpb, mutpb, reppb):
     offspring = [toolbox.clone(ind) for ind in population]
@@ -74,7 +75,7 @@ def eaSimple(randomSeed_ngen, population, toolbox, cxpb, mutpb, reppb, elitism, 
     #     randomSeed_ngen.append(np.random.randint(2000000000))
 
     # get parameters for the given dataset/scenario
-    scenarioDesign = ScenarioDesign_rental_RFQ_price(dataset_name)
+    scenarioDesign = ScenarioDesign_replenish_transship_price(dataset_name)
     parameters = scenarioDesign.get_parameter()
 
     logbook = tools.Logbook()

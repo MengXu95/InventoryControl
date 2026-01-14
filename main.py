@@ -7,6 +7,7 @@ import MTGP_niching_rental_RFQ.GPFC as GPmain_niching_rental_RFQ
 import MTGP_niching_rental_RFQ.testRuleMTGP as testRuleMTGP_rental_RFQ
 import MTGP_niching_rental_RFQ_price.GPFC as GPmain_niching_rental_RFQ_price
 import MTGP_niching_replenish_transship_price.GPFC as GPmain_niching_replenish_transship_price
+import MTGP_niching_replenish_transship_price.testRuleMTGP as InventoryGPTest
 import MTGP_niching_rental_RFQ_price.testRuleMTGP as testRuleMTGP_rental_RFQ_price
 import CCGP_niching_rental.GPFC as CCGPmain_niching_rental
 import MTGP_niching_rental_original.GPFC as GPmain_niching_rental_original
@@ -61,6 +62,9 @@ if __name__ == '__main__':
     elif algo == 'InventoryGP':
         print('----------InventoryGP----------')
         GPmain_niching_replenish_transship_price.main(dataset_name, seed)
+    elif algo == 'InventoryGP-test':
+        print('----------test InventoryGP----------')
+        InventoryGPTest.main(dataset_name, seed)
     elif algo == 'redGP-test':
         print('----------testRuleMTGP_rental_RFQ_price----------')
         testRuleMTGP_rental_RFQ_price.main(dataset_name, seed)

@@ -8,9 +8,9 @@ from MTGP_niching_replenish_transship_price.selection import *
 import sys
 from MTGP_niching_replenish_transship_price import saveFile
 import time
-from MTGP_niching_replenish_transship_price.Inventory_simulator_rental_RFQ import *
+from MTGP_niching_replenish_transship_price.Inventory_simulator_replenish_transship_price import *
 import MTGP_niching_replenish_transship_price.replenishment as replenishment
-import MTGP_niching_replenish_transship_price.rental as rental
+import MTGP_niching_replenish_transship_price.transshipment as transshipment
 import MTGP_niching_replenish_transship_price.RFQ_price_predict as RFQ_price_predict
 
 import numpy as np
@@ -45,22 +45,22 @@ def init_stats():
     return stats
 
 def valid_check(individual):
-    replenishment_policy = individual[0]
-    return replenishment.is_valid(replenishment_policy)
-    # if len(individual)==1:
-    #     replenishment_policy = individual[0]
-    #     return replenishment.is_valid(replenishment_policy)
-    # elif len(individual)==2:
-    #     replenishment_policy = individual[0]
-    #     rental_policy = individual[1]
-    #     valid = replenishment.is_valid(replenishment_policy) and rental.is_valid(rental_policy)
-    #     return valid
-    # elif len(individual)==3:
-    #     replenishment_policy = individual[0]
-    #     rental_policy = individual[1]
-    #     RFQ_predict_policy = individual[2]
-    #     valid = replenishment.is_valid(replenishment_policy) and rental.is_valid(rental_policy) and RFQ_price_predict.is_valid(RFQ_predict_policy)
-    #     return valid
+    # replenishment_policy = individual[0]
+    # return replenishment.is_valid(replenishment_policy)
+    if len(individual)==1:
+        replenishment_policy = individual[0]
+        return replenishment.is_valid(replenishment_policy)
+    elif len(individual)==2:
+        replenishment_policy = individual[0]
+        transshipment_policy = individual[1]
+        valid = replenishment.is_valid(replenishment_policy) and transshipment.is_valid(transshipment_policy)
+        return valid
+    elif len(individual)==3:
+        replenishment_policy = individual[0]
+        transshipment_policy = individual[1]
+        RFQ_predict_policy = individual[2]
+        valid = replenishment.is_valid(replenishment_policy) and transshipment.is_valid(transshipment_policy) and RFQ_price_predict.is_valid(RFQ_predict_policy)
+        return valid
 
 def evaluate(individual,seed,parameters):
     # add by mengxu 2022.10.13 to add the training instances ===============================================
@@ -68,7 +68,7 @@ def evaluate(individual,seed,parameters):
     # Generate forecasts and demand
     # seed = rd['seed']
     # if check valid
-    scores = [np.inf, np.inf, np.inf, np.inf, np.inf]
+    scores = [np.inf, np.inf, np.inf, np.inf]
     is_valid = True
     if Check_policy_valid:
         is_valid = valid_check(individual)
@@ -119,9 +119,8 @@ def GPFC_main(dataset_name, seed, randomSeed_ngen):
         REP.init_primitives_replenishment(pset1)
         pset2 = gp.PrimitiveSet("MAIN2", num_features, prefix="f")
         pset2.context["array"] = np.array
-        REP.init_primitives_rental(pset2)
-        # weights = (-1.,)
-        weights = (-1.,-1.,-1.,-1.,-1.,)
+        REP.init_primitives_transshipment(pset2)
+        weights = (-1.,-1.,-1.,-1.,)
         creator.create("FitnessMin", base.Fitness, weights=weights)
         # set up toolbox
         toolbox = ParallelToolbox()  # base.Toolbox()
@@ -133,12 +132,11 @@ def GPFC_main(dataset_name, seed, randomSeed_ngen):
         REP.init_primitives_replenishment(pset1)
         pset2 = gp.PrimitiveSet("MAIN2", num_features, prefix="f")
         pset2.context["array"] = np.array
-        REP.init_primitives_rental(pset2)
+        REP.init_primitives_transshipment(pset2)
         pset3 = gp.PrimitiveSet("MAIN3", num_features, prefix="f")
         pset3.context["array"] = np.array
         REP.init_primitives_RFQ_predict(pset3)
-        # weights = (-1.,)
-        weights = (-1.,-1.,-1.,-1.,-1.,)
+        weights = (-1.,-1.,-1.,-1.,)
         creator.create("FitnessMin", base.Fitness, weights=weights)
         # set up toolbox
         toolbox = ParallelToolbox()  # base.Toolbox()
@@ -148,8 +146,7 @@ def GPFC_main(dataset_name, seed, randomSeed_ngen):
         pset = gp.PrimitiveSet("MAIN", num_features, prefix="f")
         pset.context["array"] = np.array
         REP.init_primitives_replenishment(pset)
-        # weights = (-1.,)
-        weights = (-1.,-1.,-1.,-1.,-1.,)
+        weights = (-1.,-1.,-1.,-1.,)
         creator.create("FitnessMin", base.Fitness, weights=weights)
         # set up toolbox
         toolbox = ParallelToolbox()  # base.Toolbox()
@@ -166,32 +163,34 @@ def GPFC_main(dataset_name, seed, randomSeed_ngen):
     return min_fitness,best, best_ind_all_gen, min_all_cost
 
 
-POP_SIZE = 100
-NGEN = 5
+POP_SIZE = 400
+NGEN = 50
 CXPB = 0.8
 MUTPB = 0.15
 REPPB = 0.05
-ELITISM = 2
+ELITISM = 4
 TOURNSIZE = 5
 MAX_HEIGHT = 8
-REP = mt  # individual representation {mt (multi-tree) or vt (vector-tree)}
-#still only two trees, but one for replenishment, one for rental, no transshipment
+REP = mt  # individual representation {mt (multi-tree)}
+#Two trees, one for replenishment, one for transshipment, and one for price predict
 N_TREES = 3
 rd = {}
 DIFF_PSET = True
-seedRotate = False # added by mengxu 2022.10.13
-USE_Niching = True
-USE_BroodRecombination = True
+seedRotate = True # added by mengxu 2022.10.13
+USE_Niching = False
+USE_BroodRecombination = False
 Check_policy_valid = False
+ins_each_gen = 1
 
-# create the shop floor instance
-ins_each_gen = 1 # added by mengxu followed the advice of Meng 2022.11.01
+
 def main(dataset_name, seed):
     random.seed(int(seed))
     np.random.seed(int(seed))
+
     randomSeed_ngen = []
     for i in range((NGEN + 1)):
         randomSeed_ngen.append(np.random.randint(2000000000))
+
     saveFile.clear_individual_each_gen_to_txt(seed, dataset_name)
     start = time.time()
     min_fitness,p_one,best_ind_all_gen, min_all_cost= GPFC_main(dataset_name,seed,randomSeed_ngen)
