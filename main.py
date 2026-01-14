@@ -1,3 +1,4 @@
+import multiprocessing
 import sys
 import CCGP_niching.GPFC as CCGPmain_niching
 import MTGP_niching.GPFC as GPmain_niching
@@ -5,6 +6,7 @@ import MTGP_niching_rental.GPFC as GPmain_niching_rental
 import MTGP_niching_rental_RFQ.GPFC as GPmain_niching_rental_RFQ
 import MTGP_niching_rental_RFQ.testRuleMTGP as testRuleMTGP_rental_RFQ
 import MTGP_niching_rental_RFQ_price.GPFC as GPmain_niching_rental_RFQ_price
+import MTGP_niching_replenish_transship_price.GPFC as GPmain_niching_replenish_transship_price
 import MTGP_niching_rental_RFQ_price.testRuleMTGP as testRuleMTGP_rental_RFQ_price
 import CCGP_niching_rental.GPFC as CCGPmain_niching_rental
 import MTGP_niching_rental_original.GPFC as GPmain_niching_rental_original
@@ -16,6 +18,7 @@ import CCGP_niching.testRuleCCGP as testRuleCCGP
 import DRL.testRuleDRL as testRuleDRL
 import sSPolicy.trainRulesSPolicy as trainRulesSPolicy
 import S2Demo as S2Demo
+import multiprocessing as mp
 
 sys.path
 
@@ -24,6 +27,9 @@ if __name__ == '__main__':
     seed = int(sys.argv[2])
     algo = str(sys.argv[3])
 
+    # Add freeze_support for Windows
+    if sys.platform.startswith('win'):
+        mp.freeze_support()
 
     if algo == 'CCGP_niching':
         print('----------CCGP_niching----------')
@@ -52,6 +58,9 @@ if __name__ == '__main__':
     elif algo == 'redGP':
         print('----------redGP----------')
         GPmain_niching_rental_RFQ_price.main(dataset_name, seed)
+    elif algo == 'InventoryGP':
+        print('----------InventoryGP----------')
+        GPmain_niching_replenish_transship_price.main(dataset_name, seed)
     elif algo == 'redGP-test':
         print('----------testRuleMTGP_rental_RFQ_price----------')
         testRuleMTGP_rental_RFQ_price.main(dataset_name, seed)

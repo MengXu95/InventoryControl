@@ -1,0 +1,55 @@
+Best individuals from each gen:
+
+Gen: 0
+Individual:
+Tree 0:
+subtract(maximum('FC2', 'PIP'), protected_div('PUOC', 'FOC'))
+Tree 1:
+maximum(protected_sqrt('RDUR'), 'RDUR')
+Tree 2:
+add('TUD', 'RFQ')
+
+Gen: 1
+Individual:
+Tree 0:
+subtract(maximum('FC2', 'PIP'), protected_div('PUOC', 'FOC'))
+Tree 1:
+maximum(protected_sqrt('RDUR'), 'RDUR')
+Tree 2:
+add('TUD', 'RFQ')
+
+Gen: 2
+Individual:
+Tree 0:
+square('PUOC')
+Tree 1:
+protected_sqrt(multiply(maximum(subtract(subtract('RP', 'CRENT'), 'RCAP'), 'RCAP'), minimum(square(protected_div('RCAP', 'TREQ')), 'RCAP')))
+Tree 2:
+minimum(protected_div(multiply('RFQ', 'TUD'), multiply('RFQ', 'TUD')), square(square('RFQ')))
+
+Gen: 3
+Individual:
+Tree 0:
+square('PUOC')
+Tree 1:
+protected_sqrt(multiply(maximum(subtract(subtract('RP', 'CRENT'), 'RCAP'), 'RCAP'), minimum(square(protected_div('RCAP', 'TREQ')), 'RCAP')))
+Tree 2:
+minimum(protected_div(multiply('RFQ', 'TUD'), multiply('RFQ', 'TUD')), square(square('RFQ')))
+
+Gen: 4
+Individual:
+Tree 0:
+square('PUOC')
+Tree 1:
+protected_sqrt(multiply(maximum(subtract(subtract('RP', 'CRENT'), 'RCAP'), 'RCAP'), minimum(square(protected_div('RCAP', 'TREQ')), 'RCAP')))
+Tree 2:
+minimum(protected_div(multiply('RFQ', 'TUD'), multiply('RFQ', 'TUD')), square(square('RFQ')))
+
+Gen: 5
+Individual:
+Tree 0:
+square('PUOC')
+Tree 1:
+protected_sqrt(multiply(maximum(subtract(subtract('RP', 'CRENT'), 'RCAP'), 'RCAP'), minimum(square(protected_div('RCAP', 'TREQ')), 'RCAP')))
+Tree 2:
+minimum(protected_div(multiply('RFQ', 'TUD'), multiply('RFQ', 'TUD')), square(square('RFQ')))
