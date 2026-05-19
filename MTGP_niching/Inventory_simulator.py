@@ -11,6 +11,7 @@ from torch.distributions import Categorical
 
 from MTGP_niching.replenishment import *
 from MTGP_niching.transshipment import *
+from Utils.inventory_core import Retailer, build_demand_model
 import threading
 
 # np.random.seed(0)
@@ -30,108 +31,6 @@ import threading
 # per_trans_order = 20 # Fixed cost per transshipment (either direction)
 # #########################################################
 
-
-# Demand forecast function
-# Note that at decision time t, demand for time t has already been realised
-class RandomDemand:
-    def __init__(self, seed, demand_level, num_retailer, epi_len):
-        self.seed = seed
-        np.random.seed(self.seed)
-        self.demand_level = demand_level
-        self.num_retailer = num_retailer
-        self.epi_len = epi_len
-        self.list = np.random.uniform(0, self.demand_level, size=(self.num_retailer, self.epi_len + 3)) # for Teckwah
-        # todo: modified by mengxu only for the Teckwah that without the second retailer
-        # for i in range(len(self.list[1])):
-        #     self.list[1][i] = 0
-
-    def seedRotation(self): # add by xumeng for changing to a new seed
-        self.seed = self.seed + 1000
-        np.random.seed(self.seed)
-    def reset(self):
-        self.seedRotation() # add by xumeng for changing to a new seed
-        self.list = np.random.uniform(0, self.demand_level, size=(self.num_retailer, self.epi_len + 3))# for Teckwah
-        # todo: modified by mengxu only for the Teckwah that without the second retailer
-        # for i in range(len(self.list[1])):
-        #     self.list[1][i] = 0
-
-    def f(self, n, t):  # Generate forecasts, f(n,t) corresponds to demand mean for retailer n at time t+1
-        if n >= self.num_retailer:
-            raise ValueError("Invalid retailer number")
-        return self.list[n, t]
-
-    # Function to generate demand history for the two retailers, of length epi_len+1
-    def gen_demand(self):
-        demand_hist_list = []  # List to hold demand histories for multiple retailers
-        for k in range(self.num_retailer):
-            demand_hist = []
-            for i in range(1, self.epi_len + 2):  # 1 extra demand generated so that last state has a next state
-                random_demand = np.random.poisson(self.list[k, i])  # Poisson distribution with forecasted mean
-                demand_hist.append(random_demand)
-            demand_hist_list.append(demand_hist)
-        # todo: modified by mengxu only for the Teckwah that without the second retailer
-        # for i in range(len(demand_hist_list[1])):
-        #     demand_hist_list[1][i] = 0
-        return demand_hist_list
-
-class TeckwahDemand:
-    def __init__(self, seed, demand_hist_list, forcast, num_retailer, epi_len):
-        self.seed = seed
-        np.random.seed(self.seed)
-        self.num_retailer = num_retailer
-        self.epi_len = epi_len
-        self.demand_hist_list = demand_hist_list
-        self.list = forcast
-        # for i in range(len(self.list[1])):
-        #     self.list[1][i] = 0
-
-    def seedRotation(self): # add by xumeng for changing to a new seed
-        self.seed = self.seed + 1000
-        np.random.seed(self.seed)
-    def reset(self):
-        self.seedRotation() # add by xumeng for changing to a new seed
-
-    def f(self, n, t):  # Generate forecasts, f(n,t) corresponds to demand mean for retailer n at time t+1
-        if n >= self.num_retailer:
-            raise ValueError("Invalid retailer number")
-        return self.list[n, t]
-
-    # Function to generate demand history for the two retailers, of length epi_len+1
-    def gen_demand(self):
-        return self.demand_hist_list
-
-
-class Retailer:
-    def __init__(self, demand_records, number, f,
-                 ini_inv, holding, lost_sales, L, LT, capacity, fixed_order,
-                 per_trans_item, per_trans_order):  # Each retailer has its own number 0,1,2,... f is its forecast
-        self.ini_inv = ini_inv
-        self.L = L
-        self.LT = LT
-        self.number = number  # Retailer number
-        self.inv_level = ini_inv[number]  # Initial inventory level
-        self.holding_cost = holding[number]  # Holding cost per unit
-        self.lost_sales_cost = lost_sales[number]  # Cost per unit of lost sales
-        self.pipeline = [0] * (LT - 1)  # List to track orders yet to arrive, of length (LT - 1)
-        self.forecast = [f(number, t) for t in range(1, L + 1)]  # Forecast for time t+1
-        self.capacity = capacity[number]  # Maximum inventory capacity
-        self.demand_list = demand_records  # Historical demand records
-        self.fixed_order_cost = fixed_order[number]  # Fixed cost for placing an order
-        self.transshipment_cost = per_trans_item
-        self.fixed_order_transshipment_cost = per_trans_order
-        self.action = 0  # Order qty
-
-    def reset(self, f):
-        self.inv_level = self.ini_inv[self.number]
-        self.pipeline = [0] * (self.LT - 1)
-        self.forecast = [f(self.number, t) for t in range(1, self.L + 1)]  # Forecast for time t+1
-
-    def order_arrival(self, demand):  # Get next state after pipeline inv arrives and demand is realized
-        self.inv_level = min(self.capacity,
-                             self.inv_level + self.pipeline[0])  # Pipeline arrives, cannot exceed storage capacity
-        self.inv_level -= demand
-        # Update pipeline
-        self.pipeline = np.concatenate((self.pipeline[1:], [self.action]))
 
 class TimeoutException(Exception):
     pass
@@ -167,23 +66,7 @@ class InvOptEnv:
         self.per_trans_item = parameters['per_trans_item']
         self.per_trans_order = parameters['per_trans_order']
 
-        if 'demand_test' in parameters and parameters['demand_test'] is not None:#use teckwah dataset
-            self.demand_records = parameters['demand_test']
-            # Update forecasts
-            forecast1_all = []
-            forecast2_all = []
-            for current_period in range(len(self.demand_records[0])):
-                forecast1 = [self.demand_records[0, current_period]]
-                forecast2 = [self.demand_records[1, current_period]]
-                # forecast1 = [self.demand_records[0, k] for k in range(current_period, current_period + self.L)]
-                # forecast2 = [self.demand_records[1, k] for k in range(current_period, current_period + self.L)]
-                forecast1_all = forecast1_all + forecast1
-                forecast2_all = forecast2_all + forecast2
-            forecast = np.array([forecast1_all, forecast2_all])
-            self.rd = TeckwahDemand(seed, self.demand_records, forecast, self.num_retailer, self.epi_len)
-        else:
-            self.rd = RandomDemand(seed, self.demand_level, self.num_retailer, self.epi_len)
-            self.demand_records = self.rd.gen_demand()
+        self.rd, self.demand_records = build_demand_model(seed, parameters)
         self.n_retailers = self.num_retailer
         self.retailers = []
         for i in range(self.n_retailers):

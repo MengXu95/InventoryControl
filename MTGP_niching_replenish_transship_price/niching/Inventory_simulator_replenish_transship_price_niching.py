@@ -1,10 +1,12 @@
-﻿import threading
+import numpy as np
+import threading
 
 from MTGP_niching_replenish_transship_price import logistic_util
 from MTGP_niching_replenish_transship_price.replenishment import *
 from MTGP_niching_replenish_transship_price.transshipment import *
 from MTGP_niching_replenish_transship_price.RFQ_price_predict import *
 import MTGP_niching_replenish_transship_price.niching.ReplenishmentDecisionSituation as ReplenishmentDecisionSituation
+from Utils.inventory_core import build_deadline_rfq_demand_model
 import MTGP_niching_replenish_transship_price.niching.TransshipmentDecisionSituation as TransshipmentDecisionSituation
 import MTGP_niching_replenish_transship_price.niching.RFQPredictDecisionSituation as RFQPredictDecisionSituation
 
@@ -37,104 +39,6 @@ class SupplierSupport:
         P_true = self.base_price * (1 + demand_factor + urgency_factor) + fluctuation
 
         return P_true
-
-
-# Demand forecast function with RFQ support
-class RandomDemand:
-    def __init__(self, seed, demand_level, RFQ_deadline_level, num_retailer, epi_len):
-        self.seed = seed
-        np.random.seed(self.seed)
-        self.demand_level = demand_level
-        self.RFQ_deadline_level = RFQ_deadline_level
-        self.num_retailer = num_retailer
-        self.epi_len = epi_len
-        self.list = np.random.uniform(0, self.demand_level, size=(self.num_retailer, self.epi_len + 3))
-        self.deadline_list = np.random.uniform(0, self.RFQ_deadline_level, size=(self.num_retailer, self.epi_len + 3))
-
-    def seedRotation(self):
-        self.seed = self.seed + 1000
-        np.random.seed(self.seed)
-
-    def reset(self):
-        self.seedRotation()
-        self.list = np.random.uniform(0, self.demand_level, size=(self.num_retailer, self.epi_len + 3))
-        self.deadline_list = np.random.uniform(0, self.RFQ_deadline_level, size=(self.num_retailer, self.epi_len + 3))
-
-    def f(self, n, t):
-        if n >= self.num_retailer:
-            raise ValueError("Invalid retailer number")
-        return self.list[n, t]
-
-    def gen_demand(self):
-        demand_hist_list = []
-        for k in range(self.num_retailer):
-            demand_hist = []
-            for i in range(1, self.epi_len + 2):
-                random_demand = np.random.poisson(self.list[k, i])
-                demand_hist.append(random_demand)
-            demand_hist_list.append(demand_hist)
-        return demand_hist_list
-
-    def gen_urgent_RFQ_demand(self, RFQ_happen_pro):
-        demand_hist_list = []
-        DUT_demand_hist_list = []
-        for k in range(self.num_retailer):
-            demand_hist = []
-            DUT_demand_hist = []
-            for i in range(1, self.epi_len + 2):
-                random_demand = np.random.uniform(0, self.list[k, i])
-                DUT_random_demand = np.random.uniform(0, self.deadline_list[k, i])
-                if np.random.rand() > RFQ_happen_pro:
-                    random_demand = 0
-                    DUT_random_demand = 0
-                demand_hist.append(random_demand)
-                DUT_demand_hist.append(DUT_random_demand)
-            demand_hist_list.append(demand_hist)
-            DUT_demand_hist_list.append(DUT_demand_hist)
-        return demand_hist_list, DUT_demand_hist_list
-
-
-class TeckwahDemand:
-    def __init__(self, seed, demand_hist_list, forcast, num_retailer, epi_len):
-        self.seed = seed
-        np.random.seed(self.seed)
-        self.num_retailer = num_retailer
-        self.epi_len = epi_len
-        self.demand_hist_list = demand_hist_list
-        self.list = forcast
-
-    def seedRotation(self):
-        self.seed = self.seed + 1000
-        np.random.seed(self.seed)
-
-    def reset(self):
-        self.seedRotation()
-
-    def f(self, n, t):
-        if n >= self.num_retailer:
-            raise ValueError("Invalid retailer number")
-        return self.list[n, t]
-
-    def gen_demand(self):
-        return self.demand_hist_list
-
-    def gen_urgent_RFQ_demand(self, RFQ_happen_pro):
-        demand_hist_list = []
-        DUT_demand_hist_list = []
-        for k in range(self.num_retailer):
-            demand_hist = []
-            DUT_demand_hist = []
-            for i in range(1, self.epi_len + 2):
-                random_demand = np.random.uniform(0, self.list[k, i])
-                DUT_random_demand = 0  # Need to implement deadline for Teckwah
-                if np.random.rand() > RFQ_happen_pro:
-                    random_demand = 0
-                    DUT_random_demand = 0
-                demand_hist.append(random_demand)
-                DUT_demand_hist.append(DUT_random_demand)
-            demand_hist_list.append(demand_hist)
-            DUT_demand_hist_list.append(DUT_demand_hist)
-        return demand_hist_list, DUT_demand_hist_list
 
 
 class Retailer:
@@ -199,26 +103,7 @@ class InvOptEnv:
         self.RFQ_deadline_level = parameters['RFQ_deadline_level']
         self.RFQ_happen_pro = parameters['RFQ_happen_pro']
         self.partial_information_visibility = parameters['partial_information_visibility']
-
-        if 'demand_test' in parameters and parameters['demand_test'] is not None:  # use teckwah dataset
-            self.demand_records = parameters['demand_test']
-            forecast1_all = []
-            forecast2_all = []
-            for current_period in range(len(self.demand_records[0])):
-                forecast1 = [self.demand_records[0, current_period]]
-                forecast2 = [self.demand_records[1, current_period]]
-                forecast1_all = forecast1_all + forecast1
-                forecast2_all = forecast2_all + forecast2
-            forecast = np.array([forecast1_all, forecast2_all])
-            self.rd = TeckwahDemand(seed, self.demand_records, forecast, self.num_retailer, self.epi_len)
-            self.urgent_RFQ_demand_records, self.urgent_RFQ_TUD_records = self.rd.gen_urgent_RFQ_demand(
-                self.RFQ_happen_pro)
-        else:
-            self.rd = RandomDemand(seed, self.demand_level, self.RFQ_deadline_level, self.num_retailer, self.epi_len)
-            self.demand_records = self.rd.gen_demand()
-            self.urgent_RFQ_demand_records, self.urgent_RFQ_TUD_records = self.rd.gen_urgent_RFQ_demand(
-                self.RFQ_happen_pro)
-
+        self.rd, self.demand_records, self.urgent_RFQ_demand_records, self.urgent_RFQ_TUD_records = build_deadline_rfq_demand_model(seed, parameters)
         self.n_retailers = self.num_retailer
         self.retailers = []
         for i in range(self.n_retailers):

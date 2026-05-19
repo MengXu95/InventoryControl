@@ -1,4 +1,4 @@
-﻿import numpy as np
+import numpy as np
 import matplotlib.pyplot as plt
 import itertools
 import torch
@@ -17,6 +17,7 @@ from MTGP_niching_rental_RFQ.transshipment import *
 from MTGP_niching_rental_RFQ.rental import *
 from MTGP_niching_rental_RFQ.RFQ_predict import *
 import MTGP_niching_rental_RFQ.niching.ReplenishmentDecisionSituation as ReplenishmentDecisionSituation
+from Utils.inventory_core import build_urgent_rfq_demand_model
 import MTGP_niching_rental_RFQ.niching.TransshipmentDecisionSituation as TransshipmentDecisionSituation
 import MTGP_niching_rental_RFQ.niching.RentalDecisionSituation as RentalDecisionSituation
 import MTGP_niching_rental_RFQ.niching.RFQPredictDecisionSituation as RFQPredictDecisionSituation
@@ -61,106 +62,6 @@ class SupplierSupport:
         # for i in range(len(demand_hist_list[1])):
         #     demand_hist_list[1][i] = 0
         return support_hist_list
-
-
-# Demand forecast function
-# Note that at decision time t, demand for time t has already been realised
-class RandomDemand:
-    def __init__(self, seed, demand_level, num_retailer, epi_len):
-        self.seed = seed
-        np.random.seed(self.seed)
-        self.demand_level = demand_level
-        self.num_retailer = num_retailer
-        self.epi_len = epi_len
-        self.list = np.random.uniform(0, self.demand_level, size=(self.num_retailer, self.epi_len + 3)) # for Teckwah
-        # todo: modified by mengxu only for the Teckwah that without the second retailer
-        # for i in range(len(self.list[1])):
-        #     self.list[1][i] = 0
-
-    def seedRotation(self): # add by xumeng for changing to a new seed
-        self.seed = self.seed + 1000
-        np.random.seed(self.seed)
-    def reset(self):
-        self.seedRotation() # add by xumeng for changing to a new seed
-        self.list = np.random.uniform(0, self.demand_level, size=(self.num_retailer, self.epi_len + 3))# for Teckwah
-        # todo: modified by mengxu only for the Teckwah that without the second retailer
-        # for i in range(len(self.list[1])):
-        #     self.list[1][i] = 0
-
-    def f(self, n, t):  # Generate forecasts, f(n,t) corresponds to demand mean for retailer n at time t+1
-        if n >= self.num_retailer:
-            raise ValueError("Invalid retailer number")
-        return self.list[n, t]
-
-    # Function to generate demand history for the two retailers, of length epi_len+1
-    def gen_demand(self):
-        demand_hist_list = []  # List to hold demand histories for multiple retailers
-        for k in range(self.num_retailer):
-            demand_hist = []
-            for i in range(1, self.epi_len + 2):  # 1 extra demand generated so that last state has a next state
-                random_demand = np.random.poisson(self.list[k, i])  # Poisson distribution with forecasted mean
-                demand_hist.append(random_demand)
-            demand_hist_list.append(demand_hist)
-        # todo: the following is modified by mengxu only for the Teckwah that without the second retailer
-        # for i in range(len(demand_hist_list[1])):
-        #     demand_hist_list[1][i] = 0
-        return demand_hist_list
-
-    def gen_urgent_RFQ_demand(self, RFQ_happen_pro):
-        demand_hist_list = []  # List to hold demand histories for multiple retailers
-        for k in range(self.num_retailer):
-            demand_hist = []
-            for i in range(1, self.epi_len + 2):  # 1 extra demand generated so that last state has a next state
-                random_demand = np.random.uniform(0,self.list[k, i])  # Poisson distribution with forecasted mean
-                if np.random.rand() > RFQ_happen_pro:
-                    random_demand = 0 # urgent RFQ not always happen! by mengxu 2025.3.3
-                demand_hist.append(random_demand)
-            demand_hist_list.append(demand_hist)
-        # todo: the following is modified by mengxu only for the Teckwah that without the second retailer
-        # for i in range(len(demand_hist_list[1])):
-        #     demand_hist_list[1][i] = 0
-        return demand_hist_list
-
-class TeckwahDemand:
-    def __init__(self, seed, demand_hist_list, forcast, num_retailer, epi_len):
-        self.seed = seed
-        np.random.seed(self.seed)
-        self.num_retailer = num_retailer
-        self.epi_len = epi_len
-        self.demand_hist_list = demand_hist_list
-        self.list = forcast
-        # for i in range(len(self.list[1])):
-        #     self.list[1][i] = 0
-
-    def seedRotation(self): # add by xumeng for changing to a new seed
-        self.seed = self.seed + 1000
-        np.random.seed(self.seed)
-    def reset(self):
-        self.seedRotation() # add by xumeng for changing to a new seed
-
-    def f(self, n, t):  # Generate forecasts, f(n,t) corresponds to demand mean for retailer n at time t+1
-        if n >= self.num_retailer:
-            raise ValueError("Invalid retailer number")
-        return self.list[n, t]
-
-    # Function to generate demand history for the two retailers, of length epi_len+1
-    def gen_demand(self):
-        return self.demand_hist_list
-
-    def gen_urgent_RFQ_demand(self, RFQ_happen_pro):
-        demand_hist_list = []  # List to hold demand histories for multiple retailers
-        for k in range(self.num_retailer):
-            demand_hist = []
-            for i in range(1, self.epi_len + 2):  # 1 extra demand generated so that last state has a next state
-                random_demand = np.random.uniform(0, self.list[k, i])  # Uniform urgent-demand draw bounded by forecast
-                if np.random.rand() > RFQ_happen_pro:
-                    random_demand = 0 # urgent RFQ not always happen! by mengxu 2025.3.3
-                demand_hist.append(random_demand)
-            demand_hist_list.append(demand_hist)
-        # todo: modified by mengxu only for the Teckwah that without the second retailer
-        # for i in range(len(demand_hist_list[1])):
-        #     demand_hist_list[1][i] = 0
-        return demand_hist_list
 
 
 class Retailer:
@@ -286,27 +187,7 @@ class InvOptEnv:
         # add by xu meng 2024.12.2
         self.rental_choice = parameters['rental_choice']
         self.current_rentals = []
-
-        if 'demand_test' in parameters and parameters['demand_test'] is not None:#use teckwah dataset
-            self.demand_records = parameters['demand_test']
-            # Update forecasts
-            forecast1_all = []
-            forecast2_all = []
-            for current_period in range(len(self.demand_records[0])):
-                forecast1 = [self.demand_records[0, current_period]]
-                forecast2 = [self.demand_records[1, current_period]]
-                # forecast1 = [self.demand_records[0, k] for k in range(current_period, current_period + self.L)]
-                # forecast2 = [self.demand_records[1, k] for k in range(current_period, current_period + self.L)]
-                forecast1_all = forecast1_all + forecast1
-                forecast2_all = forecast2_all + forecast2
-            forecast = np.array([forecast1_all, forecast2_all])
-            self.rd = TeckwahDemand(seed, self.demand_records, forecast, self.num_retailer, self.epi_len)
-            self.urgent_RFQ_demand_records = self.rd.gen_urgent_RFQ_demand(
-                self.RFQ_happen_pro)  # add by meng xu for urgent RFQ
-        else:
-            self.rd = RandomDemand(seed, self.demand_level, self.num_retailer, self.epi_len)
-            self.demand_records = self.rd.gen_demand()
-            self.urgent_RFQ_demand_records = self.rd.gen_urgent_RFQ_demand(self.RFQ_happen_pro) # add by meng xu for urgent RFQ
+        self.rd, self.demand_records, self.urgent_RFQ_demand_records = build_urgent_rfq_demand_model(seed, parameters) # add by meng xu for urgent RFQ
 
         # this is for RFQ and support for partial information visibility
         supplierSupport = SupplierSupport(seed, self.support_level, self.num_retailer, self.epi_len)

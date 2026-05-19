@@ -138,6 +138,14 @@ pip install numpy pandas deap torch matplotlib scipy pytz
 - Many algorithm folders share similar file names but differ in important details. Compare variants before moving logic across folders.
 - On Windows, keep multiprocessing entry points guarded and preserve `freeze_support()` behavior in runnable scripts.
 
+## Simulator Architecture
+
+The simulator code is being moved toward a shared-core structure. Common inventory mechanics live in `Utils/inventory_core.py`, including demand models, Teckwah demand handling, basic retailer state transitions, and rental-aware retailer state transitions.
+
+Method folders should keep their method-specific pieces, such as GP tree evaluation, PPO action maps, PSO action vectors, state feature construction, result saving, and experiment parameters. Shared physical mechanics such as demand generation, pipeline arrivals, capacity limits, rental shortage support, and demand-record selection should be reused from the core module so method comparisons are not affected by copied simulator bugs.
+
+Current first-stage migrations use the shared core in the base CCGP, MTGP, sS, DRL, and main rental CCGP/MTGP/PSO simulators. RFQ, pricing, and niching variants still have method-specific simulator logic and should be migrated gradually with fixed-action regression checks.
+
 ## Copilot Agent
 
 This repository includes a workspace custom agent at `.github/agents/inventory-control-coder.agent.md`. Use it in VS Code when working on coding, debugging, documentation, or method-improvement tasks for this project.
