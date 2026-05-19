@@ -1,4 +1,4 @@
-import numpy as np
+﻿import numpy as np
 import matplotlib.pyplot as plt
 import itertools
 import torch
@@ -152,7 +152,7 @@ class TeckwahDemand:
         for k in range(self.num_retailer):
             demand_hist = []
             for i in range(1, self.epi_len + 2):  # 1 extra demand generated so that last state has a next state
-                random_demand = np.random.random(self.list[k, i])  # Poisson distribution with forecasted mean
+                random_demand = np.random.uniform(0, self.list[k, i])  # Uniform urgent-demand draw bounded by forecast
                 if np.random.rand() > RFQ_happen_pro:
                     random_demand = 0 # urgent RFQ not always happen! by mengxu 2025.3.3
                 demand_hist.append(random_demand)
@@ -198,9 +198,10 @@ class Retailer:
         self.inv_level -= demand
 
         if self.inv_level < 0:
-            if np.absolute(self.inv_level) < rental_available:
+            shortage = np.absolute(self.inv_level)
+            if shortage <= rental_available:
                 self.inv_level = 0
-                rental_available = rental_available - np.absolute(self.inv_level)
+                rental_available = rental_available - shortage
             else:
                 self.inv_level = self.inv_level + rental_available
                 rental_available = 0
@@ -218,9 +219,10 @@ class Retailer:
         support_cost = 0
 
         if self.inv_level < 0:
-            if np.absolute(self.inv_level) < rental_available:
+            shortage = np.absolute(self.inv_level)
+            if shortage <= rental_available:
                 self.inv_level = 0
-                rental_available = rental_available - np.absolute(self.inv_level)
+                rental_available = rental_available - shortage
             else:
                 self.inv_level = self.inv_level + rental_available
                 rental_available = 0
@@ -285,7 +287,7 @@ class InvOptEnv:
         self.rental_choice = parameters['rental_choice']
         self.current_rentals = []
 
-        if self.demand_level == None:#use teckwah dataset
+        if 'demand_test' in parameters and parameters['demand_test'] is not None:#use teckwah dataset
             self.demand_records = parameters['demand_test']
             # Update forecasts
             forecast1_all = []
@@ -321,6 +323,7 @@ class InvOptEnv:
 
         self.n_period = len(self.demand_records[0])
         self.current_period = 1
+        self.current_rentals = []
         self.state = []  # include replenishment state of each retailer and transshipment state of each pair of sites
         state_replenishment = []
         for retailer in self.retailers:
@@ -402,6 +405,7 @@ class InvOptEnv:
         for retailer in self.retailers:
             retailer.reset(self.rd.f)
         self.current_period = 1
+        self.current_rentals = []
         self.state = []  # include replenishment state of each retailer and transshipment state of each pair of sites
         state_replenishment = []
         for retailer in self.retailers:
@@ -476,7 +480,7 @@ class InvOptEnv:
                 ]
             rental_available = total_current_rental
             for retailer, demand in zip(self.retailers, self.demand_records):
-                rental_available = retailer.order_arrival(demand[self.current_period - 2], rental_available)  # -2 not -1
+                rental_available = retailer.order_arrival(demand[self.current_period - 1], rental_available)  # use zero-based period index
 
                 # this is for handle urgent RFQ demand
                 total_support_cost = 0
@@ -484,7 +488,7 @@ class InvOptEnv:
                 for RFQ_predict_decision, retailer, urgent_RFQ_demand, true_support_inventory in zip(
                         RFQ_predict_decisions, self.retailers, self.urgent_RFQ_demand_records,
                         self.support_records):
-                    if urgent_RFQ_demand[self.current_period - 2] > 0:  # urgent_RFQ happen
+                    if urgent_RFQ_demand[self.current_period - 1] > 0:  # urgent_RFQ happen
                         # true_support_inventory represents the true maximal inventory support by others
                         # predict_support_inventory = 10 # this represents the predict maximal inventory support by others
                         # todo: here need to predict how much our partner/competitive can support by mengxu 2025.3.3
@@ -492,10 +496,10 @@ class InvOptEnv:
                             predict_support_inventory = RFQ_predict_decision
                             # print("RFQ_predict_decision: ", RFQ_predict_decision)
                         else:
-                            predict_support_inventory = true_support_inventory[self.current_period - 2]
+                            predict_support_inventory = true_support_inventory[self.current_period - 1]
                         rental_available, support_cost = retailer.urgent_RFQ_order_arrival(
-                            urgent_RFQ_demand[self.current_period - 2], rental_available, predict_support_inventory,
-                            true_support_inventory[self.current_period - 2])  # -2 not -1
+                            urgent_RFQ_demand[self.current_period - 1], rental_available, predict_support_inventory,
+                            true_support_inventory[self.current_period - 1])  # use zero-based period index
                         total_support_cost += support_cost
 
             # Update rental decision and calculate rental cost, new for Strategy version 2.0
@@ -561,7 +565,7 @@ class InvOptEnv:
                                      range(self.current_period, self.current_period + self.L)]  # No +1
             # # Update inv levels and pipelines
             # for retailer, demand in zip(self.retailers, self.demand_records):
-            #     retailer.order_arrival(demand[self.current_period - 2])  # -2 not -1
+            #     retailer.order_arrival(demand[self.current_period - 1])  # use zero-based period index
             self.state = []  # include replenishment state of each retailer and transshipment state of each pair of sites
             state_replenishment = []
             for retailer in self.retailers:
@@ -616,7 +620,7 @@ class InvOptEnv:
             for retailer_index in range(len(self.retailers)):
                 retailer = self.retailers[retailer_index]
                 state_RFQ_predict_retailer = np.array(
-                    [self.urgent_RFQ_demand_records[retailer_index][self.current_period - 2],
+                    [self.urgent_RFQ_demand_records[retailer_index][self.current_period - 1],
                      retailer.inv_level])  # only suitable for LT = 2
                 state_RFQ_predict.append(state_RFQ_predict_retailer)
             self.state.append(state_RFQ_predict)
@@ -636,7 +640,7 @@ class InvOptEnv:
             for RFQ_predict_decision, retailer, urgent_RFQ_demand, true_support_inventory in zip(
                     RFQ_predict_decisions, self.retailers, self.urgent_RFQ_demand_records,
                     self.support_records):
-                if urgent_RFQ_demand[self.current_period - 2] > 0:  # urgent_RFQ happen
+                if urgent_RFQ_demand[self.current_period - 1] > 0:  # urgent_RFQ happen
                     # true_support_inventory represents the true maximal inventory support by others
                     # predict_support_inventory = 10 # this represents the predict maximal inventory support by others
                     # todo: here need to predict how much our partner/competitive can support by mengxu 2025.3.3
@@ -644,10 +648,10 @@ class InvOptEnv:
                         predict_support_inventory = RFQ_predict_decision
                         # print("RFQ_predict_decision: ", RFQ_predict_decision)
                     else:
-                        predict_support_inventory = true_support_inventory[self.current_period - 2]
+                        predict_support_inventory = true_support_inventory[self.current_period - 1]
                     rental_available, support_cost = retailer.urgent_RFQ_order_arrival(
-                        urgent_RFQ_demand[self.current_period - 2], rental_available, predict_support_inventory,
-                        true_support_inventory[self.current_period - 2])  # -2 not -1
+                        urgent_RFQ_demand[self.current_period - 1], rental_available, predict_support_inventory,
+                        true_support_inventory[self.current_period - 1])  # use zero-based period index
                     total_support_cost += support_cost
 
             # Update inv levels and pipelines
@@ -662,8 +666,8 @@ class InvOptEnv:
                 ]
             rental_available = total_current_rental
             for retailer, demand in zip(self.retailers, self.demand_records):
-                rental_available = retailer.order_arrival(demand[self.current_period - 2],
-                                                          rental_available)  # -2 not -1
+                rental_available = retailer.order_arrival(demand[self.current_period - 1],
+                                                          rental_available)  # use zero-based period index
 
             # Update rental decision and calculate rental cost, new for Strategy version 2.0
             rental_cost = 0
@@ -741,7 +745,7 @@ class InvOptEnv:
                                      range(self.current_period, self.current_period + self.L)]  # No +1
             # Update inv levels and pipelines
             # for retailer, demand in zip(self.retailers, self.demand_records):
-            #     retailer.order_arrival(demand[self.current_period - 2])  # -2 not -1
+            #     retailer.order_arrival(demand[self.current_period - 1])  # use zero-based period index
             self.state = []  # include replenishment state of each retailer and transshipment state of each pair of sites
             state_replenishment = []
             for retailer in self.retailers:

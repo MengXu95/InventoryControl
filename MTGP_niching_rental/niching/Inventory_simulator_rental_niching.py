@@ -1,4 +1,4 @@
-import numpy as np
+﻿import numpy as np
 import matplotlib.pyplot as plt
 import itertools
 import torch
@@ -132,9 +132,10 @@ class Retailer:
                              self.inv_level + self.pipeline[0])  # Pipeline arrives, cannot exceed storage capacity
         self.inv_level -= demand
         if self.inv_level < 0:
-            if np.absolute(self.inv_level) < rental_available:
+            shortage = np.absolute(self.inv_level)
+            if shortage <= rental_available:
                 self.inv_level = 0
-                rental_available = rental_available - np.absolute(self.inv_level)
+                rental_available = rental_available - shortage
             else:
                 self.inv_level = self.inv_level + rental_available
                 rental_available = 0
@@ -183,7 +184,7 @@ class InvOptEnv:
                               [20,100,6], [80,500,6], [100,700,6]]
         self.current_rentals = []
 
-        if self.demand_level == None:#use teckwah dataset
+        if 'demand_test' in parameters and parameters['demand_test'] is not None:#use teckwah dataset
             self.demand_records = parameters['demand_test']
             # Update forecasts
             forecast1_all = []
@@ -210,6 +211,7 @@ class InvOptEnv:
 
         self.n_period = len(self.demand_records[0])
         self.current_period = 1
+        self.current_rentals = []
         self.state = []  # include replenishment state of each retailer and transshipment state of each pair of sites
         state_replenishment = []
         for retailer in self.retailers:
@@ -291,6 +293,7 @@ class InvOptEnv:
         for retailer in self.retailers:
             retailer.reset(self.rd.f)
         self.current_period = 1
+        self.current_rentals = []
         self.state = []  # include replenishment state of each retailer and transshipment state of each pair of sites
         state_replenishment = []
         for retailer in self.retailers:
@@ -362,7 +365,7 @@ class InvOptEnv:
                 ]
             rental_available = total_current_rental
             for retailer, demand in zip(self.retailers, self.demand_records):
-                rental_available = retailer.order_arrival(demand[self.current_period - 2], rental_available)  # -2 not -1
+                rental_available = retailer.order_arrival(demand[self.current_period - 1], rental_available)  # use zero-based period index
 
             # Update rental decision and calculate rental cost
             rental_decision = self.rental_choice[action_modified[-1]]  # currently each time only rental one choice
@@ -411,7 +414,7 @@ class InvOptEnv:
                                      range(self.current_period, self.current_period + self.L)]  # No +1
             # # Update inv levels and pipelines
             # for retailer, demand in zip(self.retailers, self.demand_records):
-            #     retailer.order_arrival(demand[self.current_period - 2])  # -2 not -1
+            #     retailer.order_arrival(demand[self.current_period - 1])  # use zero-based period index
             self.state = []  # include replenishment state of each retailer and transshipment state of each pair of sites
             state_replenishment = []
             for retailer in self.retailers:
@@ -481,8 +484,8 @@ class InvOptEnv:
                 ]
             rental_available = total_current_rental
             for retailer, demand in zip(self.retailers, self.demand_records):
-                rental_available = retailer.order_arrival(demand[self.current_period - 2],
-                                                          rental_available)  # -2 not -1
+                rental_available = retailer.order_arrival(demand[self.current_period - 1],
+                                                          rental_available)  # use zero-based period index
 
             # Update rental decision and calculate rental cost
             rental_decision = self.rental_choice[action_modified[-1]]  # currently each time only rental one choice
@@ -546,7 +549,7 @@ class InvOptEnv:
                                      range(self.current_period, self.current_period + self.L)]  # No +1
             # Update inv levels and pipelines
             # for retailer, demand in zip(self.retailers, self.demand_records):
-            #     retailer.order_arrival(demand[self.current_period - 2])  # -2 not -1
+            #     retailer.order_arrival(demand[self.current_period - 1])  # use zero-based period index
             self.state = []  # include replenishment state of each retailer and transshipment state of each pair of sites
             state_replenishment = []
             for retailer in self.retailers:

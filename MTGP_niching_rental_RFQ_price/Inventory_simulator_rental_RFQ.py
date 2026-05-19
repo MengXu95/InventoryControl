@@ -1,4 +1,4 @@
-import numpy as np
+﻿import numpy as np
 
 from MTGP_niching_rental_RFQ_price.replenishment import *
 from MTGP_niching_rental_RFQ_price.transshipment import *
@@ -171,7 +171,7 @@ class TeckwahDemand:
         for k in range(self.num_retailer):
             demand_hist = []
             for i in range(1, self.epi_len + 2):  # 1 extra demand generated so that last state has a next state
-                random_demand = np.random.random(self.list[k, i])  # Poisson distribution with forecasted mean
+                random_demand = np.random.uniform(0, self.list[k, i])  # Uniform urgent-demand draw bounded by forecast
                 if np.random.rand() > RFQ_happen_pro:
                     random_demand = 0 # urgent RFQ not always happen! by mengxu 2025.3.3
                 demand_hist.append(random_demand)
@@ -263,7 +263,7 @@ class InvOptEnv:
         # add by xu meng 2024.12.2
         self.rental_choice = parameters['rental_choice']
 
-        if self.demand_level == None:#use teckwah dataset
+        if 'demand_test' in parameters and parameters['demand_test'] is not None:#use teckwah dataset
             self.demand_records = parameters['demand_test']
             # Update forecasts
             forecast1_all = []
@@ -298,6 +298,7 @@ class InvOptEnv:
 
         self.n_period = len(self.demand_records[0])
         self.current_period = 1
+        self.current_rentals = []
         self.state = []  # include replenishment state of each retailer and transshipment state of each pair of sites
         state_replenishment = []
         for retailer in self.retailers:
@@ -356,8 +357,8 @@ class InvOptEnv:
         for retailer_index in range(len(self.retailers)):
             retailer = self.retailers[retailer_index]
             state_RFQ_predict_retailer = np.array(
-                [self.urgent_RFQ_demand_records[retailer_index][self.current_period - 2],
-                 self.urgent_RFQ_TUD_records[retailer_index][self.current_period - 2]])  # only suitable for LT = 2
+                [self.urgent_RFQ_demand_records[retailer_index][self.current_period - 1],
+                 self.urgent_RFQ_TUD_records[retailer_index][self.current_period - 1]])  # only suitable for LT = 2
             state_RFQ_predict.append(state_RFQ_predict_retailer)
         self.state.append(state_RFQ_predict)
 
@@ -392,6 +393,7 @@ class InvOptEnv:
         for retailer in self.retailers:
             retailer.reset(self.rd.f)
         self.current_period = 1
+        self.current_rentals = []
         self.state = []  # include replenishment state of each retailer and transshipment state of each pair of sites
         state_replenishment = []
         for retailer in self.retailers:
@@ -468,7 +470,7 @@ class InvOptEnv:
                         for each in retailer.current_rentals
                         if each[2] != 1
                     ]
-                retailer.order_arrival(demand[self.current_period - 2], total_current_rental)  # -2 not -1
+                retailer.order_arrival(demand[self.current_period - 1], total_current_rental)  # use zero-based period index
 
             # this is for handle urgent RFQ demand
             total_predict_error = 0
@@ -479,8 +481,8 @@ class InvOptEnv:
             else:
                 for RFQ_predict_price, retailer, urgent_RFQ_demand, urgent_RFQ_TUD in zip(
                         RFQ_predict_decisions, self.retailers, self.urgent_RFQ_demand_records, self.urgent_RFQ_TUD_records):
-                    if urgent_RFQ_demand[self.current_period - 2] > 0:  # urgent_RFQ happen
-                        true_support_price = retailer.supplierSupport.compute_true_price(urgent_RFQ_demand[self.current_period - 2], urgent_RFQ_TUD[self.current_period - 2])
+                    if urgent_RFQ_demand[self.current_period - 1] > 0:  # urgent_RFQ happen
+                        true_support_price = retailer.supplierSupport.compute_true_price(urgent_RFQ_demand[self.current_period - 1], urgent_RFQ_TUD[self.current_period - 1])
                         predict_support_price = RFQ_predict_price
                         if self.partial_information_visibility:
                             predict_error = np.abs(predict_support_price - true_support_price)
@@ -553,7 +555,7 @@ class InvOptEnv:
                                      range(self.current_period, self.current_period + self.L)]  # No +1
             # # Update inv levels and pipelines
             # for retailer, demand in zip(self.retailers, self.demand_records):
-            #     retailer.order_arrival(demand[self.current_period - 2])  # -2 not -1
+            #     retailer.order_arrival(demand[self.current_period - 1])  # use zero-based period index
             self.state = []  # include replenishment state of each retailer and transshipment state of each pair of sites
             state_replenishment = []
             for retailer in self.retailers:
@@ -613,8 +615,8 @@ class InvOptEnv:
             for retailer_index in range(len(self.retailers)):
                 retailer = self.retailers[retailer_index]
                 state_RFQ_predict_retailer = np.array(
-                    [self.urgent_RFQ_demand_records[retailer_index][self.current_period - 2],
-                     self.urgent_RFQ_TUD_records[retailer_index][self.current_period - 2]])  # only suitable for LT = 2
+                    [self.urgent_RFQ_demand_records[retailer_index][self.current_period - 1],
+                     self.urgent_RFQ_TUD_records[retailer_index][self.current_period - 1]])  # only suitable for LT = 2
                 state_RFQ_predict.append(state_RFQ_predict_retailer)
             self.state.append(state_RFQ_predict)
 
@@ -640,7 +642,7 @@ class InvOptEnv:
                         for each in retailer.current_rentals
                         if each[2] != 1
                     ]
-                retailer.order_arrival(demand[self.current_period - 2], total_current_rental)  # -2 not -1
+                retailer.order_arrival(demand[self.current_period - 1], total_current_rental)  # use zero-based period index
 
             # this is for handle urgent RFQ demand
             total_predict_error = 0
@@ -651,9 +653,9 @@ class InvOptEnv:
                 for RFQ_predict_price, retailer, urgent_RFQ_demand, urgent_RFQ_TUD in zip(
                         RFQ_predict_decisions, self.retailers, self.urgent_RFQ_demand_records,
                         self.urgent_RFQ_TUD_records):
-                    if urgent_RFQ_demand[self.current_period - 2] > 0:  # urgent_RFQ happen
+                    if urgent_RFQ_demand[self.current_period - 1] > 0:  # urgent_RFQ happen
                         true_support_price = retailer.supplierSupport.compute_true_price(
-                            urgent_RFQ_demand[self.current_period - 2], urgent_RFQ_TUD[self.current_period - 2])
+                            urgent_RFQ_demand[self.current_period - 1], urgent_RFQ_TUD[self.current_period - 1])
                         predict_support_price = RFQ_predict_price
                         if self.partial_information_visibility:
                             predict_error = np.abs(predict_support_price - true_support_price)
@@ -741,7 +743,7 @@ class InvOptEnv:
                                      range(self.current_period, self.current_period + self.L)]  # No +1
             # Update inv levels and pipelines
             # for retailer, demand in zip(self.retailers, self.demand_records):
-            #     retailer.order_arrival(demand[self.current_period - 2])  # -2 not -1
+            #     retailer.order_arrival(demand[self.current_period - 1])  # use zero-based period index
             self.state = []  # include replenishment state of each retailer and transshipment state of each pair of sites
             state_replenishment = []
             for retailer in self.retailers:
@@ -799,8 +801,8 @@ class InvOptEnv:
             for retailer_index in range(len(self.retailers)):
                 retailer = self.retailers[retailer_index]
                 state_RFQ_predict_retailer = np.array(
-                    [self.urgent_RFQ_demand_records[retailer_index][self.current_period - 2],
-                     self.urgent_RFQ_TUD_records[retailer_index][self.current_period - 2]])  # only suitable for LT = 2
+                    [self.urgent_RFQ_demand_records[retailer_index][self.current_period - 1],
+                     self.urgent_RFQ_TUD_records[retailer_index][self.current_period - 1]])  # only suitable for LT = 2
                 state_RFQ_predict.append(state_RFQ_predict_retailer)
             self.state.append(state_RFQ_predict)
 
