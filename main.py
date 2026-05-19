@@ -25,9 +25,24 @@ import multiprocessing as mp
 
 sys.path
 
+
+def print_usage():
+    print("Usage: python main.py <dataset_name> <seed> <algo>")
+    print("Example: python main.py sN2h_1_5b2 0 MTGP_niching_replenish_transship")
+    print("Common algos: MTGP_niching, CCGP_niching, InventoryGP, MTGP_niching_replenish_transship")
+
 if __name__ == '__main__':
+    if len(sys.argv) < 4:
+        print_usage()
+        sys.exit(1)
+
     dataset_name = str(sys.argv[1])
-    seed = int(sys.argv[2])
+    try:
+        seed = int(sys.argv[2])
+    except ValueError:
+        print("Error: <seed> must be an integer.")
+        print_usage()
+        sys.exit(1)
     algo = str(sys.argv[3])
 
     # Add freeze_support for Windows
