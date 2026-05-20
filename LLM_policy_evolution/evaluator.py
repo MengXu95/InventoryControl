@@ -22,12 +22,12 @@ def evaluate_policy_file(policy_path, dataset_name, seed):
     return metrics
 
 
-def write_results(results, dataset_name, seed, output_root=DEFAULT_OUTPUT_ROOT):
+def write_results(results, dataset_name, seed, output_root=DEFAULT_OUTPUT_ROOT, run_label='manual_candidates'):
     output_dir = output_root / f'scenario_{dataset_name}'
     output_dir.mkdir(parents=True, exist_ok=True)
-    json_path = output_dir / f'seed_{seed}_manual_candidates.json'
-    csv_path = output_dir / f'seed_{seed}_manual_candidates.csv'
-    source_dir = output_dir / f'seed_{seed}_candidate_sources'
+    json_path = output_dir / f'seed_{seed}_{run_label}.json'
+    csv_path = output_dir / f'seed_{seed}_{run_label}.csv'
+    source_dir = output_dir / f'seed_{seed}_{run_label}_sources'
     source_dir.mkdir(parents=True, exist_ok=True)
 
     with open(json_path, 'w', encoding='utf-8') as json_file:

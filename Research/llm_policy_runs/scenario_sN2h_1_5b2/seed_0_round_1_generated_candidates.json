@@ -1,0 +1,44 @@
+[
+  {
+    "fitness": 147.70859375000003,
+    "transshipment_cost": 2.45734375,
+    "holding_lost_sales_cost": 105.07687499999997,
+    "order_cost": 40.174375,
+    "stockout_proxy_count": 31,
+    "accepted_transfer_count": 10,
+    "rejected_transfer_count": 0,
+    "fairness_debt": 0.07000000000000117,
+    "policy_name": "lean_emergency_transfer",
+    "policy_path": "Research\\llm_policy_runs\\scenario_sN2h_1_5b2\\round_1\\generated_candidates\\lean_emergency_transfer.py",
+    "source_lines": 27,
+    "source": "def replenishment_policy(site_state, global_state):\n    lean_target = site_state['forecast_1'] + site_state['pipeline']\n    if site_state['lost_sales_cost'] > site_state['holding_cost'] * 5:\n        lean_target = lean_target + site_state['forecast_2'] * 0.5\n    gap = lean_target - site_state['inventory_level']\n    return max(0, min(site_state['production_capacity'] * 0.9, gap))\n\n\ndef transshipment_proposal(source_state, target_state, global_state):\n    source_surplus = source_state['inventory_level'] - source_state['forecast_1'] - source_state['forecast_2']\n    target_emergency = target_state['forecast_1'] - target_state['inventory_level']\n    forward = min(max(0, source_surplus), max(0, target_emergency))\n    reverse_surplus = target_state['inventory_level'] - target_state['forecast_1'] - target_state['forecast_2']\n    reverse_emergency = source_state['forecast_1'] - source_state['inventory_level']\n    reverse = min(max(0, reverse_surplus), max(0, reverse_emergency))\n    return forward - reverse\n\n\ndef consensus_gate(source_state, target_state, proposed_quantity, history):\n    donor_safe = source_state['inventory_level'] - source_state['forecast_1'] - source_state['forecast_2']\n    receiver_emergency = target_state['forecast_1'] - target_state['inventory_level']\n    if donor_safe <= 0:\n        return 0\n    if receiver_emergency <= 0:\n        return 0\n    fairness = max(0, 1 - abs(history['net_pair_transfer']) / max(1, source_state['capacity'] * 0.5))\n    return min(proposed_quantity, donor_safe, receiver_emergency) * fairness"
+  },
+  {
+    "fitness": 149.09828124999996,
+    "transshipment_cost": 2.36640625,
+    "holding_lost_sales_cost": 107.64,
+    "order_cost": 39.091875,
+    "stockout_proxy_count": 23,
+    "accepted_transfer_count": 9,
+    "rejected_transfer_count": 0,
+    "fairness_debt": 19.24,
+    "policy_name": "fairness_balanced_transfer",
+    "policy_path": "Research\\llm_policy_runs\\scenario_sN2h_1_5b2\\round_1\\generated_candidates\\fairness_balanced_transfer.py",
+    "source_lines": 29,
+    "source": "def replenishment_policy(site_state, global_state):\n    system_pressure = global_state['total_forecast'] - global_state['total_inventory']\n    local_target = site_state['forecast_1'] + site_state['forecast_2'] - site_state['pipeline']\n    if system_pressure > 0:\n        local_target = local_target + system_pressure / max(1, global_state['num_sites'])\n    gap = local_target - site_state['inventory_level']\n    return max(0, min(site_state['production_capacity'], gap))\n\n\ndef transshipment_proposal(source_state, target_state, global_state):\n    source_surplus = source_state['inventory_level'] - source_state['forecast_1'] - source_state['forecast_2']\n    target_shortage = target_state['forecast_1'] + target_state['forecast_2'] - target_state['inventory_level']\n    forward = min(max(0, source_surplus), max(0, target_shortage))\n    reverse_surplus = target_state['inventory_level'] - target_state['forecast_1'] - target_state['forecast_2']\n    reverse_shortage = source_state['forecast_1'] + source_state['forecast_2'] - source_state['inventory_level']\n    reverse = min(max(0, reverse_surplus), max(0, reverse_shortage))\n    if global_state['inventory_imbalance'] < max(1, global_state['average_inventory'] * 0.25):\n        return 0\n    return forward - reverse\n\n\ndef consensus_gate(source_state, target_state, proposed_quantity, history):\n    donor_margin = source_state['inventory_level'] - source_state['forecast_1'] - source_state['forecast_2']\n    receiver_gap = target_state['forecast_1'] + target_state['forecast_2'] - target_state['inventory_level']\n    if donor_margin <= 0 or receiver_gap <= 0:\n        return 0\n    fairness = max(0, 1 - abs(history['net_pair_transfer']) / max(1, source_state['capacity']))\n    transfer_limit = min(donor_margin * 0.75, receiver_gap)\n    return min(proposed_quantity, transfer_limit) * fairness\n"
+  },
+  {
+    "fitness": 239.7918750000001,
+    "transshipment_cost": 5.81671875,
+    "holding_lost_sales_cost": 194.96265625,
+    "order_cost": 39.0125,
+    "stockout_proxy_count": 13,
+    "accepted_transfer_count": 24,
+    "rejected_transfer_count": 1,
+    "fairness_debt": 46.40999999999999,
+    "policy_name": "donor_protection_service_recovery",
+    "policy_path": "Research\\llm_policy_runs\\scenario_sN2h_1_5b2\\round_1\\generated_candidates\\donor_protection_service_recovery.py",
+    "source_lines": 28,
+    "source": "def replenishment_policy(site_state, global_state):\n    near_term_need = site_state['forecast_1'] + site_state['forecast_2']\n    risk_buffer = site_state['lost_sales_cost'] / max(1, site_state['holding_cost'])\n    target = near_term_need + risk_buffer + site_state['pipeline']\n    gap = target - site_state['inventory_level']\n    return max(0, min(site_state['production_capacity'] * 1.25, gap))\n\n\ndef transshipment_proposal(source_state, target_state, global_state):\n    source_safe = source_state['inventory_level'] - source_state['forecast_1'] - source_state['pipeline']\n    target_gap = target_state['forecast_1'] + target_state['pipeline'] - target_state['inventory_level']\n    forward = min(max(0, source_safe), max(0, target_gap))\n    reverse_safe = target_state['inventory_level'] - target_state['forecast_1'] - target_state['pipeline']\n    reverse_gap = source_state['forecast_1'] + source_state['pipeline'] - source_state['inventory_level']\n    reverse = min(max(0, reverse_safe), max(0, reverse_gap))\n    return forward - reverse\n\n\ndef consensus_gate(source_state, target_state, proposed_quantity, history):\n    donor_buffer = source_state['inventory_level'] - source_state['forecast_1'] - source_state['pipeline']\n    receiver_need = target_state['forecast_1'] + target_state['pipeline'] - target_state['inventory_level']\n    if donor_buffer <= source_state['forecast_2'] * 0.5:\n        return 0\n    if receiver_need <= 0:\n        return 0\n    fairness = max(0, 1 - abs(history['net_pair_transfer']) / max(1, source_state['capacity'] * 0.75))\n    urgency = min(1, receiver_need / max(1, target_state['forecast_1'] + target_state['forecast_2']))\n    return min(proposed_quantity, donor_buffer, receiver_need) * max(0.25, urgency) * fairness\n"
+  }
+]

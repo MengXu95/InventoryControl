@@ -30,3 +30,13 @@ def consensus_gate(source_state, target_state, proposed_quantity, history):
 ```
 
 Generated policies are intentionally limited: no imports, no file access, no random calls, no attributes, and only `abs`, `min`, `max`, and `round` function calls.
+
+Create the next LLM mutation prompt with:
+
+```powershell
+python main.py sN2h_1_5b2 0 LLM_policy_evolution_next
+```
+
+This writes `llm_mutation_prompt.md` and a `generated_candidates/` folder under `Research/llm_policy_runs/scenario_<dataset>/round_<n>/`. Put LLM-generated `.py` files into that folder, then run the same command again to validate and evaluate them.
+
+Alternatively, paste the complete LLM answer into `llm_response.md` inside the round folder. The next run will extract fenced Python blocks into candidate files automatically before evaluation.

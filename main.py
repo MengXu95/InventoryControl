@@ -22,6 +22,7 @@ import DRL.testRuleDRL as testRuleDRL
 import sSPolicy.trainRulesSPolicy as trainRulesSPolicy
 import S2Demo as S2Demo
 import LLM_policy_evolution.LLM_main as LLM_policy_evolution_main
+import LLM_policy_evolution.mutation_loop as LLM_policy_mutation_loop
 import multiprocessing as mp
 
 sys.path
@@ -30,7 +31,7 @@ sys.path
 def print_usage():
     print("Usage: python main.py <dataset_name> <seed> <algo>")
     print("Example: python main.py sN2h_1_5b2 0 MTGP_niching_replenish_transship")
-    print("Common algos: MTGP_niching, CCGP_niching, InventoryGP, MTGP_niching_replenish_transship, LLM_policy_evolution")
+    print("Common algos: MTGP_niching, CCGP_niching, InventoryGP, MTGP_niching_replenish_transship, LLM_policy_evolution, LLM_policy_evolution_next")
 
 if __name__ == '__main__':
     if len(sys.argv) < 4:
@@ -92,6 +93,9 @@ if __name__ == '__main__':
     elif algo == 'LLM_policy_evolution':
         print('----------LLM_policy_evolution----------')
         LLM_policy_evolution_main.main(dataset_name, seed)
+    elif algo == 'LLM_policy_evolution_next':
+        print('----------LLM_policy_evolution_next----------')
+        LLM_policy_mutation_loop.main(dataset_name, seed)
     elif algo == 'redGP-test':
         print('----------testRuleMTGP_rental_RFQ_price----------')
         testRuleMTGP_rental_RFQ_price.main(dataset_name, seed)
