@@ -1,0 +1,41 @@
+[
+  {
+    "fitness": 308.52593750000005,
+    "transshipment_cost": 0.0,
+    "holding_lost_sales_cost": 241.78109374999994,
+    "order_cost": 66.74484375000002,
+    "stockout_proxy_count": 36,
+    "accepted_transfer_count": 0,
+    "rejected_transfer_count": 0,
+    "fairness_debt": 0.0,
+    "policy_name": "no_transship_reorder",
+    "policy_path": "D:\\pythonProject\\InventoryControl\\LLM_policy_evolution\\seed_policies\\no_transship_reorder.py",
+    "source_lines": 11
+  },
+  {
+    "fitness": 365.20562499999994,
+    "transshipment_cost": 15.062812500000003,
+    "holding_lost_sales_cost": 279.80984374999997,
+    "order_cost": 70.33296875,
+    "stockout_proxy_count": 20,
+    "accepted_transfer_count": 76,
+    "rejected_transfer_count": 0,
+    "fairness_debt": 113.99999999999997,
+    "policy_name": "conservative_service",
+    "policy_path": "D:\\pythonProject\\InventoryControl\\LLM_policy_evolution\\seed_policies\\conservative_service.py",
+    "source_lines": 23
+  },
+  {
+    "fitness": 491.449375,
+    "transshipment_cost": 16.343906249999996,
+    "holding_lost_sales_cost": 413.01640625000005,
+    "order_cost": 62.0890625,
+    "stockout_proxy_count": 29,
+    "accepted_transfer_count": 80,
+    "rejected_transfer_count": 2,
+    "fairness_debt": 31.59,
+    "policy_name": "balanced_consensus",
+    "policy_path": "D:\\pythonProject\\InventoryControl\\LLM_policy_evolution\\seed_policies\\balanced_consensus.py",
+    "source_lines": 24
+  }
+]

@@ -1,0 +1,44 @@
+[
+  {
+    "fitness": 126.38312499999999,
+    "transshipment_cost": 3.0671875,
+    "holding_lost_sales_cost": 77.77953124999999,
+    "order_cost": 45.53640625,
+    "stockout_proxy_count": 27,
+    "accepted_transfer_count": 16,
+    "rejected_transfer_count": 0,
+    "fairness_debt": 25.749999999999996,
+    "policy_name": "conservative_service",
+    "policy_path": "D:\\pythonProject\\InventoryControl\\LLM_policy_evolution\\seed_policies\\conservative_service.py",
+    "source_lines": 23,
+    "source": "def replenishment_policy(site_state, global_state):\n    service_target = site_state['forecast_1'] + site_state['forecast_2'] + site_state['lost_sales_cost']\n    gap = service_target - site_state['inventory_level'] - site_state['pipeline']\n    return max(0, min(site_state['production_capacity'] * 1.5, gap))\n\n\ndef transshipment_proposal(source_state, target_state, global_state):\n    source_buffer = source_state['inventory_level'] - source_state['forecast_1'] - source_state['forecast_2']\n    target_need = target_state['forecast_1'] + target_state['forecast_2'] - target_state['inventory_level']\n    transfer = min(max(0, source_buffer), max(0, target_need))\n    reverse_buffer = target_state['inventory_level'] - target_state['forecast_1'] - target_state['forecast_2']\n    reverse_need = source_state['forecast_1'] + source_state['forecast_2'] - source_state['inventory_level']\n    reverse_transfer = min(max(0, reverse_buffer), max(0, reverse_need))\n    return transfer - reverse_transfer\n\n\ndef consensus_gate(source_state, target_state, proposed_quantity, history):\n    donor_safe_inventory = source_state['inventory_level'] - source_state['forecast_1'] - source_state['forecast_2']\n    receiver_gap = target_state['forecast_1'] + target_state['forecast_2'] - target_state['inventory_level']\n    if donor_safe_inventory <= 0 or receiver_gap <= 0:\n        return 0\n    fairness_factor = max(0, 1 - abs(history['net_pair_transfer']) / max(1, source_state['capacity'] * 0.5))\n    return min(proposed_quantity, donor_safe_inventory, receiver_gap) * fairness_factor\n"
+  },
+  {
+    "fitness": 143.51109375000004,
+    "transshipment_cost": 0.0,
+    "holding_lost_sales_cost": 100.90703125,
+    "order_cost": 42.604062500000005,
+    "stockout_proxy_count": 25,
+    "accepted_transfer_count": 0,
+    "rejected_transfer_count": 0,
+    "fairness_debt": 0.0,
+    "policy_name": "no_transship_reorder",
+    "policy_path": "D:\\pythonProject\\InventoryControl\\LLM_policy_evolution\\seed_policies\\no_transship_reorder.py",
+    "source_lines": 11,
+    "source": "def replenishment_policy(site_state, global_state):\n    target = site_state['forecast_1'] + site_state['forecast_2']\n    return max(0, min(site_state['production_capacity'], target - site_state['inventory_level']))\n\n\ndef transshipment_proposal(source_state, target_state, global_state):\n    return 0\n\n\ndef consensus_gate(source_state, target_state, proposed_quantity, history):\n    return 0\n"
+  },
+  {
+    "fitness": 197.93484375000003,
+    "transshipment_cost": 4.574375000000001,
+    "holding_lost_sales_cost": 151.84328125000005,
+    "order_cost": 41.5171875,
+    "stockout_proxy_count": 14,
+    "accepted_transfer_count": 24,
+    "rejected_transfer_count": 0,
+    "fairness_debt": 22.739999999999995,
+    "policy_name": "balanced_consensus",
+    "policy_path": "D:\\pythonProject\\InventoryControl\\LLM_policy_evolution\\seed_policies\\balanced_consensus.py",
+    "source_lines": 24,
+    "source": "def replenishment_policy(site_state, global_state):\n    target = site_state['forecast_1'] + site_state['forecast_2'] + site_state['pipeline']\n    shortage_gap = target - site_state['inventory_level']\n    capacity_gate = site_state['production_capacity']\n    return max(0, min(capacity_gate, shortage_gap))\n\n\ndef transshipment_proposal(source_state, target_state, global_state):\n    source_pressure = source_state['inventory_level'] - source_state['forecast_1'] - source_state['pipeline']\n    target_pressure = target_state['forecast_1'] + target_state['pipeline'] - target_state['inventory_level']\n    transfer = min(max(0, source_pressure), max(0, target_pressure))\n    reverse_source_pressure = target_state['inventory_level'] - target_state['forecast_1'] - target_state['pipeline']\n    reverse_target_pressure = source_state['forecast_1'] + source_state['pipeline'] - source_state['inventory_level']\n    reverse_transfer = min(max(0, reverse_source_pressure), max(0, reverse_target_pressure))\n    return transfer - reverse_transfer\n\n\ndef consensus_gate(source_state, target_state, proposed_quantity, history):\n    donor_buffer = source_state['inventory_level'] - source_state['forecast_1'] - source_state['pipeline']\n    receiver_gap = target_state['forecast_1'] + target_state['pipeline'] - target_state['inventory_level']\n    donor_willingness = min(1, max(0, donor_buffer / max(1, source_state['capacity'])))\n    receiver_urgency = min(1, max(0, receiver_gap / max(1, target_state['capacity'])))\n    fairness_factor = max(0, 1 - abs(history['net_pair_transfer']) / max(1, source_state['capacity']))\n    return proposed_quantity * min(donor_willingness + receiver_urgency, 1) * fairness_factor\n"
+  }
+]
