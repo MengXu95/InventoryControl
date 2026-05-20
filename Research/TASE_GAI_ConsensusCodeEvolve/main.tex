@@ -17,7 +17,7 @@
 \maketitle
 
 \begin{abstract}
-Generative AI is creating new opportunities for industrial automation, but direct deployment of large language models (LLMs) as online controllers remains difficult because of cost, safety, interpretability, and reproducibility concerns. This paper proposes \emph{ConsensusCode-Evolve}, a simulator-grounded framework that uses an LLM as an offline code-evolution engine for multi-agent inventory automation. The target problem is multi-site replenishment and transshipment, a representative discrete manufacturing and supply-operation task in which local inventory agents must coordinate material movements under demand uncertainty, lead times, capacity limits, and asymmetric cost structures. Instead of asking an LLM to control the system online, the proposed method asks it to generate constrained Python policy functions for replenishment, transshipment proposal, and consensus gating. Candidate policies are validated by an abstract-syntax-tree safety checker, evaluated in a physical inventory simulator, and selected through an archive-based loop using compact numerical feedback. A consensus-seeking layer models donor willingness, receiver urgency, and fairness debt, so transshipment actions are accepted only when they satisfy both local and system-level requirements. The resulting policies are lightweight, executable without an LLM at deployment time, and directly inspectable by engineers. The paper outlines the method, safety constraints, evaluation protocol, and planned comparisons against genetic programming, heuristic, and learning-based baselines. The central hypothesis is that simulator-grounded generative code search can discover interpretable, consensus-aware inventory policies with lower token cost than online LLM agents while retaining automation-oriented robustness and deployability.
+Generative AI is creating new opportunities for industrial automation, but direct deployment of large language models (LLMs) as online controllers remains difficult because of cost, safety, interpretability, and reproducibility concerns. This paper proposes \emph{ConsensusCode-Evolve}, a simulator-grounded framework that uses an LLM as an offline code-evolution engine for multi-agent inventory automation. The target problem is multi-site replenishment and transshipment, a representative discrete manufacturing and supply-operation task in which local inventory agents must coordinate material movements under demand uncertainty, lead times, capacity limits, and asymmetric cost structures. The paper also formulates a simulator benchmark for this setting, since existing studies cover related inventory and supply-chain control problems but do not provide a widely used benchmark for the full setting considered here. Instead of asking an LLM to control the system online, the proposed method asks it to generate constrained Python policy functions for replenishment, transshipment proposal, and consensus gating. Candidate policies are validated by an abstract-syntax-tree safety checker, evaluated in the simulator, and selected through an archive-based loop using compact numerical feedback. A consensus-seeking layer models donor willingness, receiver urgency, and fairness debt, so transshipment actions are accepted only when they satisfy both local and system-level requirements. The resulting policies are lightweight, executable without an LLM at deployment time, and directly inspectable by engineers. The paper outlines the benchmark problem, simulator, method, safety constraints, evaluation protocol, and planned comparisons against genetic programming, heuristic, and learning-based baselines. The central hypothesis is that simulator-grounded generative code search can discover interpretable, consensus-aware inventory policies with lower token cost than online LLM agents while retaining automation-oriented robustness and deployability.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -27,6 +27,8 @@ Generative AI, industrial automation, large language models, multi-agent systems
 \section{Introduction}
 
 Industrial automation increasingly requires decision-making systems that coordinate distributed assets, adapt to uncertain operating conditions, and remain interpretable to engineers. In discrete manufacturing and supply operations, material-flow decisions such as replenishment, inventory allocation, and transshipment are not merely numerical optimization tasks. They involve multiple sites or production units with local constraints, asymmetric costs, and sometimes conflicting interests. A site with surplus inventory may be asked to support another site, but such a transfer can be harmful if the donor later faces a demand surge. This makes multi-site inventory automation a natural setting for studying distributed decision-making and consensus-aware control.
+
+Similar decision settings arise in many supply chains. Large retailers must balance stock across stores, regional warehouses, and distribution centers. E-commerce firms operate fulfillment networks where local shortages and overstock can occur at the same time. Manufacturers coordinate raw materials, components, and finished goods across plants. Spare-parts networks in transportation, energy, and equipment maintenance must avoid service failures while limiting slow-moving inventory. Pharmaceutical, medical, grocery, and fresh-product supply chains face a further tension: shortages can be costly, but excess stock can also lead to waste, expiration, or high holding cost. These examples differ in detail, but they share the same core difficulty: local inventory decisions affect the whole network.
 
 Large language models (LLMs) create a new way to generate decision logic, but direct online use of an LLM as an industrial controller is difficult. Online calls add cost and latency. They also make reproducibility, safety review, and engineering inspection harder. Inventory control adds further constraints: decisions must respect material availability, capacity, lead times, order costs, and transfer costs. A useful generative method for this setting should therefore be grounded in the simulator or plant model, should produce deterministic policies for deployment, and should expose the decision logic in a form that engineers can inspect.
 
@@ -38,6 +40,7 @@ The proposed approach differs from direct LLM planning in three ways. First, the
 
 The intended contributions are as follows:
 \begin{itemize}
+    \item A configurable simulator benchmark for multi-site replenishment and transshipment with local site states, demand forecasts, capacity limits, cost asymmetry, and pairwise transfer decisions.
     \item A simulator-grounded generative code-evolution framework for multi-site replenishment and transshipment automation.
     \item A consensus-aware policy representation that separates replenishment, transshipment proposal, and agreement gating.
     \item A lightweight safety mechanism based on abstract syntax tree validation for generated industrial policy code.
@@ -100,15 +103,23 @@ The final category is generative AI for executable decision logic. Recent work s
 
 These studies suggest a useful direction for industrial automation: the LLM does not need to act as an online controller. It can instead propose candidate programs offline, while a task simulator checks whether those programs work. This separation is important for inventory automation because online LLM calls are costly, hard to reproduce exactly, and difficult to certify. However, existing LLM code-generation work is usually not designed around inventory physics, lateral transshipment, or local agreement among industrial agents. It also often assumes that generated programs are judged by unit tests or benchmark scores, whereas this paper judges policy code by stochastic simulator performance and operational metrics.
 
+\subsection{Supply-Chain Control Benchmarks}
+
+Benchmark environments are important because they make it possible to compare methods under the same dynamics, cost model, and information structure. In supply-chain control, the Beer Game has long been used to study ordering behavior, delayed information, and the bullwhip effect; it has also been used as a testbed for reinforcement learning in ordering decisions \cite{chaharsooghi2008beer}. OR-Gym provides reinforcement-learning environments for several operations research problems, including inventory management, and has helped make OR problems easier to test with standard RL interfaces \cite{hubbs2020orgym}. Recent studies also examine multi-echelon or multi-location inventory control with deep reinforcement learning and multi-agent reinforcement learning \cite{liu2024marl,chen2024multilocation}.
+
+These benchmarks and models are useful, but they do not directly cover the full setting studied here. Beer Game environments focus on ordering and information delay in a serial supply chain. Multi-echelon inventory environments focus on upstream-downstream replenishment and allocation. Multi-location studies address distributed inventory, but many do not include explicit pairwise lateral transshipment with donor feasibility, local agreement logic, forecast features, and fairness-oriented coordination metrics. To the best of our knowledge, there is no widely used benchmark that directly models the multi-site, multi-agent replenish-and-transship setting considered in this paper. Existing studies cover related parts of the problem, but they do not provide a standard benchmark for comparing policies that jointly decide replenishment, transshipment proposal, and consensus-aware transfer acceptance.
+
 \subsection{Research Gap}
 
-The literature above leaves a clear gap. Classical policies are simple and inspectable, but they have limited ability to express adaptive consensus-aware transshipment. Optimization and simulation-based methods can evaluate realistic systems, but they need a policy representation that is expressive and still safe. GP provides executable symbolic rules, but its edits are mostly syntactic and may struggle to create structured agreement logic efficiently. RL can learn complex behavior, but the resulting policies are often hard to inspect and may not expose donor risk or fairness. LLM program search can generate meaningful code, but it has not been adapted to safe, simulator-grounded, multi-site inventory automation with explicit transshipment consensus.
+The literature above leaves a clear gap. Classical policies are simple and inspectable, but they have limited ability to express adaptive consensus-aware transshipment. Optimization and simulation-based methods can evaluate realistic systems, but they need a policy representation that is expressive and still safe. GP provides executable symbolic rules, but its edits are mostly syntactic and may struggle to create structured agreement logic efficiently. RL can learn complex behavior, but the resulting policies are often hard to inspect and may not expose donor risk or fairness. Existing supply-chain benchmarks support important related problems, but they do not provide a common benchmark for the full multi-site, multi-agent inventory setting studied here. LLM program search can generate meaningful code, but it has not been adapted to safe, simulator-grounded, multi-site inventory automation with explicit transshipment consensus.
 
-This paper addresses that gap by combining three ideas: constrained executable policy code, simulator-based evaluation, and a consensus gate for lateral transshipment. The result is an offline generative code-search method whose deployed policy is a small Python program, not an online LLM agent.
+This paper addresses that gap by combining a benchmark simulator, constrained executable policy code, simulator-based evaluation, and a consensus gate for lateral transshipment. The result is an offline generative code-search method whose deployed policy is a small Python program, not an online LLM agent.
 
-\section{Problem Definition}
+\section{Benchmark Problem and Simulator}
 
-This paper studies the replenish-and-transship version of the multi-site inventory management problem implemented in the simulator. The system contains several inventory sites that face uncertain, time-varying demand. At each decision period, the controller chooses replenishment quantities and lateral transshipment quantities. The purpose is to reduce inventory operating cost while keeping transfers feasible and avoiding policies that repeatedly expose the same donor site to shortage risk. The notation used in this section is summarized in Table~\ref{table:notations}.
+This paper studies a replenish-and-transship benchmark problem for multi-site inventory management. The system contains several inventory sites that face uncertain, time-varying demand. Each site is treated as a local inventory agent with its own stock level, cost parameters, capacity, pipeline information, and demand forecasts. At each decision period, the agents jointly determine replenishment quantities and lateral transshipment quantities. The purpose is to reduce inventory operating cost while keeping transfers feasible and avoiding policies that repeatedly expose the same donor site to shortage risk.
+
+The simulator is part of the contribution, not only an implementation detail. It defines a common test environment for policies that must make replenishment and lateral transshipment decisions under the same demand process, transition rules, feasibility checks, and cost accounting. It is useful because closed-form analysis is difficult when demand is uncertain, sites have different local states, decisions are coupled through transfers, and a local action can change the shortage risk of another site. The notation used in this section is summarized in Table~\ref{table:notations}, and the simulator design is summarized in Table~\ref{table:simulator_overview}.
 
 \begin{table}[t]
 \centering
@@ -122,8 +133,8 @@ $N$ & Number of inventory sites \\
 $T$ & Number of decision periods in one simulation episode \\
 $i,j$ & Site indices, with $i,j\in\{1,\ldots,N\}$ \\
 $D_i(t)$ & Random demand at site $i$ in period $t$ \\
-$E_i(t)$ & Forecast or expected demand at site $i$ for period $t$ \\
-$H$ & Forecast horizon exposed to the policy \\
+$\hat{d}^{(\kappa)}_{i,t}$ & The $\kappa$th demand forecast feature for site $i$ at period $t$ \\
+$K$ & Number of demand forecast features exposed to the policy \\
 $L_o$ & Replenishment lead time \\
 $I_i(t)$ & On-hand inventory at site $i$ at the start of period $t$ \\
 $P_i(t)$ & Pipeline order information available at site $i$ \\
@@ -143,11 +154,34 @@ $\pi$ & Inventory policy used to choose replenishment and transshipment actions 
 \end{tabular}
 \end{table}
 
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Simulator benchmark overview}
+\label{table:simulator_overview}
+\begin{tabular}{p{0.27\linewidth}|p{0.63\linewidth}}
+\hline
+\textbf{Component} & \textbf{Benchmark specification} \\ \hline
+Inputs & Number of sites, episode length, initial inventory, capacity, production-capacity parameter, ordering costs, holding costs, lost-sales costs, transshipment costs, demand model, and forecast features \\
+State & Site-level inventory, costs, capacity, pipeline order information, forecast vector, and pairwise transshipment states \\
+Actions & Pairwise signed transshipment quantities and site-level replenishment quantities \\
+Demand & Synthetic stochastic demand or loaded demand records; synthetic demand uses time-varying Poisson means \\
+Transition & Order arrival, demand realization, lateral transshipment, cost calculation, pipeline update, and forecast update \\
+Costs & Transshipment cost, holding and lost-sales cost, and order cost \\
+Evaluation & Average cost per episode plus service and coordination metrics, including stockout proxy, accepted/rejected transfers, and fairness debt \\
+Configurability & Site number, demand scale, cost asymmetry, capacity, initial inventory, lead time, episode length, and benchmark scenario \\ \hline
+\end{tabular}
+\end{table}
+
 \subsection{System State and Demand}
 
-We consider a finite-horizon periodic-review system with $N$ sites and decision periods $t=1,\ldots,T$. The current simulator supports the two-site and three-site cases. At the beginning of a decision period, the policy observes a state $S(t)$ containing local site information and pairwise transshipment information. For each site, the local information includes current inventory, holding cost, lost-sales cost, storage capacity, production-capacity parameter, fixed and unit ordering costs, the first pipeline order value, two demand forecasts, and transshipment cost parameters. Thus, the forecast horizon exposed to the policy is $H=2$ in the implemented simulator.
+We consider a finite-horizon periodic-review system with $N$ sites and decision periods $t=1,\ldots,T$. The current simulator supports the two-site and three-site cases. At the beginning of a decision period, the policy observes a state $S(t)$ containing local site information and pairwise transshipment information. For each site, the local information includes current inventory, holding cost, lost-sales cost, storage capacity, production-capacity parameter, fixed and unit ordering costs, pipeline order information, a demand forecast vector, and transshipment cost parameters. The forecast vector is written as
+\begin{equation}
+    \hat{\mathbf{d}}_{i,t}=\left[\hat{d}^{(1)}_{i,t},\hat{d}^{(2)}_{i,t},\ldots,\hat{d}^{(K)}_{i,t}\right],
+\end{equation}
+where $K$ is the number of forecast features exposed to the policy. The general formulation allows any $K$. The current experiments use $K=2$, matching the two forecast values exposed by the implemented simulator state.
 
-For synthetic scenarios, the simulator first samples a time-varying demand mean for each site and period. The realized demand $D_i(t)$ is then sampled from a Poisson distribution with that period-specific mean. The forecast value $E_i(t)$ used by the policy is the sampled mean of that demand distribution. For test scenarios based on historical demand records, the simulator uses the provided demand sequence and uses the same sequence as the forecast record. In both cases, future realized demand is not known when the policy chooses the action.
+For synthetic scenarios, the simulator first samples a time-varying demand mean for each site and period. The realized demand $D_i(t)$ is then sampled from a Poisson distribution with that period-specific mean. The forecast features are generated from the demand model and provide short-horizon demand information to the policy. For test scenarios based on historical demand records, the simulator uses the provided demand sequence and uses the same sequence as the forecast record. In both cases, future realized demand is not known when the policy chooses the action.
 
 \subsection{Decision Variables and Action Structure}
 
@@ -227,6 +261,12 @@ The optimization goal is to find a policy with low expected average cost across 
 
 The evaluation also records service and coordination measures, including stockout proxy count, accepted transfer count, rejected transfer count, and fairness debt. Fairness debt is computed in the current prototype as the sum of absolute net pairwise transfers over the episode. These measures do not replace the cost objective. They are used to judge whether a low-cost policy achieves its performance through reasonable coordination behavior.
 
+\subsection{Benchmark Scope}
+
+The benchmark is designed for researchers who need a repeatable environment for multi-site, multi-agent inventory control with lateral transshipment. It differs from a single-site inventory benchmark because decisions at one site can change the shortage risk at another site. It differs from a standard multi-echelon benchmark because the sites considered here are at the same echelon and can share inventory laterally. It also differs from a pure ordering benchmark because a policy must decide both replenishment and pairwise transfer quantities.
+
+The simulator can be used to compare hand-designed rules, GP policies, DRL policies, LLM-generated code policies, and other policy-search methods under the same demand and cost setting. Researchers can configure the number of sites supported by the simulator, demand scale, cost asymmetry, initial inventory, capacity, lead time, and episode length. The present implementation supports two-site and three-site replenish-and-transship scenarios; extending the simulator to larger networks is a natural next step.
+
 \section{Proposed Method}
 
 \subsection{Framework Overview}
@@ -237,7 +277,7 @@ The method has four design principles. First, the deployed controller must not d
 
 \subsection{State Representation}
 
-The current implementation converts simulator arrays into dictionaries before calling the policy code. For replenishment, the site state contains the site index, inventory level, holding cost, lost-sales cost, capacity, production capacity, fixed and unit order costs, pipeline inventory, two forecast values, and transshipment costs. For transshipment, the state of a source-target pair contains both sites' inventory, costs, capacity, pipeline inventory, and forecasts. The global state contains the current period, episode length, number of sites, total inventory, total forecast, average inventory, inventory imbalance, and forecast imbalance.
+The current implementation converts simulator arrays into dictionaries before calling the policy code. In the general formulation, each site state contains the site index, inventory level, holding cost, lost-sales cost, capacity, production-capacity parameter, fixed and unit ordering costs, pipeline inventory, a forecast vector $\hat{\mathbf{d}}_{i,t}$ with $K$ entries, and transshipment cost parameters. For transshipment, the state of a source-target pair contains the same local information for both sites. The global state contains the current period, episode length, number of sites, total inventory, total forecast over the exposed forecast vector, average inventory, inventory imbalance, and forecast imbalance. The implemented experiments use $K=2$ and expose these entries as \texttt{forecast\_1} and \texttt{forecast\_2} in the policy dictionaries.
 
 This dictionary representation is used for two reasons. It gives generated code meaningful variable names, which improves readability. It also hides simulator internals from the LLM. The LLM does not receive direct access to the environment object, files, random generators, or external libraries.
 
@@ -327,7 +367,7 @@ RQ1 asks whether LLM-evolved policy code can reduce average inventory cost compa
 
 \subsection{Scenarios and Data}
 
-The current implementation evaluates policies in the multi-site replenishment and transshipment simulator used by the inventory-control codebase. The available scenario interface is \texttt{ScenarioDesign\_replenish\_transship}. The initial prototype has been exercised on the synthetic scenario \texttt{sN2h\_1\_5b2} with seed 0. [AUTHOR CHECK: list all final datasets, industrial cases, synthetic scenarios, random seeds, episode lengths, number of sites, demand settings, lead times, capacity settings, and cost parameters.]
+The current implementation evaluates policies in the multi-site replenishment and transshipment simulator used by the inventory-control codebase. The available scenario interface is \texttt{ScenarioDesign\_replenish\_transship}. The initial prototype has been exercised on the synthetic scenario \texttt{sN2h\_1\_5b2} with seed 0. The formulation allows any number $K$ of forecast features, while the current experimental implementation uses $K=2$. [AUTHOR CHECK: list all final datasets, industrial cases, synthetic scenarios, random seeds, episode lengths, number of sites, demand settings, forecast features, lead times, capacity settings, and cost parameters.]
 
 The scenario set includes at least two-site and three-site cases because the consensus mechanism is most meaningful when more than one donor-receiver relationship can occur. Stress scenarios vary demand imbalance, cost asymmetry, and capacity tightness. [AUTHOR CHECK: confirm the scenario set and specify whether Teckwah, Sanwa, Taiyo, or other industrial cases are included. Describe the data source.]
 
