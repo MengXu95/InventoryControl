@@ -1,14 +1,14 @@
 # Notes For Revision
 
-## Suitability Judgment
+## Research Framing
 
-The topic is suitable for the T-ASE special issue if positioned as an industrial automation method for discrete manufacturing/supply operations. The strongest framing is not "LLM writes code" alone, but:
+The topic should be positioned as an inventory-control and industrial-automation method, not as a general LLM-for-code study. The strongest framing is:
 
-> lightweight generative industrial task agents for consensus-aware material-flow decision-making.
+> lightweight generative policy-code search for consensus-aware material-flow decision-making.
 
 The method should emphasize simulator grounding, physical constraints, safe generated code, interpretable deployment, and collaborative control.
 
-## What Must Be Added Before Submission
+## What Must Be Added Before Final Manuscript
 
 - Full experiments over multiple seeds and scenarios.
 - Comparison with `MTGP_niching_replenish_transship`, hand-designed policies, and ideally one conventional inventory baseline.

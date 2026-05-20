@@ -5,13 +5,12 @@
 \usepackage{booktabs}
 \usepackage{cite}
 \usepackage{url}
+\usepackage{algorithm}
 \usepackage{algorithmic}
 
 \title{ConsensusCode-Evolve: Token-Efficient Generative Code Search for Consensus-Aware Multi-Agent Inventory Automation}
 
-\author{Author~Name% <- replace before submission
-\thanks{This manuscript is prepared for possible submission to the IEEE Transactions on Automation Science and Engineering Special Issue on Generative AI Theories, Methods and Applications for Industrial Automation.}
-}
+\author{Author~Name}
 
 \begin{document}
 
@@ -27,9 +26,9 @@ Generative AI, industrial automation, large language models, multi-agent systems
 
 \section{Introduction}
 
-Industrial automation increasingly requires decision-making systems that can coordinate distributed assets, adapt to uncertain operating conditions, and remain interpretable to engineers. In discrete manufacturing and supply operations, material-flow decisions such as replenishment, inventory allocation, and transshipment are not merely numerical optimization tasks. They involve multiple sites or production units with local constraints, asymmetric costs, and sometimes conflicting interests. A site with surplus inventory may be asked to support another site, but such a transfer can be harmful if the donor later faces a demand surge. This makes multi-site inventory automation a natural setting for studying collaborative industrial task agents and consensus-aware control.
+Industrial automation increasingly requires decision-making systems that coordinate distributed assets, adapt to uncertain operating conditions, and remain interpretable to engineers. In discrete manufacturing and supply operations, material-flow decisions such as replenishment, inventory allocation, and transshipment are not merely numerical optimization tasks. They involve multiple sites or production units with local constraints, asymmetric costs, and sometimes conflicting interests. A site with surplus inventory may be asked to support another site, but such a transfer can be harmful if the donor later faces a demand surge. This makes multi-site inventory automation a natural setting for studying distributed decision-making and consensus-aware control.
 
-The special issue theme on generative AI (GAI) for industrial automation is especially relevant to this problem. GAI methods, industrial large models, and industrial task agents can potentially support production-line modeling, adaptive scheduling, multi-objective optimization, and cooperative decision-making. However, industrial automation imposes requirements that differ from open-ended language tasks. Generated decisions must respect physical mechanisms, capacity limits, lead times, safety constraints, and deployment budgets. Moreover, many industrial systems cannot afford to call a large model at every control step. A useful GAI method for automation should therefore be grounded in physical simulators, lightweight at deployment time, and transparent enough to support engineering inspection.
+Large language models (LLMs) create a new way to generate decision logic, but direct online use of an LLM as an industrial controller is difficult. Online calls add cost and latency. They also make reproducibility, safety review, and engineering inspection harder. Inventory control adds further constraints: decisions must respect material availability, capacity, lead times, order costs, and transfer costs. A useful generative method for this setting should therefore be grounded in the simulator or plant model, should produce deterministic policies for deployment, and should expose the decision logic in a form that engineers can inspect.
 
 Recent progress in LLM-based code generation and program search suggests one promising path. AlphaCode showed that large language models can generate many candidate programs and use selection mechanisms to solve competitive programming problems \cite{li2022alphacode}. CodeRL incorporated execution feedback into code generation \cite{le2022coderl}. Self-Refine and Reflexion demonstrated that language models can iteratively improve outputs using compact feedback or verbal memory \cite{madaan2023selfrefine,shinn2023reflexion}. Voyager used LLM-generated executable code as reusable skills in an embodied environment \cite{wang2023voyager}, and Eureka showed that LLMs can write reward functions evaluated through simulation \cite{ma2024eureka}. FunSearch is particularly relevant because it combines LLM-generated programs with automatic evaluation to discover high-performing mathematical constructions \cite{romera2024funsearch}. These studies suggest that an LLM need not be the controller itself; instead, it can serve as a generator of candidate executable programs, while an external evaluator provides grounding.
 
@@ -45,17 +44,23 @@ The intended contributions are as follows:
     \item An evaluation protocol comparing LLM-evolved policies with genetic programming, heuristic, and learning-based baselines under cost, service, fairness, and robustness metrics.
 \end{itemize}
 
-This draft does not claim empirical superiority yet. The present implementation establishes the framework and an initial prototype. Full experimental validation should compare multiple scenarios, seeds, and token budgets before making performance claims.
+The claims in this paper are limited to the method, the implemented prototype, and the evaluation design. Empirical superiority over baselines should be claimed only after the full experiments in Sections V and VI are completed.
 
 \section{Background and Related Work}
 
-\subsection{Multi-Site Inventory Automation}
+\subsection{Multi-Site Inventory and Material-Flow Automation}
 
-The problem studied in this paper belongs to multi-location inventory control. A set of sites, such as plants, warehouses, production cells, or spare-parts depots, must decide when to order inventory and how to share inventory across locations. The basic inventory tradeoff is well known: high inventory reduces lost sales or service failures, but it increases holding cost and may waste capacity; low inventory saves capital, but it raises the risk of shortage. Classical inventory texts describe this tradeoff through reorder-point, base-stock, and $(s,S)$ policies under demand uncertainty and replenishment lead times \cite{zipkin2000foundations,axsater2015inventory}.
+The problem studied in this paper belongs to multi-location inventory control and material-flow automation. A set of sites, such as plants, warehouses, production cells, or spare-parts depots, must decide when to order inventory and how to share inventory across locations. The basic inventory tradeoff is well known: high inventory reduces lost sales or service failures, but it increases holding cost and may waste capacity; low inventory saves capital, but it raises the risk of shortage. Classical inventory texts describe this tradeoff through reorder-point, base-stock, and $(s,S)$ policies under demand uncertainty and replenishment lead times \cite{zipkin2000foundations,axsater2015inventory}.
 
 Multi-site systems are harder than single-site systems for three reasons. First, each site has a local state, but the value of an action depends on the network state. A site with high inventory may be a good donor when the rest of the network is short, but the same site may need to keep stock when its own forecast is high. Second, replenishment and transshipment decisions interact. Ordering too much can reduce future shortages but may also make transshipment unnecessary and costly. Transshipping too aggressively can lower current lost sales but create future donor shortages. Third, industrial automation must respect physical and operational constraints, including lead times, capacity, order costs, and transfer costs. These constraints make the control problem a sequential decision problem rather than a one-period allocation problem.
 
-This paper focuses on replenishment and lateral transshipment. Replenishment brings new material into the network after a lead time. Lateral transshipment moves inventory between sites at the same echelon. Reviews of lateral transshipment models show that pooling inventory can improve service and reduce total stock, but the decision rules become difficult when demand is stochastic, costs are asymmetric, and sites differ in capacity or service pressure \cite{paterson2011lateral}. In industrial automation, this difficulty is not only computational. A transfer also changes the risk exposure of the donor site. This motivates a policy representation that treats transshipment as an agreement between local agents rather than as a forced movement from a central planner.
+This paper focuses on replenishment and lateral transshipment. Replenishment brings new material into the network after a lead time. Lateral transshipment moves inventory between sites at the same echelon. Reviews of lateral transshipment models show that pooling inventory can improve service and reduce total stock, but the decision rules become difficult when demand is stochastic, costs are asymmetric, and sites differ in capacity or service pressure \cite{paterson2011lateral}. Prior work on supply-chain inventory review and control also shows that inventory decisions must be modeled as dynamic systems with uncertain demand and coupled decisions \cite{kogan2010inventory,boccadoro2008hinfinity}. In industrial automation, this difficulty is not only computational. A transfer also changes the risk exposure of the donor site. This motivates a policy representation that treats transshipment as an agreement between local agents rather than as a forced movement from a central planner.
+
+\subsection{Production-System Modeling and Scheduling}
+
+A second body of work studies how production and logistics systems should be modeled before decisions are optimized. Manufacturing systems are often discrete, constrained, and history dependent. Petri-net models have been used to describe production sequences and resource constraints \cite{castelnuovo2007petri}. Systems approaches to batch-discrete manufacturing model production stages, buffers, and improvement actions at the system level \cite{liu2022batch}. Stochastic continuum models have also been used for control of multi-line re-entrant manufacturing plants \cite{zhang2024reentrant}. These studies show that industrial decisions should be grounded in the physical and operational structure of the system.
+
+Scheduling research gives a related view. In semiconductor and job-shop systems, reinforcement learning has been used for robust scheduling and real-time dynamic scheduling under changing conditions \cite{park2020semiconductor,luo2022jobshop}. Cloud manufacturing studies also use deep reinforcement learning to assign tasks when rewards are sparse and resources are distributed \cite{wang2025cloud}. These methods can react to complex system states and learn from simulation, but they usually produce scheduling policies rather than inspectable inventory-transfer code. They also do not address the donor-risk and fairness issues that appear when one site gives inventory to another. The present paper adopts the same need for simulator-grounded decisions, but studies replenishment and transshipment policies whose final form is executable code.
 
 \subsection{Analytical and Rule-Based Inventory Policies}
 
@@ -63,11 +68,11 @@ The first category of methods uses analytical or rule-based policies. Representa
 
 Their limit is that hand-designed rules often encode only a small part of the system state. A local $(s,S)$ rule may handle replenishment well for one site, but it does not naturally decide how much inventory should be moved between sites under asymmetric holding costs, shortage costs, and forecasts. Rule-based lateral transshipment policies can be added, for example by moving inventory from surplus sites to shortage sites. However, such rules often require fixed thresholds and may not capture donor risk, receiver urgency, and repeated one-way support in the same decision. In the present paper, these policies are useful as interpretable baselines and as seed policies for generative code search, but they do not provide an automatic way to design consensus-aware transfer logic.
 
-\subsection{Optimization and Simulation-Based Search}
+\subsection{Optimization, Simulation, and Digital-Twin-Based Search}
 
 The second category formulates inventory control as an optimization problem. Exact dynamic programming can be used for small systems, but the state and action spaces grow quickly with the number of sites, inventory levels, pipeline orders, and transfer decisions. For larger stochastic systems, simulation-based optimization is often used: a candidate policy is evaluated in a simulator, and a search method improves policy parameters or policy structure based on simulated performance \cite{fu2015simulation,amaran2016simulation}.
 
-Simulation-based search fits the problem in this paper because the simulator can include lead times, lost sales, capacity, order costs, and lateral transfers directly. It also supports fair comparison among very different policy classes. The weakness is that simulation feedback can be expensive and noisy. A search method must decide how to use limited evaluation budget. If the policy class is too simple, the search cannot express useful coordination behavior. If the policy class is too large, many candidates are invalid, unsafe, or hard to interpret. ConsensusCode-Evolve follows the simulation-based view, but it uses an LLM to propose small executable policy programs and uses the simulator only as the judge.
+Simulation-based search fits the problem in this paper because the simulator can include lead times, lost sales, capacity, order costs, and lateral transfers directly. It also supports fair comparison among very different policy classes. Related studies use digital twins and data-driven models to support scheduling and multi-objective optimization in manufacturing systems \cite{shen2024digitaltwin,lin2026digitaltwin}. Such work is valuable because it connects decision learning to a model of the plant or process. The weakness is that simulation feedback can be expensive and noisy. A search method must decide how to use limited evaluation budget. If the policy class is too simple, the search cannot express useful coordination behavior. If the policy class is too large, many candidates are invalid, unsafe, or hard to interpret. ConsensusCode-Evolve follows the simulation-based view, but it uses an LLM to propose small executable policy programs and uses the simulator only as the judge.
 
 \subsection{Evolutionary and Genetic Programming Policies}
 
@@ -85,7 +90,7 @@ The main strength of RL is flexibility. It can use rich state information and op
 
 \subsection{Multi-Agent Coordination and Consensus Seeking}
 
-The fifth category studies distributed decision-making and consensus among agents. Consensus algorithms are widely used in multi-agent control to align decisions or estimates through local interaction \cite{olfati2007consensus}. In supply and inventory settings, the same idea appears in a practical form: a local unit may not want to give up inventory unless the transfer is justified by system benefit and does not create unacceptable local risk. Thus, the decision is not only ``how much should move?'' but also ``should the donor agree?'' and ``is the repeated pattern of support acceptable?''
+The fifth category studies distributed decision-making and consensus among agents. Consensus algorithms are widely used in multi-agent control to align decisions or estimates through local interaction \cite{olfati2007consensus}. Agent-based scheduling has also been studied through bidding languages that let agents express requirements during scheduling \cite{wang2013bidding}. Human-machine collaborative systems in intelligent manufacturing further show that industrial decision support must be understandable to people who review or modify the system output \cite{wei2025humanmachine}. In supply and inventory settings, the same idea appears in a practical form: a local unit may not want to give up inventory unless the transfer is justified by system benefit and does not create unacceptable local risk. Thus, the decision is not only ``how much should move?'' but also ``should the donor agree?'' and ``is the repeated pattern of support acceptable?''
 
 This view is closely related to lateral transshipment. A centralized model can optimize all transfers from a network perspective, but industrial operations often contain local ownership, local service targets, and different risk exposure. A consensus-aware policy can make these tensions explicit. In this paper, the consensus gate is not a general communication protocol. It is a small executable function that accepts, scales, or rejects a proposed transfer using donor state, receiver state, and transfer history. This choice is deliberately modest. It gives the policy a place to encode donor willingness, receiver urgency, and fairness debt without claiming that a full negotiation protocol has been solved.
 
@@ -101,24 +106,128 @@ The literature above leaves a clear gap. Classical policies are simple and inspe
 
 This paper addresses that gap by combining three ideas: constrained executable policy code, simulator-based evaluation, and a consensus gate for lateral transshipment. The result is an offline generative code-search method whose deployed policy is a small Python program, not an online LLM agent.
 
+\section{Problem Definition}
+
+This paper studies the replenish-and-transship version of the multi-site inventory management problem implemented in the simulator. The system contains several inventory sites that face uncertain, time-varying demand. At each decision period, the controller chooses replenishment quantities and lateral transshipment quantities. The purpose is to reduce inventory operating cost while keeping transfers feasible and avoiding policies that repeatedly expose the same donor site to shortage risk. The notation used in this section is summarized in Table~\ref{table:notations}.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Notation}
+\label{table:notations}
+\begin{tabular}{c|p{0.62\linewidth}}
+\hline
+\textbf{Symbol} & \textbf{Description} \\ \hline
+$N$ & Number of inventory sites \\
+$T$ & Number of decision periods in one simulation episode \\
+$i,j$ & Site indices, with $i,j\in\{1,\ldots,N\}$ \\
+$D_i(t)$ & Random demand at site $i$ in period $t$ \\
+$E_i(t)$ & Forecast or expected demand at site $i$ for period $t$ \\
+$H$ & Forecast horizon exposed to the policy \\
+$L_o$ & Replenishment lead time \\
+$I_i(t)$ & On-hand inventory at site $i$ at the start of period $t$ \\
+$P_i(t)$ & Pipeline order information available at site $i$ \\
+$Cap_i$ & Storage capacity of site $i$ \\
+$U_i$ & Production-capacity parameter exposed to the policy state \\
+$x_i(t)$ & Replenishment quantity ordered for site $i$ in period $t$ \\
+$q_{ij}(t)$ & Lateral transshipment quantity between sites $i$ and $j$ \\
+$a_i$ & Per-unit ordering cost at site $i$ \\
+$k_i$ & Fixed ordering cost at site $i$ \\
+$h_i$ & Holding cost per positive inventory unit at site $i$ \\
+$b_i$ & Lost-sales cost per shortage unit at site $i$ \\
+$c^{tr}$ & Per-unit transshipment cost \\
+$K^{tr}$ & Fixed cost charged when a transshipment is made \\
+$S(t)$ & State observed by the policy at period $t$ \\
+$C_t$ & Total cost incurred in period $t$ \\
+$\pi$ & Inventory policy used to choose replenishment and transshipment actions \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{System State and Demand}
+
+We consider a finite-horizon periodic-review system with $N$ sites and decision periods $t=1,\ldots,T$. The current simulator supports the two-site and three-site cases. At the beginning of a decision period, the policy observes a state $S(t)$ containing local site information and pairwise transshipment information. For each site, the local information includes current inventory, holding cost, lost-sales cost, storage capacity, production-capacity parameter, fixed and unit ordering costs, the first pipeline order value, two demand forecasts, and transshipment cost parameters. Thus, the forecast horizon exposed to the policy is $H=2$ in the implemented simulator.
+
+For synthetic scenarios, the simulator first samples a time-varying demand mean for each site and period. The realized demand $D_i(t)$ is then sampled from a Poisson distribution with that period-specific mean. The forecast value $E_i(t)$ used by the policy is the sampled mean of that demand distribution. For test scenarios based on historical demand records, the simulator uses the provided demand sequence and uses the same sequence as the forecast record. In both cases, future realized demand is not known when the policy chooses the action.
+
+\subsection{Decision Variables and Action Structure}
+
+At each period, the policy chooses a replenishment vector and a transshipment vector. The replenishment vector is
+\begin{equation}
+    \mathbf{x}(t)=\left[x_1(t),\ldots,x_N(t)\right],
+\end{equation}
+where $x_i(t)$ is the order quantity for site $i$. Orders are not available immediately. They enter the pipeline and arrive after the replenishment lead time $L_o$.
+
+The transshipment vector contains one signed quantity for each unordered site pair. For a pair $(i,j)$ with $i<j$, $q_{ij}(t)>0$ denotes a transfer from site $i$ to site $j$, while $q_{ij}(t)<0$ denotes a transfer from site $j$ to site $i$. For two sites, the action contains one transshipment quantity. For three sites, the action contains quantities for pairs $(1,2)$, $(1,3)$, and $(2,3)$.
+
+The complete action is therefore
+\begin{equation}
+    \mathbf{d}(t)=\left(\mathbf{q}(t),\mathbf{x}(t)\right),
+\end{equation}
+where the transshipment part appears before the replenishment part in the simulator action vector.
+
+\subsection{Inventory Transition}
+
+For each site, an outstanding order arrives at the start of the simulator step. The inventory after order arrival is capped by storage capacity:
+\begin{equation}
+    \bar{I}_i(t)=\min\{Cap_i, I_i(t)+A_i(t)\},
+\end{equation}
+where $A_i(t)$ is the pipeline order that arrives in period $t$. Demand is then realized and subtracted:
+\begin{equation}
+    \tilde{I}_i(t)=\bar{I}_i(t)-D_i(t).
+\end{equation}
+
+After this demand update, lateral transshipments are applied. A proposed transfer is executed only if the donor has enough available inventory at the point where the transfer is checked. If the donor inventory is insufficient, the simulator sets that transfer to zero. Let $Q_i(t)$ denote the net inventory change at site $i$ caused by all accepted transshipments in period $t$. The inventory after transshipment is
+\begin{equation}
+    I_i^{+}(t)=\tilde{I}_i(t)+Q_i(t).
+\end{equation}
+
+If $I_i^{+}(t)$ is positive, the site pays holding cost. If $I_i^{+}(t)$ is negative, the shortage is charged as lost sales and the inventory carried to the next period is reset to zero:
+\begin{equation}
+    I_i(t+1)=\max\{0,I_i^{+}(t)\}.
+\end{equation}
+The new replenishment decision $x_i(t)$ is then stored in the pipeline and becomes available after the lead time.
+
+\subsection{Feasibility Constraints}
+
+The simulator enforces simple feasibility rules. Replenishment quantities are nonnegative after policy adaptation and are capped before entering the pipeline. In the current simulator step, any replenishment quantity above site capacity is reduced to $Cap_i$:
+\begin{equation}
+    0\leq x_i(t)\leq Cap_i.
+\end{equation}
+For LLM-generated policies, the adapter first clips order quantities to a nonnegative range before the simulator applies its own capacity cap.
+
+Transshipment feasibility is checked through donor availability. For each proposed pairwise transfer, the donor must have enough inventory to cover the requested movement after prior transfers in the same period have been considered. Otherwise, that pairwise movement is not executed. This rule prevents the simulator from creating negative donor inventory through transshipment alone, although a site may still have negative inventory after demand if it faces shortage before receiving enough transfer support.
+
+\subsection{Cost and Objective}
+
+The one-period cost contains three parts: transshipment cost, holding and lost-sales cost, and order cost. The transshipment cost is
+\begin{equation}
+    C_t^{tr}=\sum_{(i,j)} \left(c^{tr}|q_{ij}^{acc}(t)| + K^{tr}\mathbb{I}\{|q_{ij}^{acc}(t)|>0\}\right),
+\end{equation}
+where $q_{ij}^{acc}(t)$ is the accepted transfer after feasibility checking. The holding and lost-sales cost is
+\begin{equation}
+    C_t^{hl}=\sum_{i=1}^{N}\left(h_i\max\{I_i^{+}(t),0\}+b_i\max\{-I_i^{+}(t),0\}\right).
+\end{equation}
+The order cost is
+\begin{equation}
+    C_t^{ord}=\sum_{i=1}^{N}\left(a_i x_i(t)+k_i\mathbb{I}\{x_i(t)>0\}\right).
+\end{equation}
+The total period cost is
+\begin{equation}
+    C_t=C_t^{tr}+C_t^{hl}+C_t^{ord}.
+\end{equation}
+
+Given a policy $\pi$, the simulator evaluates the average cost over one episode:
+\begin{equation}
+    J_T(\pi)=\frac{1}{T}\sum_{t=1}^{T}C_t.
+\end{equation}
+The optimization goal is to find a policy with low expected average cost across demand realizations and test scenarios:
+\begin{equation}
+    \min_{\pi}\;\mathbb{E}\left[J_T(\pi)\right].
+\end{equation}
+
+The evaluation also records service and coordination measures, including stockout proxy count, accepted transfer count, rejected transfer count, and fairness debt. Fairness debt is computed in the current prototype as the sum of absolute net pairwise transfers over the episode. These measures do not replace the cost objective. They are used to judge whether a low-cost policy achieves its performance through reasonable coordination behavior.
+
 \section{Proposed Method}
-
-\subsection{Problem Setting and Notation}
-
-We consider a finite-horizon multi-site inventory system with $N$ locations and decision periods $t=1,\ldots,T$. Site $i$ has on-hand inventory $I_{i,t}$, pipeline inventory $P_{i,t}$, capacity $C_i$, production or order capacity $U_i$, holding cost $h_i$, lost-sales cost $b_i$, fixed order cost $K_i$, unit order cost $c_i$, and short-horizon demand forecasts. The simulator used in the current implementation exposes two forecast values, denoted by $\hat{d}_{i,t}^{(1)}$ and $\hat{d}_{i,t}^{(2)}$. Demand is stochastic and unmet demand is treated as lost sales in the simulator. [AUTHOR CHECK: state the exact demand distribution and whether unmet demand is always lost rather than backlogged.]
-
-At each period, the controller chooses two action types. The first is a replenishment quantity $o_{i,t}\geq 0$ for each site. Replenishment arrives after the specified lead time. The second is a set of lateral transshipment quantities $q_{ij,t}$ between sites at the same echelon. A positive $q_{ij,t}$ denotes a movement from site $i$ to site $j$. A transfer is feasible only if the donor has available inventory and the simulator capacity rules allow the movement. The one-period cost contains transshipment cost, holding and lost-sales cost, and order cost:
-\begin{equation}
-    C_t = C_t^{\mathrm{trans}} + C_t^{\mathrm{hold/lost}} + C_t^{\mathrm{order}}.
-\end{equation}
-
-The main optimization objective is to minimize average simulated cost,
-\begin{equation}
-    J(\pi)=\frac{1}{T}\sum_{t=1}^{T} C_t,
-\end{equation}
-where $\pi$ is a policy that maps simulator states to replenishment and transshipment actions. The evaluation also records service and coordination measures, including a stockout proxy count, accepted and rejected transfer counts, and fairness debt. Fairness debt is measured in the current prototype as the sum of absolute net pairwise transfers over the episode. This quantity does not replace cost minimization, but it helps identify policies that repeatedly drain the same donor site.
-
-The policy-design problem is therefore not only to reduce cost. The policy should also produce feasible actions, avoid needless transfers, protect donor sites from future shortage risk, and remain simple enough for inspection by engineers.
 
 \subsection{Framework Overview}
 
@@ -161,7 +270,7 @@ This structure is important for industrial automation because it prevents the GA
 
 The LLM is used only between simulation batches. In each round, the algorithm provides a compact prompt containing the allowed API, available state keys, safety rules, the scenario name and seed, the current top policy scores, and selected policy source code. The score table includes fitness, transshipment cost, holding/lost-sales cost, order cost, stockout proxy count, accepted transfer count, rejected transfer count, and fairness debt. The LLM is asked to generate a small fixed number of deterministic candidate policy files. The current prototype asks for three candidates per round.
 
-Before simulation, each candidate is checked by an abstract-syntax-tree validator. The current safe subset allows only top-level definitions of the three required functions. It permits assignments, returns, conditionals, arithmetic, Boolean expressions, comparisons, dictionary indexing, constants, and calls to \texttt{abs}, \texttt{min}, \texttt{max}, and \texttt{round}. It disallows imports, file operations, network access, random calls, classes, decorators, attributes, list or dictionary construction, unexpected functions, and names beginning with double underscores. Candidates that fail validation are rejected without execution.
+Before simulation, each candidate is checked by an abstract-syntax-tree validator. The current safe subset allows only top-level definitions of the three required functions. It permits assignments, returns, conditionals, arithmetic, Boolean expressions, comparisons, dictionary indexing, constants, and calls to \texttt{abs}, \texttt{min}, \texttt{max}, and \texttt{round}. It disallows imports, file operations, network access, random calls, classes, decorators, attributes, list or dictionary construction, unexpected functions, and dunder names. Candidates that fail validation are rejected without execution.
 
 The safety checker is not a full sandbox. It is a first filter that prevents common unsafe or non-reproducible generated code patterns before simulator evaluation. [AUTHOR CHECK: describe any additional runtime isolation used when experiments are run, or state that AST validation is the current safety layer.]
 
@@ -169,7 +278,7 @@ The safety checker is not a full sandbox. It is a first filter that prevents com
 
 The search loop starts from human-written seed policies. These seeds are not expected to be optimal. Their purpose is to provide the LLM with valid examples of the API and with initial behavior for comparison. After evaluation, valid candidates are sorted by fitness and stored with source code and metrics. The archive is then used to build the next mutation prompt.
 
-\begin{figure}[t]
+\begin{algorithm}[t]
 \begin{algorithmic}[1]
 \STATE Initialize archive $\mathcal{A}$ with seed policy files.
 \STATE Validate each seed policy with the AST checker.
@@ -193,7 +302,7 @@ The search loop starts from human-written seed policies. These seeds are not exp
 \end{algorithmic}
 \caption{Offline ConsensusCode-Evolve search loop.}
 \label{alg:consensus-code-evolve}
-\end{figure}
+\end{algorithm}
 
 In the current implementation, $k=3$ top policies are included in the prompt and $m=3$ new candidates are requested. The archive is stored as JSON and CSV files under the research output directory. Generated candidates can be supplied either as separate Python files or as fenced Python blocks in a response file, which the mutation loop extracts before validation.
 
@@ -209,15 +318,86 @@ At each deployment decision period, the simulator or industrial control system b
 
 ConsensusCode-Evolve differs from the method categories reviewed in Section II in several concrete ways. Compared with classical inventory rules, it searches over generated policy code rather than fixing thresholds by hand. Compared with GP, it asks an LLM to make semantic code edits under an API, while still relying on simulation for selection. Compared with RL, it produces a small inspectable policy program instead of a neural controller. Compared with online LLM agents, it removes the LLM from the control loop and uses it only as an offline generator. Compared with ordinary LLM code generation, it evaluates candidates in an inventory simulator and includes a consensus gate tailored to transshipment.
 
-\subsection{Evaluation Plan}
+\section{Experimental Design}
 
-The planned evaluation compares ConsensusCode-Evolve against: (i) the existing multi-tree genetic programming method for replenishment and transshipment, (ii) hand-designed consensus policies, (iii) LLM-evolved policies without the consensus gate, and (iv) classical inventory baselines such as $(s,S)$ policies where applicable. The primary metrics are total average cost, holding/lost-sales cost, order cost, transshipment cost, stockout frequency, transshipment frequency, fairness debt, and robustness under stress-test scenarios.
+\subsection{Research Questions}
 
-The ablation study should vary the token budget, number of candidates per LLM call, consensus components, and archive-selection strategy. A useful automation-oriented result would show not only low cost, but also low token usage, stable simulator feasibility, interpretable policies, and improved coordination behavior compared with direct pairwise transshipment rules.
+The experiments are designed to answer four questions.
+RQ1 asks whether LLM-evolved policy code can reduce average inventory cost compared with rule-based, GP-based, and learning-based baselines under the same simulator. RQ2 asks whether the consensus gate changes transshipment behavior in a useful way, measured by accepted transfers, rejected transfers, fairness debt, and stockout proxy counts. RQ3 asks whether the method uses LLM calls efficiently, measured by the number of generated candidates, token budget, and valid-policy rate. RQ4 asks whether the selected policies remain stable under changes in demand level, holding and lost-sales costs, and network size.
 
-\section{Planned Experiments and Discussion}
+\subsection{Scenarios and Data}
 
-The initial prototype has implemented the safe policy API, AST validation, simulator adapter, seed policy evaluation, prompt generation, and generated-candidate evaluation. The next stage is to perform systematic experiments across two-site and three-site scenarios, multiple random seeds, and different holding/lost-sales asymmetries. Results should be reported conservatively. Until full experiments are complete, the central claim should be framed as a methodological contribution and a testable hypothesis rather than an established empirical improvement.
+The current implementation evaluates policies in the multi-site replenishment and transshipment simulator used by the inventory-control codebase. The available scenario interface is \texttt{ScenarioDesign\_replenish\_transship}. The initial prototype has been exercised on the synthetic scenario \texttt{sN2h\_1\_5b2} with seed 0. [AUTHOR CHECK: list all final datasets, industrial cases, synthetic scenarios, random seeds, episode lengths, number of sites, demand settings, lead times, capacity settings, and cost parameters.]
+
+The scenario set includes at least two-site and three-site cases because the consensus mechanism is most meaningful when more than one donor-receiver relationship can occur. Stress scenarios vary demand imbalance, cost asymmetry, and capacity tightness. [AUTHOR CHECK: confirm the scenario set and specify whether Teckwah, Sanwa, Taiyo, or other industrial cases are included. Describe the data source.]
+
+\subsection{Compared Methods}
+
+The main comparison includes the following methods when available:
+\begin{itemize}
+    \item Classical or rule-based inventory policies, such as reorder-up-to or $(s,S)$ baselines. [AUTHOR CHECK: define the exact rule and parameter tuning method.]
+    \item Hand-designed consensus policies using the same three-function API.
+    \item The existing multi-tree GP replenishment-transshipment method, in which separate GP trees produce replenishment and transshipment decisions.
+    \item Learning-based baselines, such as PPO or another DRL policy already implemented in the repository. [AUTHOR CHECK: state whether the DRL baseline is trained for the same action space and scenarios.]
+    \item ConsensusCode-Evolve without the consensus gate, where proposed transshipments are applied directly after feasibility clipping.
+    \item The full ConsensusCode-Evolve method with replenishment policy, transshipment proposal, and consensus gate.
+\end{itemize}
+
+This set separates three effects: the value of generated code, the value of simulator-grounded search, and the value of consensus gating.
+
+\subsection{Evaluation Metrics}
+
+The primary metric is average total cost per period. The cost is decomposed into transshipment cost, holding and lost-sales cost, and order cost. Service behavior is measured by stockout frequency or the current stockout proxy count. Coordination behavior is measured by accepted transfer count, rejected transfer count, transshipment frequency, and fairness debt. Search efficiency is measured by valid-policy rate, number of evaluated candidates, number of LLM calls, and token usage. [AUTHOR CHECK: provide the exact token-counting method and whether prompt and completion tokens are counted separately.]
+
+The reported results use means and standard deviations over random seeds. Comparisons among stochastic methods are tested statistically. [AUTHOR CHECK: choose the final statistical test, such as Wilcoxon signed-rank test or paired t-test, and state the significance level.]
+
+\subsection{Parameter Settings and Implementation}
+
+In the current prototype, the archive prompt includes the top $k=3$ policies, and each LLM call asks for $m=3$ new candidate files. Candidate code must pass the AST validator before execution. The allowed built-in functions are \texttt{abs}, \texttt{min}, \texttt{max}, and \texttt{round}. The policy adapter clips replenishment quantities to a nonnegative range and clips accepted transshipment quantities to the proposed amount.
+
+[AUTHOR CHECK: report the final LLM model, decoding settings, maximum tokens, prompt template version, number of mutation rounds, number of candidates per round, CPU/GPU hardware, operating system, Python version, DEAP version, and simulator version or commit hash.]
+
+\subsection{Ablation and Sensitivity Studies}
+
+The ablation study tests whether each design choice changes behavior. The minimum ablations are: no consensus gate, no fairness history, no donor-protection term, no receiver-urgency term, and different archive sizes. A separate sensitivity study varies token budget, number of generated candidates, demand variance, cost asymmetry, and network size. [AUTHOR CHECK: provide the final values used for each ablation and sensitivity factor.]
+
+\section{Experimental Results}
+
+\subsection{Main Comparison}
+
+[AUTHOR CHECK: Insert the main comparison table with average total cost, cost components, service metrics, and coordination metrics for all baselines and ConsensusCode-Evolve.]
+
+This comparison addresses RQ1. The analysis identifies which method obtains the lowest average cost, whether the difference is consistent across seeds, and which cost component explains the difference. If ConsensusCode-Evolve improves total cost, the discussion separates gains from replenishment and gains from transshipment. If it does not improve cost, the result is reported directly, together with any observed change in interpretability, valid-policy rate, or coordination behavior.
+
+\subsection{Consensus-Gate Analysis}
+
+[AUTHOR CHECK: Insert ablation results comparing direct transshipment, proposal-only policy, consensus gate without fairness history, and full consensus gate.]
+
+This analysis addresses RQ2 by testing whether the consensus gate reduces harmful transfers without increasing stockouts. Evidence for improved coordination may appear as fewer repeated one-way transfers, lower fairness debt, or fewer donor shortages. Such a result would support the claim that explicit agreement logic changes coordination behavior. It would not by itself prove that the method is optimal or that the same gate works in every network.
+
+\subsection{Search Efficiency and Safety}
+
+[AUTHOR CHECK: Insert the number of generated candidates, valid candidates, rejected candidates, LLM calls, token usage, and best fitness by round.]
+
+This analysis addresses RQ3 by measuring whether compact archive feedback helps the LLM produce valid and useful policy code over rounds. The valid-policy rate matters because unsafe or invalid code reduces the value of generative search. Token usage matters because the method is motivated by offline, low-frequency LLM use rather than online LLM control.
+
+\subsection{Sensitivity and Stress Tests}
+
+[AUTHOR CHECK: Insert sensitivity results for demand variance, cost asymmetry, capacity tightness, network size, and random seed.]
+
+This analysis addresses RQ4 by testing whether policies found in one setting remain useful when the environment changes. If performance drops under a stress case, the failure is described. Examples include over-ordering when demand is low, refusing transfers too often when lost-sales costs are high, or draining one donor in a three-site network. Such failure cases are useful because they show where the policy representation or archive feedback needs improvement.
+
+\subsection{Qualitative Policy Inspection}
+
+[AUTHOR CHECK: Insert one or two selected generated policies or simplified code excerpts, together with a short explanation of the decision logic.]
+
+This analysis shows whether the final policy can be inspected by engineers. The discussion identifies the main thresholds or expressions used by the generated code and relates them to inventory concepts such as safety stock, donor risk, receiver urgency, and transfer history. The purpose is not to claim that the code is always simple, but to test whether the generated policy is more transparent than a neural controller.
+
+\subsection{Summary of Evidence}
+
+[AUTHOR CHECK: Complete this paragraph after the experimental tables are available. State which research questions are supported, which are only partly supported, and which remain open.]
+
+The results should be interpreted conservatively. Lower cost in a simulator supports the usefulness of the generated policy for the tested scenarios. It does not prove plant-wide optimality, safety in unseen industrial settings, or superiority for all inventory networks. Those claims require broader validation.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
