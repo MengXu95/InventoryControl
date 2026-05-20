@@ -109,6 +109,39 @@ Benchmark environments are important because they make it possible to compare me
 
 These benchmarks and models are useful, but they do not directly cover the full setting studied here. Beer Game environments focus on ordering and information delay in a serial supply chain. Multi-echelon inventory environments focus on upstream-downstream replenishment and allocation. Multi-location studies address distributed inventory, but many do not include explicit pairwise lateral transshipment with donor feasibility, local agreement logic, forecast features, and fairness-oriented coordination metrics. To the best of our knowledge, there is no widely used benchmark that directly models the multi-site, multi-agent replenish-and-transship setting considered in this paper. Existing studies cover related parts of the problem, but they do not provide a standard benchmark for comparing policies that jointly decide replenishment, transshipment proposal, and consensus-aware transfer acceptance.
 
+The related work covers methods with different assumptions about the decision maker, the policy form, and the evaluation setting. A category-level comparison is therefore useful before stating the research gap. Table~\ref{table:method_category_comparison} summarizes the main categories discussed above. The table does not rank the methods. It shows which parts of the present benchmark setting are naturally supported by each category and which parts usually require extra modeling choices.
+
+\begin{table*}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2pt}
+\caption{Category-level comparison of inventory-control and decision-generation methods}
+\label{table:method_category_comparison}
+\begin{tabular}{p{0.12\textwidth}|p{0.14\textwidth}|p{0.13\textwidth}|p{0.14\textwidth}|p{0.13\textwidth}|p{0.032\textwidth}p{0.032\textwidth}p{0.032\textwidth}p{0.032\textwidth}p{0.038\textwidth}}
+\hline
+\textbf{Method/category} & \textbf{Main idea} & \textbf{Strengths} & \textbf{Limitations} & \textbf{Relation to this problem} & \textbf{MS} & \textbf{MA} & \textbf{KF} & \textbf{Exec.} & \textbf{Bench.} \\ \hline
+Classical inventory control & Use fixed rules such as base-stock, reorder-point, or $(s,S)$ policies & Simple, fast, and easy to inspect & Usually needs hand tuning and limited state coupling & Strong baseline for local replenishment, but lateral consensus must be added separately & Part. & No & Part. & Yes & No \\
+Multi-echelon inventory optimization & Optimize ordering and allocation across upstream and downstream stages & Models network structure and lead times & Can become hard for large stochastic state spaces & Related to supply networks, but not the same as same-echelon lateral transfer & Yes & Part. & Part. & Part. & No \\
+Stochastic or robust optimization & Optimize decisions under demand uncertainty or uncertainty sets & Clear objective and constraints & Often requires simplified dynamics or tractable approximations & Useful reference for uncertainty handling; less direct for executable consensus gates & Part. & No & Part. & Part. & No \\
+Simulation-based optimization & Evaluate candidate policies in a simulator and search for better policies & Handles detailed transition and cost rules & Can be evaluation-expensive and depends on policy class & Provides the evaluation principle used in this paper & Yes & Part. & Yes & Part. & Yes \\
+Genetic programming policies & Evolve symbolic decision rules or trees & Produces executable and inspectable rules & Search edits are mostly syntactic and may need many evaluations & Strong baseline for replenishment and transshipment rules in this codebase & Yes & Part. & Yes & Yes & Part. \\
+RL for inventory control & Learn a policy by interacting with a simulator & Flexible for sequential decisions & Neural policies can be hard to inspect and validate & Learning-based baseline for the same simulator when action spaces match & Yes & No & Yes & No & Part. \\
+Multi-agent RL or consensus methods & Learn or design distributed decisions among agents & Represents local agents and coupled decisions & Often needs careful training and may not expose simple executable logic & Related to donor risk, receiver need, and agreement in transshipment & Yes & Yes & Yes & No & Part. \\
+Forecast-driven inventory methods & Use demand forecasts as decision inputs & Connects control to predictive information & Forecast use alone does not define coordination or transshipment logic & Supplies an important part of the policy state used here & Part. & No & Yes & Part. & No \\
+LLM or code-generation methods & Generate programs, plans, or reward/policy code using a large model & Can propose structured code and reuse feedback & Needs validation, grounding, and safety limits & Provides the source of candidate policy programs, but must be tied to inventory simulation & Part. & Part. & Part. & Yes & Part. \\
+Supply-chain control benchmarks & Provide common environments for method comparison & Enables repeatable evaluation & Existing benchmarks often focus on ordering or echelon flows & Motivates the proposed replenish-and-transship benchmark setting & Yes & Part. & Part. & Part. & Yes \\
+ConsensusCode-Evolve & Offline LLM-based search over safe policy code with replenishment, transshipment proposal, and consensus gating & Uses executable decision logic and is evaluated in the proposed simulator & Current claims depend on the planned experiments and implemented scenarios & Directly targets the benchmark setting studied in this paper & Yes & Yes & Yes & Yes & Yes \\ \hline
+\end{tabular}
+\vspace{1mm}
+\begin{minipage}{\textwidth}
+\scriptsize
+\raggedright
+MS: multi-site inventory. MA: multi-agent decisions. KF: multiple demand forecast features. Exec.: executable decision logic. Bench.: benchmark-style evaluation. ``Part.'' means the category can support the item in some formulations, but it is not a default feature of the category.
+\end{minipage}
+\end{table*}
+
+The main takeaway is that no single existing category gives all parts of the setting in a simple form: multi-site inventory, local agent decisions, multiple forecast inputs, executable policy logic, and a common replenish-and-transship simulator. The proposed method is designed for this gap. It differs from classical rules by searching over policy code, from RL by returning inspectable Python functions rather than a neural controller, and from ordinary LLM code generation by using the inventory simulator as the evaluator. The simulator is part of the contribution because it defines the transition, cost, feasibility, and feedback rules under which these policies can be compared. The method does not claim to solve all inventory-control problems, replace analytical optimization, or guarantee better performance than every baseline. Its claim is narrower: it provides a simulator-grounded way to generate and test executable multi-agent inventory policies for the benchmark studied in this paper.
+
 \subsection{Research Gap}
 
 The literature above leaves a clear gap. Classical policies are simple and inspectable, but they have limited ability to express adaptive consensus-aware transshipment. Optimization and simulation-based methods can evaluate realistic systems, but they need a policy representation that is expressive and still safe. GP provides executable symbolic rules, but its edits are mostly syntactic and may struggle to create structured agreement logic efficiently. RL can learn complex behavior, but the resulting policies are often hard to inspect and may not expose donor risk or fairness. Existing supply-chain benchmarks support important related problems, but they do not provide a common benchmark for the full multi-site, multi-agent inventory setting studied here. LLM program search can generate meaningful code, but it has not been adapted to safe, simulator-grounded, multi-site inventory automation with explicit transshipment consensus.
@@ -120,6 +153,21 @@ This paper addresses that gap by combining a benchmark simulator, constrained ex
 This paper studies a replenish-and-transship benchmark problem for multi-site inventory management. The system contains several inventory sites that face uncertain, time-varying demand. Each site is treated as a local inventory agent with its own stock level, cost parameters, capacity, pipeline information, and demand forecasts. At each decision period, the agents jointly determine replenishment quantities and lateral transshipment quantities. The purpose is to reduce inventory operating cost while keeping transfers feasible and avoiding policies that repeatedly expose the same donor site to shortage risk.
 
 The simulator is part of the contribution, not only an implementation detail. It defines a common test environment for policies that must make replenishment and lateral transshipment decisions under the same demand process, transition rules, feasibility checks, and cost accounting. It is useful because closed-form analysis is difficult when demand is uncertain, sites have different local states, decisions are coupled through transfers, and a local action can change the shortage risk of another site. The notation used in this section is summarized in Table~\ref{table:notations}, and the simulator design is summarized in Table~\ref{table:simulator_overview}.
+
+The scenario is shown at a high level in Fig.~\ref{fig:scenario_multi_site_inventory}. The figure is meant to make the benchmark structure clear: the simulator provides site states, forecasts, and feedback; local inventory agents choose replenishment and transshipment actions; and the proposed method generates the executable decision logic that is tested in the simulator.
+
+\begin{figure}[t]
+\centering
+\fbox{\begin{minipage}{0.92\linewidth}
+\centering
+\scriptsize [AUTHOR CHECK: export the editable HTML source to PDF/SVG/PNG and include the rendered figure here.]\\
+\url{figures/scenario_multi_site_inventory.html}
+\end{minipage}}
+\caption{Multi-site inventory benchmark studied in this paper. Each site is modeled as a local inventory agent with inventory state and demand forecasts. The simulator applies demand, replenishment lead times, lateral transshipment, feasibility checks, and cost accounting. The proposed method supplies executable policy logic, and performance is evaluated using cost, service, and coordination measures.}
+\label{fig:scenario_multi_site_inventory}
+\end{figure}
+
+This figure also marks the boundary of the paper. The work focuses on policy generation and evaluation for the replenish-and-transship simulator. It does not claim to model every supply-chain process, such as procurement contracts, routing, pricing, or production scheduling.
 
 \begin{table}[t]
 \centering
@@ -272,6 +320,21 @@ The simulator can be used to compare hand-designed rules, GP policies, DRL polic
 \subsection{Framework Overview}
 
 ConsensusCode-Evolve is an offline generate--validate--simulate--select loop. The LLM is used only during design time. It receives a compact summary of previous policy performance and writes new candidate policy code. Each candidate is checked by a static safety validator before it is executed. Valid candidates are then evaluated in the inventory simulator. The best policies and their metrics are archived and used to construct the next prompt.
+
+Figure~\ref{fig:proposed_method_pipeline} summarizes the method pipeline. The figure separates the design-time search loop from the deployment-time controller. During search, candidate policy programs are generated, checked, evaluated, and selected. During deployment, only the selected executable policy is used.
+
+\begin{figure}[t]
+\centering
+\fbox{\begin{minipage}{0.92\linewidth}
+\centering
+\scriptsize [AUTHOR CHECK: export the editable HTML source to PDF/SVG/PNG and include the rendered figure here.]\\
+\url{figures/proposed_method_pipeline.html}
+\end{minipage}}
+\caption{Proposed ConsensusCode-Evolve pipeline. Site states and $K$ forecast features are converted into a policy-code interface. An offline LLM mutation loop proposes candidate replenishment, transshipment, and consensus-gate functions. Valid code is evaluated in the inventory simulator, selected through an archive, and deployed as executable decision logic without an online LLM call.}
+\label{fig:proposed_method_pipeline}
+\end{figure}
+
+The pipeline is intentionally simple. The LLM proposes code, but it does not judge the final policy. The simulator and the safety checker determine which candidates can enter the archive.
 
 The method has four design principles. First, the deployed controller must not depend on an LLM call. After search, the selected policy is ordinary Python code. Second, the policy representation must separate local replenishment, transfer proposal, and transfer agreement. This separation makes the transshipment logic easier to inspect. Third, the simulator, not the LLM, decides whether a policy is good. Fourth, generated code must be restricted to a small deterministic subset of Python.
 
