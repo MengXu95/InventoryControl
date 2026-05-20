@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Editable Real-world Inventory Management Environment</title>
+<style>
+  :root {
+    --ink: #1f2933;
+    --muted: #52606d;
+    --line: #59636f;
+    --light-line: #9aa5b1;
+    --site-bg: #eef6ff;
+    --site-border: #2f6f9f;
+    --agent-bg: #eef8f1;
+    --agent-border: #3f8f5f;
+    --order-bg: #fff7e6;
+    --order-border: #b87900;
+    --sim-bg: #f8fafc;
+    --metric-bg: #f5f2fb;
+    --metric-border: #6f5aa8;
+    --alert-bg: #fff1f2;
+    --alert-border: #be3a46;
+  }
+
+  body {
+    margin: 0;
+    background: #ffffff;
+    color: var(--ink);
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  .page {
+    max-width: 1240px;
+    margin: 18px auto;
+    padding: 10px;
+    background: #ffffff;
+  }
+
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: #ffffff;
+  }
+
+  .title {
+    font-size: 23px;
+    font-weight: 700;
+    fill: var(--ink);
+  }
+
+  .subtitle {
+    font-size: 13.5px;
+    fill: var(--muted);
+  }
+
+  .box-title {
+    font-size: 15.5px;
+    font-weight: 700;
+    fill: var(--ink);
+  }
+
+  .label {
+    font-size: 12.5px;
+    fill: var(--ink);
+  }
+
+  .small {
+    font-size: 11px;
+    fill: var(--muted);
+  }
+
+  .tiny {
+    font-size: 10px;
+    fill: var(--muted);
+  }
+
+  .site-card {
+    fill: var(--site-bg);
+    stroke: var(--site-border);
+    stroke-width: 1.3;
+    rx: 7;
+  }
+
+  .agent-card {
+    fill: var(--agent-bg);
+    stroke: var(--agent-border);
+    stroke-width: 1.3;
+    rx: 7;
+  }
+
+  .order-card {
+    fill: var(--order-bg);
+    stroke: var(--order-border);
+    stroke-width: 1.25;
+    rx: 7;
+  }
+
+  .sim-card {
+    fill: var(--sim-bg);
+    stroke: var(--line);
+    stroke-width: 1.35;
+    rx: 7;
+  }
+
+  .metric-card {
+    fill: var(--metric-bg);
+    stroke: var(--metric-border);
+    stroke-width: 1.25;
+    rx: 7;
+  }
+
+  .alert-card {
+    fill: var(--alert-bg);
+    stroke: var(--alert-border);
+    stroke-width: 1.15;
+    rx: 7;
+  }
+
+  .arrow {
+    stroke: var(--line);
+    stroke-width: 1.65;
+    fill: none;
+    marker-end: url(#arrowHead);
+  }
+
+  .soft-arrow {
+    stroke: var(--light-line);
+    stroke-width: 1.25;
+    fill: none;
+    marker-end: url(#softArrowHead);
+  }
+
+  .dashed {
+    stroke-dasharray: 6 5;
+  }
+
+  .order-arrow {
+    stroke: #9a6700;
+    stroke-width: 1.55;
+    fill: none;
+    marker-end: url(#orderArrowHead);
+  }
+
+  .transship-arrow {
+    stroke: #2f6f9f;
+    stroke-width: 1.55;
+    fill: none;
+    marker-end: url(#blueArrowHead);
+  }
+
+  .feedback-arrow {
+    stroke: #3f8f5f;
+    stroke-width: 1.4;
+    stroke-dasharray: 6 5;
+    fill: none;
+    marker-end: url(#greenArrowHead);
+  }
+
+  .flow-label {
+    font-size: 10.5px;
+    fill: var(--muted);
+    paint-order: stroke;
+    stroke: #ffffff;
+    stroke-width: 4px;
+    stroke-linejoin: round;
+  }
+
+  .icon {
+    opacity: 0.95;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+<svg id="realworld-inventory-environment" viewBox="0 0 1220 780" role="img" aria-labelledby="figure-title figure-desc">
+  <title id="figure-title">Real-world multi-site inventory management environment</title>
+  <desc id="figure-desc">Editable SVG figure using local icon files to show suppliers, warehouses, stores, inventory agents, replenishment orders, lateral transshipment, negotiation, demand uncertainty, simulator feedback, and evaluation metrics.</desc>
+
+  <defs>
+    <marker id="arrowHead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M 0 0 L 10 4 L 0 8 z" fill="#59636f"></path>
+    </marker>
+    <marker id="softArrowHead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M 0 0 L 10 4 L 0 8 z" fill="#9aa5b1"></path>
+    </marker>
+    <marker id="orderArrowHead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M 0 0 L 10 4 L 0 8 z" fill="#9a6700"></path>
+    </marker>
+    <marker id="blueArrowHead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M 0 0 L 10 4 L 0 8 z" fill="#2f6f9f"></path>
+    </marker>
+    <marker id="greenArrowHead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M 0 0 L 10 4 L 0 8 z" fill="#3f8f5f"></path>
+    </marker>
+  </defs>
+
+  <!-- Main title and editable subtitle -->
+  <text id="main-title" x="610" y="34" text-anchor="middle" class="title">Real-world Multi-site Inventory Management Environment</text>
+  <text id="main-subtitle" x="610" y="57" text-anchor="middle" class="subtitle">Inventory agents use local stock, orders, forecasts, and consensus to make replenishment and transshipment decisions in a simulator.</text>
+
+  <!-- Simulator / environment boundary -->
+  <rect id="simulator-boundary" class="sim-card" x="250" y="90" width="700" height="560"></rect>
+  <text id="simulator-title" x="600" y="120" text-anchor="middle" class="box-title">Inventory Simulator as the Environment</text>
+  <text x="600" y="142" text-anchor="middle" class="small">demand realization, order lead time, capacity, transfer feasibility, and cost accounting</text>
+
+  <!-- External supplier and order process -->
+  <g id="supplier-and-order">
+    <rect id="supplier-card" class="order-card" x="38" y="130" width="172" height="118"></rect>
+    <image id="supplier-inventory-icon" class="icon" href="icon/inventory.svg" x="62" y="151" width="46" height="46"></image>
+    <text x="132" y="169" class="box-title">Supplier</text>
+    <text x="132" y="191" class="small">external source</text>
+    <text x="132" y="211" class="small">lead time L_o</text>
+
+    <rect id="order-card" class="order-card" x="42" y="295" width="164" height="118"></rect>
+    <image id="order-icon" class="icon" href="icon/%E8%AE%A2%E5%8D%95.svg" x="67" y="317" width="44" height="44"></image>
+    <text x="130" y="337" class="box-title">Orders</text>
+    <text x="130" y="359" class="small">x_i(t)</text>
+    <text x="130" y="379" class="small">fixed and unit cost</text>
+    <text x="130" y="397" class="tiny">arrive after lead time</text>
+  </g>
+
+  <!-- Policy generation module -->
+  <g id="policy-generation-module">
+    <rect id="policy-card" class="agent-card" x="38" y="485" width="174" height="120"></rect>
+    <image id="ai-agent-policy-icon" class="icon" href="icon/AI_Agent.svg" x="62" y="508" width="46" height="46"></image>
+    <text x="132" y="524" class="box-title">Policy code</text>
+    <text x="132" y="546" class="small">generated offline</text>
+    <text x="132" y="566" class="small">replenish + transship</text>
+    <text x="132" y="586" class="tiny">executable functions</text>
+  </g>
+
+  <!-- Demand and forecast blocks -->
+  <g id="demand-and-forecast">
+    <rect id="demand-card" class="alert-card" x="325" y="170" width="185" height="82"></rect>
+    <text x="417" y="198" text-anchor="middle" class="box-title">Customer Demand</text>
+    <text x="417" y="222" text-anchor="middle" class="small">uncertain D_i(t)</text>
+    <text x="417" y="240" text-anchor="middle" class="tiny">shortage risk after realization</text>
+
+    <rect id="forecast-card" class="order-card" x="690" y="170" width="205" height="82"></rect>
+    <text x="792" y="198" text-anchor="middle" class="box-title">Demand Forecasts</text>
+    <text x="792" y="222" text-anchor="middle" class="small">dhat_i,t = [dhat^(1), ..., dhat^(K)]</text>
+    <text x="792" y="240" text-anchor="middle" class="tiny">local or shared forecast features</text>
+  </g>
+
+  <!-- Inventory sites -->
+  <g id="regional-warehouse-agent">
+    <rect id="site-a-card" class="site-card" x="318" y="315" width="178" height="178"></rect>
+    <image id="site-a-inventory-icon" class="icon" href="icon/inventory.svg" x="382" y="335" width="50" height="50"></image>
+    <text x="407" y="410" text-anchor="middle" class="box-title">Regional Center A</text>
+    <text x="407" y="434" text-anchor="middle" class="small">Agent A</text>
+    <text x="407" y="454" text-anchor="middle" class="small">Inventory I_A(t)</text>
+    <text x="407" y="474" text-anchor="middle" class="tiny">capacity, cost, pipeline</text>
+  </g>
+
+  <g id="store-agent">
+    <rect id="site-b-card" class="site-card" x="522" y="428" width="178" height="178"></rect>
+    <image id="site-b-inventory-icon" class="icon" href="icon/inventory.svg" x="586" y="448" width="50" height="50"></image>
+    <text x="611" y="523" text-anchor="middle" class="box-title">Store / Factory B</text>
+    <text x="611" y="547" text-anchor="middle" class="small">Agent B</text>
+    <text x="611" y="567" text-anchor="middle" class="small">Inventory I_B(t)</text>
+    <text x="611" y="587" text-anchor="middle" class="tiny">local service pressure</text>
+  </g>
+
+  <g id="plant-agent">
+    <rect id="site-c-card" class="site-card" x="726" y="315" width="178" height="178"></rect>
+    <image id="site-c-inventory-icon" class="icon" href="icon/inventory.svg" x="790" y="335" width="50" height="50"></image>
+    <text x="815" y="410" text-anchor="middle" class="box-title">Plant / Depot C</text>
+    <text x="815" y="434" text-anchor="middle" class="small">Agent C</text>
+    <text x="815" y="454" text-anchor="middle" class="small">Inventory I_C(t)</text>
+    <text x="815" y="474" text-anchor="middle" class="tiny">donor or receiver</text>
+  </g>
+
+  <!-- Agent layer with AI icons -->
+  <g id="local-agent-layer">
+    <rect id="agent-a-card" class="agent-card" x="318" y="525" width="150" height="76"></rect>
+    <image id="ai-agent-a-icon" class="icon" href="icon/ai_agent_icon_27.svg" x="338" y="541" width="34" height="34"></image>
+    <text x="388" y="552" class="label">Local agent A</text>
+    <text x="388" y="573" class="tiny">uses local state</text>
+
+    <rect id="agent-b-card" class="agent-card" x="536" y="633" width="150" height="76"></rect>
+    <image id="ai-agent-b-icon" class="icon" href="icon/ai_agent_icon_27.svg" x="556" y="649" width="34" height="34"></image>
+    <text x="606" y="660" class="label">Local agent B</text>
+    <text x="606" y="681" class="tiny">orders or requests</text>
+
+    <rect id="agent-c-card" class="agent-card" x="754" y="525" width="150" height="76"></rect>
+    <image id="ai-agent-c-icon" class="icon" href="icon/ai_agent_icon_27.svg" x="774" y="541" width="34" height="34"></image>
+    <text x="824" y="552" class="label">Local agent C</text>
+    <text x="824" y="573" class="tiny">accepts or rejects</text>
+  </g>
+
+  <!-- Consensus module -->
+  <g id="consensus-module">
+    <rect id="consensus-card" class="agent-card" x="515" y="302" width="190" height="88"></rect>
+    <image id="consensus-icon" class="icon" href="icon/icon_negotiations.svg" x="534" y="323" width="42" height="42"></image>
+    <text x="618" y="329" text-anchor="middle" class="box-title">Consensus</text>
+    <text x="618" y="352" text-anchor="middle" class="small">donor risk + receiver need</text>
+    <text x="618" y="370" text-anchor="middle" class="tiny">accept, reduce, or reject transfer</text>
+  </g>
+
+  <!-- Output and metrics -->
+  <g id="decision-output">
+    <rect id="decision-output-card" class="order-card" x="1005" y="150" width="178" height="142"></rect>
+    <image id="decision-order-icon" class="icon" href="icon/%E8%AE%A2%E5%8D%95.svg" x="1030" y="174" width="42" height="42"></image>
+    <text x="1110" y="188" class="box-title">Decisions</text>
+    <text x="1110" y="211" class="small">orders x_i(t)</text>
+    <text x="1110" y="231" class="small">transfers q_ij(t)</text>
+    <text x="1110" y="251" class="tiny">executable policy output</text>
+  </g>
+
+  <g id="evaluation-metrics">
+    <rect id="metric-card" class="metric-card" x="1005" y="370" width="178" height="166"></rect>
+    <text x="1094" y="399" text-anchor="middle" class="box-title">Evaluation</text>
+    <text x="1094" y="430" text-anchor="middle" class="small">inventory cost</text>
+    <text x="1094" y="452" text-anchor="middle" class="small">shortage / stockout</text>
+    <text x="1094" y="474" text-anchor="middle" class="small">holding / overstock</text>
+    <text x="1094" y="496" text-anchor="middle" class="small">service level</text>
+    <text x="1094" y="518" text-anchor="middle" class="small">fairness debt</text>
+  </g>
+
+  <!-- Material, information, and feedback flows -->
+  <path id="supplier-to-orders" class="order-arrow" d="M 124 248 L 124 292"></path>
+  <path id="orders-to-site-a" class="order-arrow" d="M 206 344 C 245 330, 278 326, 318 350"></path>
+  <path id="orders-to-site-b" class="order-arrow" d="M 206 374 C 310 435, 438 479, 522 502"></path>
+  <path id="orders-to-site-c" class="order-arrow" d="M 206 360 C 380 292, 596 285, 726 348"></path>
+  <text x="250" y="321" class="flow-label">replenishment orders</text>
+
+  <path id="site-a-to-site-b-transfer" class="transship-arrow" d="M 452 493 C 485 520, 508 537, 544 546"></path>
+  <path id="site-c-to-site-b-transfer" class="transship-arrow" d="M 768 493 C 735 520, 710 538, 676 547"></path>
+  <path id="site-a-to-site-c-transfer" class="transship-arrow dashed" d="M 496 384 C 560 340, 667 340, 726 384"></path>
+  <text x="612" y="336" text-anchor="middle" class="flow-label">lateral transshipment</text>
+
+  <path id="demand-to-site-a" class="soft-arrow dashed" d="M 384 252 L 397 315"></path>
+  <path id="demand-to-site-b" class="soft-arrow dashed" d="M 441 252 C 495 318, 560 370, 590 428"></path>
+  <path id="demand-to-site-c" class="soft-arrow dashed" d="M 510 230 C 610 245, 742 275, 796 315"></path>
+
+  <path id="forecast-to-site-a" class="soft-arrow dashed" d="M 736 252 C 640 275, 510 289, 438 315"></path>
+  <path id="forecast-to-site-b" class="soft-arrow dashed" d="M 780 252 C 735 321, 680 381, 646 428"></path>
+  <path id="forecast-to-site-c" class="soft-arrow dashed" d="M 827 252 L 822 315"></path>
+
+  <path id="policy-to-simulator" class="arrow" d="M 212 545 C 244 527, 258 495, 318 456"></path>
+  <text x="242" y="508" class="flow-label">policy functions</text>
+
+  <path id="agents-to-consensus" class="feedback-arrow" d="M 468 563 C 512 520, 548 442, 576 390"></path>
+  <path id="agent-b-to-consensus" class="feedback-arrow" d="M 611 633 C 610 558, 612 464, 616 390"></path>
+  <path id="agent-c-to-consensus" class="feedback-arrow" d="M 754 563 C 708 520, 674 442, 650 390"></path>
+  <text x="636" y="617" class="flow-label">local state and transfer history</text>
+
+  <path id="simulator-to-decisions" class="arrow" d="M 950 222 L 1005 222"></path>
+  <text x="958" y="210" class="flow-label">actions</text>
+
+  <path id="simulator-to-metrics" class="arrow" d="M 950 454 L 1005 454"></path>
+  <text x="957" y="442" class="flow-label">episode results</text>
+
+  <path id="metrics-to-policy-feedback" class="feedback-arrow" d="M 1094 536 C 1065 735, 180 735, 125 606"></path>
+  <text x="610" y="748" text-anchor="middle" class="flow-label">simulator feedback supports offline policy-code evolution</text>
+
+  <!-- Legend -->
+  <g id="legend">
+    <rect id="legend-card" class="sim-card" x="300" y="675" width="312" height="54"></rect>
+    <line x1="318" y1="693" x2="360" y2="693" class="order-arrow"></line>
+    <text x="370" y="697" class="tiny">replenishment order flow</text>
+    <line x1="318" y1="715" x2="360" y2="715" class="transship-arrow"></line>
+    <text x="370" y="719" class="tiny">lateral transshipment flow</text>
+
+    <rect id="legend-card-2" class="sim-card" x="640" y="675" width="282" height="54"></rect>
+    <line x1="658" y1="693" x2="700" y2="693" class="soft-arrow dashed"></line>
+    <text x="710" y="697" class="tiny">forecast / demand information</text>
+    <line x1="658" y1="715" x2="700" y2="715" class="feedback-arrow"></line>
+    <text x="710" y="719" class="tiny">feedback and consensus information</text>
+  </g>
+</svg>
+</div>
+</body>
+</html>

@@ -4,6 +4,7 @@
 \usepackage{amsfonts}
 \usepackage{booktabs}
 \usepackage{cite}
+\usepackage{graphicx}
 \usepackage{url}
 \usepackage{algorithm}
 \usepackage{algorithmic}
@@ -156,16 +157,12 @@ The simulator is part of the contribution, not only an implementation detail. It
 
 The scenario is shown at a high level in Fig.~\ref{fig:scenario_multi_site_inventory}. The figure is meant to make the benchmark structure clear: the simulator provides site states, forecasts, and feedback; local inventory agents choose replenishment and transshipment actions; and the proposed method generates the executable decision logic that is tested in the simulator.
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\fbox{\begin{minipage}{0.92\linewidth}
-\centering
-\scriptsize [AUTHOR CHECK: export the editable HTML source to PDF/SVG/PNG and include the rendered figure here.]\\
-\url{figures/scenario_multi_site_inventory.html}
-\end{minipage}}
-\caption{Multi-site inventory benchmark studied in this paper. Each site is modeled as a local inventory agent with inventory state and demand forecasts. The simulator applies demand, replenishment lead times, lateral transshipment, feasibility checks, and cost accounting. The proposed method supplies executable policy logic, and performance is evaluated using cost, service, and coordination measures.}
+\includegraphics[width=0.98\textwidth]{figures/multi_site_inventory_env.png}
+\caption{Illustrative multi-site inventory environment using Singapore as an example geography. Each site represents a local factory, warehouse, or inventory location operated by an inventory-control agent that observes local inventory state and demand forecasts. The simulator updates demand, replenishment lead times, lateral transshipment, feasibility checks, and cost accounting. The proposed method generates executable policy logic for these agents, and candidate policies are evaluated using cost, service, and coordination measures.}
 \label{fig:scenario_multi_site_inventory}
-\end{figure}
+\end{figure*}
 
 This figure also marks the boundary of the paper. The work focuses on policy generation and evaluation for the replenish-and-transship simulator. It does not claim to model every supply-chain process, such as procurement contracts, routing, pricing, or production scheduling.
 
