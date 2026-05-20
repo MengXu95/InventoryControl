@@ -1,0 +1,115 @@
+\documentclass[journal]{IEEEtran}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{booktabs}
+\usepackage{cite}
+\usepackage{url}
+
+\title{ConsensusCode-Evolve: Token-Efficient Generative Code Search for Consensus-Aware Multi-Agent Inventory Automation}
+
+\author{Author~Name% <- replace before submission
+\thanks{This manuscript is prepared for possible submission to the IEEE Transactions on Automation Science and Engineering Special Issue on Generative AI Theories, Methods and Applications for Industrial Automation.}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Generative AI is creating new opportunities for industrial automation, but direct deployment of large language models (LLMs) as online controllers remains difficult because of cost, safety, interpretability, and reproducibility concerns. This paper proposes \emph{ConsensusCode-Evolve}, a simulator-grounded framework that uses an LLM as an offline code-evolution engine for multi-agent inventory automation. The target problem is multi-site replenishment and transshipment, a representative discrete manufacturing and supply-operation task in which local inventory agents must coordinate material movements under demand uncertainty, lead times, capacity limits, and asymmetric cost structures. Instead of asking an LLM to control the system online, the proposed method asks it to generate constrained Python policy functions for replenishment, transshipment proposal, and consensus gating. Candidate policies are validated by an abstract-syntax-tree safety checker, evaluated in a physical inventory simulator, and selected through an archive-based loop using compact numerical feedback. A consensus-seeking layer models donor willingness, receiver urgency, and fairness debt, so transshipment actions are accepted only when they satisfy both local and system-level requirements. The resulting policies are lightweight, executable without an LLM at deployment time, and directly inspectable by engineers. The paper outlines the method, safety constraints, evaluation protocol, and planned comparisons against genetic programming, heuristic, and learning-based baselines. The central hypothesis is that simulator-grounded generative code search can discover interpretable, consensus-aware inventory policies with lower token cost than online LLM agents while retaining automation-oriented robustness and deployability.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Generative AI, industrial automation, large language models, multi-agent systems, consensus seeking, inventory control, transshipment, code generation, simulation optimization.
+\end{IEEEkeywords}
+
+\section{Introduction}
+
+Industrial automation increasingly requires decision-making systems that can coordinate distributed assets, adapt to uncertain operating conditions, and remain interpretable to engineers. In discrete manufacturing and supply operations, material-flow decisions such as replenishment, inventory allocation, and transshipment are not merely numerical optimization tasks. They involve multiple sites or production units with local constraints, asymmetric costs, and sometimes conflicting interests. A site with surplus inventory may be asked to support another site, but such a transfer can be harmful if the donor later faces a demand surge. This makes multi-site inventory automation a natural setting for studying collaborative industrial task agents and consensus-aware control.
+
+The special issue theme on generative AI (GAI) for industrial automation is especially relevant to this problem. GAI methods, industrial large models, and industrial task agents can potentially support production-line modeling, adaptive scheduling, multi-objective optimization, and cooperative decision-making. However, industrial automation imposes requirements that differ from open-ended language tasks. Generated decisions must respect physical mechanisms, capacity limits, lead times, safety constraints, and deployment budgets. Moreover, many industrial systems cannot afford to call a large model at every control step. A useful GAI method for automation should therefore be grounded in physical simulators, lightweight at deployment time, and transparent enough to support engineering inspection.
+
+Recent progress in LLM-based code generation and program search suggests one promising path. AlphaCode showed that large language models can generate many candidate programs and use selection mechanisms to solve competitive programming problems \cite{li2022alphacode}. CodeRL incorporated execution feedback into code generation \cite{le2022coderl}. Self-Refine and Reflexion demonstrated that language models can iteratively improve outputs using compact feedback or verbal memory \cite{madaan2023selfrefine,shinn2023reflexion}. Voyager used LLM-generated executable code as reusable skills in an embodied environment \cite{wang2023voyager}, and Eureka showed that LLMs can write reward functions evaluated through simulation \cite{ma2024eureka}. FunSearch is particularly relevant because it combines LLM-generated programs with automatic evaluation to discover high-performing mathematical constructions \cite{romera2024funsearch}. These studies suggest that an LLM need not be the controller itself; instead, it can serve as a generator of candidate executable programs, while an external evaluator provides grounding.
+
+This paper transfers that idea to industrial inventory automation. We propose \emph{ConsensusCode-Evolve}, a token-efficient framework in which an LLM evolves small, safe Python policy functions offline. Each candidate policy contains three functions: a replenishment policy, a transshipment proposal policy, and a consensus gate. The replenishment function determines local order quantities. The transshipment proposal function suggests pairwise material movements. The consensus gate accepts, scales, or rejects proposed transfers based on donor willingness, receiver urgency, network benefit, and fairness debt. Candidate code is statically checked before execution and then evaluated in a multi-site inventory simulator. Only compact performance summaries and selected policy code snippets are returned to the LLM for the next mutation round.
+
+The proposed approach differs from direct LLM planning in three ways. First, the LLM is used offline, which reduces token cost and avoids dependence on a large model during deployment. Second, generated code is constrained to a small safe subset of Python, making the final policies inspectable and reproducible. Third, the method embeds autonomous multi-agent consensus seeking into the action layer, so transshipment decisions are not treated as forced centralized commands but as negotiated actions among local inventory agents.
+
+The intended contributions are as follows:
+\begin{itemize}
+    \item A simulator-grounded generative code-evolution framework for multi-site replenishment and transshipment automation.
+    \item A consensus-aware policy representation that separates replenishment, transshipment proposal, and agreement gating.
+    \item A lightweight safety mechanism based on abstract syntax tree validation for generated industrial policy code.
+    \item An evaluation protocol comparing LLM-evolved policies with genetic programming, heuristic, and learning-based baselines under cost, service, fairness, and robustness metrics.
+\end{itemize}
+
+This draft does not claim empirical superiority yet. The present implementation establishes the framework and an initial prototype. Full experimental validation should compare multiple scenarios, seeds, and token budgets before making performance claims.
+
+\section{Method}
+
+\subsection{Problem Setting}
+
+We consider a multi-site inventory system with $N$ locations. At each period $t$, site $i$ has inventory level $I_{i,t}$, pipeline inventory $P_{i,t}$, capacity $C_i$, holding cost $h_i$, lost-sales cost $b_i$, fixed and per-unit ordering costs, and short-horizon demand forecasts. The automation task is to choose replenishment quantities and transshipment flows. Replenishment orders arrive after a lead time, while transshipment immediately redistributes inventory between sites subject to availability and transfer cost.
+
+The objective is to minimize long-run average cost,
+\begin{equation}
+    J = \frac{1}{T}\sum_{t=1}^{T}\left(C_t^{\mathrm{trans}} + C_t^{\mathrm{hold/lost}} + C_t^{\mathrm{order}}\right),
+\end{equation}
+while maintaining service quality and avoiding unstable or unfair transfer patterns. In contrast to a purely centralized view, we treat each site as an autonomous inventory agent with local interests. A transshipment is desirable only if it benefits the receiver without exposing the donor to excessive future risk.
+
+\subsection{Policy-Code Representation}
+
+ConsensusCode-Evolve represents an inventory policy as three constrained Python functions:
+\begin{itemize}
+    \item \texttt{replenishment\_policy(site\_state, global\_state)} returns a nonnegative order quantity for one site.
+    \item \texttt{transshipment\_proposal(source\_state, target\_state, global\_state)} returns a signed or directional proposed transfer quantity.
+    \item \texttt{consensus\_gate(source\_state, target\_state, proposed\_quantity, history)} returns the accepted transfer quantity after agreement filtering.
+\end{itemize}
+
+The policy input exposes physically meaningful variables, including inventory, pipeline, capacity, holding cost, lost-sales cost, short forecasts, total network inventory, total forecast, inventory imbalance, and historical transfer imbalance. This design gives the LLM enough structure to generate useful policies without seeing long trajectories.
+
+\subsection{Consensus-Seeking Transshipment}
+
+For each potential pairwise transfer, the framework first computes a proposed quantity and then applies a consensus gate. The gate can be interpreted as an agreement mechanism among local agents. A typical form is
+\begin{equation}
+    q_{ij,t}^{\mathrm{acc}} = q_{ij,t}^{\mathrm{prop}} \cdot w_{i,t}^{\mathrm{donor}} \cdot u_{j,t}^{\mathrm{receiver}} \cdot f_{ij,t}^{\mathrm{fair}},
+\end{equation}
+where $q_{ij,t}^{\mathrm{prop}}$ is the proposed transfer from site $i$ to site $j$, $w_{i,t}^{\mathrm{donor}}$ measures donor willingness, $u_{j,t}^{\mathrm{receiver}}$ measures receiver urgency, and $f_{ij,t}^{\mathrm{fair}}$ penalizes repeated one-way support. These terms may be hand-designed in seed policies or generated directly by the LLM as executable code.
+
+This structure is important for industrial automation because it prevents the GAI system from generating opaque transfer commands. Each accepted movement can be explained in terms of donor safety, receiver need, and fairness history.
+
+\subsection{Safe Generative Code Search}
+
+The LLM is used only between simulation batches. In each round, the algorithm provides a compact prompt containing the best policy code snippets and a table of metrics such as total cost, transshipment cost, holding/lost-sales cost, order cost, stockout proxy count, accepted transfer count, rejected transfer count, and fairness debt. The LLM then proposes new candidate policy files.
+
+Before simulation, each candidate is checked by an abstract-syntax-tree validator. The current safe subset disallows imports, file operations, network access, random calls, classes, attributes, and unbounded external dependencies. It permits arithmetic, comparisons, simple conditionals, dictionary-state indexing, and calls to \texttt{abs}, \texttt{min}, \texttt{max}, and \texttt{round}. Candidates that fail validation are rejected without execution.
+
+\subsection{Evolution Loop}
+
+The search loop is summarized as follows:
+\begin{enumerate}
+    \item Initialize an archive with human-written seed policies.
+    \item Evaluate each candidate policy in the inventory simulator across selected scenarios and seeds.
+    \item Store policy source code and compact metrics in an archive.
+    \item Select the top-performing and behaviorally distinct policies.
+    \item Prompt the LLM to generate a small number of mutations under strict API and safety rules.
+    \item Validate generated code, evaluate valid candidates, and update the archive.
+\end{enumerate}
+
+This loop follows the spirit of program search with automatic evaluation while being adapted to industrial automation. The evaluator, rather than the LLM, determines whether a candidate is useful.
+
+\subsection{Evaluation Plan}
+
+The planned evaluation compares ConsensusCode-Evolve against: (i) the existing multi-tree genetic programming method for replenishment and transshipment, (ii) hand-designed consensus policies, (iii) LLM-evolved policies without the consensus gate, and (iv) classical inventory baselines such as $(s,S)$ policies where applicable. The primary metrics are total average cost, holding/lost-sales cost, order cost, transshipment cost, stockout frequency, transshipment frequency, fairness debt, and robustness under stress-test scenarios.
+
+The ablation study should vary the token budget, number of candidates per LLM call, consensus components, and archive-selection strategy. A useful automation-oriented result would show not only low cost, but also low token usage, stable simulator feasibility, interpretable policies, and improved coordination behavior compared with direct pairwise transshipment rules.
+
+\section{Planned Experiments and Discussion}
+
+The initial prototype has implemented the safe policy API, AST validation, simulator adapter, seed policy evaluation, prompt generation, and generated-candidate evaluation. The next stage is to perform systematic experiments across two-site and three-site scenarios, multiple random seeds, and different holding/lost-sales asymmetries. Results should be reported conservatively. Until full experiments are complete, the central claim should be framed as a methodological contribution and a testable hypothesis rather than an established empirical improvement.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
