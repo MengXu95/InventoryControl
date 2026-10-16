@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multi-site Inventory Scenario Figure</title>
+<style>
+  :root {
+    --ink: #1f2933;
+    --muted: #52606d;
+    --line: #52606d;
+    --soft-line: #9aa5b1;
+    --site: #eaf4ff;
+    --site-border: #2f6f9f;
+    --method: #eef8f1;
+    --method-border: #3f8f5f;
+    --env: #f8fafc;
+    --warn: #fff7e6;
+    --warn-border: #b87900;
+    --metric: #f4f1fb;
+    --metric-border: #6f5aa8;
+  }
+
+  body {
+    margin: 0;
+    background: #ffffff;
+    color: var(--ink);
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  .page {
+    max-width: 1220px;
+    margin: 18px auto;
+    padding: 10px;
+    background: #ffffff;
+  }
+
+  svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: #ffffff;
+  }
+
+  .title {
+    font-size: 23px;
+    font-weight: 700;
+    fill: var(--ink);
+  }
+
+  .subtitle {
+    font-size: 14px;
+    fill: var(--muted);
+  }
+
+  .box-title {
+    font-size: 16px;
+    font-weight: 700;
+    fill: var(--ink);
+  }
+
+  .label {
+    font-size: 13px;
+    fill: var(--ink);
+  }
+
+  .small {
+    font-size: 11.5px;
+    fill: var(--muted);
+  }
+
+  .tiny {
+    font-size: 10.5px;
+    fill: var(--muted);
+  }
+
+  .env-box {
+    fill: var(--env);
+    stroke: var(--line);
+    stroke-width: 1.5;
+    rx: 8;
+  }
+
+  .site-box {
+    fill: var(--site);
+    stroke: var(--site-border);
+    stroke-width: 1.4;
+    rx: 7;
+  }
+
+  .method-box {
+    fill: var(--method);
+    stroke: var(--method-border);
+    stroke-width: 1.4;
+    rx: 7;
+  }
+
+  .demand-box {
+    fill: var(--warn);
+    stroke: var(--warn-border);
+    stroke-width: 1.2;
+    rx: 7;
+  }
+
+  .metric-box {
+    fill: var(--metric);
+    stroke: var(--metric-border);
+    stroke-width: 1.2;
+    rx: 7;
+  }
+
+  .arrow {
+    stroke: var(--line);
+    stroke-width: 1.7;
+    fill: none;
+    marker-end: url(#arrowHead);
+  }
+
+  .soft-arrow {
+    stroke: var(--soft-line);
+    stroke-width: 1.3;
+    fill: none;
+    marker-end: url(#softArrowHead);
+  }
+
+  .dashed {
+    stroke-dasharray: 6 5;
+  }
+
+  .flow-label {
+    font-size: 11.5px;
+    fill: var(--muted);
+    paint-order: stroke;
+    stroke: #ffffff;
+    stroke-width: 4px;
+    stroke-linejoin: round;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+<svg id="scenario-multi-site-inventory" viewBox="0 0 1200 760" role="img" aria-labelledby="fig-title fig-desc">
+  <title id="fig-title">Multi-site inventory benchmark scenario</title>
+  <desc id="fig-desc">Editable SVG figure showing a multi-site inventory simulator, local inventory agents, demand forecasts, replenishment and transshipment actions, consensus exchange, and evaluation feedback.</desc>
+
+  <defs>
+    <marker id="arrowHead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M 0 0 L 10 4 L 0 8 z" fill="#52606d"></path>
+    </marker>
+    <marker id="softArrowHead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M 0 0 L 10 4 L 0 8 z" fill="#9aa5b1"></path>
+    </marker>
+  </defs>
+
+  <!-- Figure title -->
+  <text id="main-title" x="600" y="34" text-anchor="middle" class="title">Multi-site Inventory Benchmark With Agent Decisions</text>
+  <text id="main-subtitle" x="600" y="58" text-anchor="middle" class="subtitle">The simulator supplies states, forecasts, actions, and feedback for replenish-and-transship policy evaluation.</text>
+
+  <!-- Method module -->
+  <rect id="method-module" class="method-box" x="40" y="112" width="250" height="150"></rect>
+  <text x="165" y="142" text-anchor="middle" class="box-title">Policy-generation module</text>
+  <text x="64" y="174" class="label">ConsensusCode-Evolve</text>
+  <text x="64" y="198" class="small">Offline code search</text>
+  <text x="64" y="219" class="small">Executable policy functions</text>
+  <text x="64" y="240" class="small">Replenishment, proposal, gate</text>
+
+  <rect id="decision-output" class="method-box" x="48" y="314" width="234" height="110"></rect>
+  <text x="165" y="344" text-anchor="middle" class="box-title">Decision output</text>
+  <text x="72" y="374" class="small">Orders: x_i(t)</text>
+  <text x="72" y="395" class="small">Transfers: q_ij(t)</text>
+  <text x="72" y="416" class="small">Accepted by consensus gate</text>
+
+  <!-- Simulator boundary -->
+  <rect id="simulator-environment" class="env-box" x="335" y="100" width="590" height="545"></rect>
+  <text x="630" y="130" text-anchor="middle" class="box-title">Multi-site Inventory Simulator</text>
+  <text x="630" y="153" text-anchor="middle" class="small">Demand, lead time, capacity, transshipment feasibility, and cost accounting</text>
+
+  <!-- Shared forecast and demand uncertainty -->
+  <rect id="forecast-block" class="demand-box" x="385" y="182" width="230" height="94"></rect>
+  <text x="500" y="211" text-anchor="middle" class="box-title">Forecast inputs</text>
+  <text x="408" y="239" class="small">dhat_i,t = [dhat_i,t^(1), ..., dhat_i,t^(K)]</text>
+  <text x="408" y="260" class="small">Local or shared forecast features</text>
+
+  <rect id="demand-block" class="demand-box" x="650" y="182" width="225" height="94"></rect>
+  <text x="762" y="211" text-anchor="middle" class="box-title">Demand uncertainty</text>
+  <text x="674" y="239" class="small">Synthetic or loaded demand records</text>
+  <text x="674" y="260" class="small">Realization occurs after decision timing</text>
+
+  <!-- Site cards -->
+  <rect id="site-agent-1" class="site-box" x="384" y="350" width="155" height="130"></rect>
+  <text x="461" y="378" text-anchor="middle" class="box-title">Site / Agent 1</text>
+  <text x="405" y="407" class="small">Inventory I_1(t)</text>
+  <text x="405" y="428" class="small">Pipeline P_1(t)</text>
+  <text x="405" y="449" class="small">Costs h_1, b_1</text>
+  <text x="405" y="470" class="small">Forecast vector</text>
+
+  <rect id="site-agent-2" class="site-box" x="548" y="505" width="165" height="130"></rect>
+  <text x="630" y="533" text-anchor="middle" class="box-title">Site / Agent 2</text>
+  <text x="570" y="562" class="small">Inventory I_2(t)</text>
+  <text x="570" y="583" class="small">Pipeline P_2(t)</text>
+  <text x="570" y="604" class="small">Costs h_2, b_2</text>
+  <text x="570" y="625" class="small">Forecast vector</text>
+
+  <rect id="site-agent-3" class="site-box" x="720" y="350" width="155" height="130"></rect>
+  <text x="797" y="378" text-anchor="middle" class="box-title">Site / Agent 3</text>
+  <text x="741" y="407" class="small">Inventory I_3(t)</text>
+  <text x="741" y="428" class="small">Pipeline P_3(t)</text>
+  <text x="741" y="449" class="small">Costs h_3, b_3</text>
+  <text x="741" y="470" class="small">Forecast vector</text>
+
+  <!-- Replenishment source -->
+  <rect id="supplier-block" x="500" y="295" width="260" height="42" rx="6" fill="#ffffff" stroke="#52606d" stroke-width="1.2"></rect>
+  <text x="630" y="322" text-anchor="middle" class="label">External replenishment source with lead time L_o</text>
+
+  <!-- Product and information flows -->
+  <path id="method-to-simulator" class="arrow" d="M 290 188 C 315 188, 318 188, 335 188"></path>
+  <text x="304" y="174" class="flow-label">policy logic</text>
+
+  <path id="simulator-to-decision" class="soft-arrow dashed" d="M 335 235 C 295 263, 292 305, 282 344"></path>
+  <text x="288" y="284" class="flow-label">state, forecast, feedback</text>
+
+  <path id="decision-to-simulator" class="arrow" d="M 282 380 C 308 402, 326 417, 384 417"></path>
+  <text x="305" y="404" class="flow-label">actions</text>
+
+  <path id="supplier-to-site1" class="soft-arrow" d="M 556 337 L 505 350"></path>
+  <path id="supplier-to-site2" class="soft-arrow" d="M 630 337 L 630 505"></path>
+  <path id="supplier-to-site3" class="soft-arrow" d="M 704 337 L 758 350"></path>
+
+  <path id="demand-to-site1" class="soft-arrow dashed" d="M 680 276 C 610 315, 545 331, 501 350"></path>
+  <path id="demand-to-site2" class="soft-arrow dashed" d="M 762 276 C 720 367, 684 440, 653 505"></path>
+  <path id="demand-to-site3" class="soft-arrow dashed" d="M 806 276 C 811 306, 808 329, 802 350"></path>
+
+  <path id="forecast-to-site1" class="soft-arrow dashed" d="M 470 276 C 452 302, 450 323, 452 350"></path>
+  <path id="forecast-to-site2" class="soft-arrow dashed" d="M 528 276 C 575 342, 610 428, 624 505"></path>
+  <path id="forecast-to-site3" class="soft-arrow dashed" d="M 615 244 C 677 275, 731 312, 762 350"></path>
+
+  <path id="transship-1-2" class="arrow" d="M 510 478 C 535 500, 555 516, 580 526"></path>
+  <path id="transship-2-1" class="soft-arrow" d="M 584 506 C 560 484, 540 470, 520 456"></path>
+  <text x="520" y="505" class="flow-label">lateral transfer</text>
+
+  <path id="transship-2-3" class="arrow" d="M 705 526 C 734 509, 755 492, 772 480"></path>
+  <path id="transship-3-2" class="soft-arrow" d="M 762 455 C 727 476, 704 492, 684 506"></path>
+  <text x="738" y="512" class="flow-label">lateral transfer</text>
+
+  <path id="consensus-1-3" class="soft-arrow dashed" d="M 540 392 C 595 335, 692 335, 720 392"></path>
+  <text x="630" y="352" text-anchor="middle" class="flow-label">information exchange / consensus</text>
+
+  <!-- Evaluation metrics -->
+  <rect id="metrics-block" class="metric-box" x="965" y="160" width="195" height="180"></rect>
+  <text x="1062" y="190" text-anchor="middle" class="box-title">Evaluation metrics</text>
+  <text x="990" y="224" class="small">Inventory cost</text>
+  <text x="990" y="247" class="small">Shortage / stockout proxy</text>
+  <text x="990" y="270" class="small">Overstock / holding cost</text>
+  <text x="990" y="293" class="small">Service behavior</text>
+  <text x="990" y="316" class="small">Fairness debt and transfers</text>
+
+  <path id="simulator-to-metrics" class="arrow" d="M 925 250 L 965 250"></path>
+  <text x="932" y="236" class="flow-label">feedback</text>
+
+  <rect id="archive-block" class="metric-box" x="965" y="400" width="195" height="125"></rect>
+  <text x="1062" y="430" text-anchor="middle" class="box-title">Policy selection</text>
+  <text x="990" y="462" class="small">Archive scores</text>
+  <text x="990" y="485" class="small">Candidate comparison</text>
+  <text x="990" y="508" class="small">Selected executable policy</text>
+
+  <path id="metrics-to-method" class="soft-arrow dashed" d="M 1062 340 C 1062 690, 118 690, 118 262"></path>
+  <text x="620" y="708" text-anchor="middle" class="flow-label">compact feedback for offline policy-code evolution</text>
+
+  <!-- Bottom note -->
+  <text id="scope-note" x="600" y="732" text-anchor="middle" class="tiny">Scope: same-echelon multi-site inventory with replenishment, pairwise transshipment, local agent states, forecasts, and simulator-based evaluation.</text>
+</svg>
+</div>
+</body>
+</html>

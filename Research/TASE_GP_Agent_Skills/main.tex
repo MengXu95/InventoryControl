@@ -1,0 +1,233 @@
+\documentclass[journal]{IEEEtran}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{array}
+
+\title{Three-Tree Genetic Programming for Skill-Based Peer Coordination in Multi-Site Inventory Control}
+\author{Author~Name}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Multi-site inventory control requires local replenishment decisions and
+coordinated lateral transfers under uncertain demand. Treating every transfer
+pair independently can allocate the same donor stock more than once, while
+giving a central policy unrestricted access to all site states obscures the
+information requirements of coordination. This paper develops a reproducible
+method in which each site is a peer inventory agent with local observations,
+explicit decision skills, and a reservation ledger. An offline genetic
+programming (GP) search evolves a shared individual with exactly three
+expression trees: replenishment, support request, and support offer. Fixed skill
+wrappers interpret these expressions as bounded quantities. A non-evolved
+protocol exchanges forecast-slack summaries, evaluates candidate quantities,
+confirms mutually preferred partners over a finite number of rounds, and
+reserves quantities without a central matching optimizer. Negotiation precedes
+current demand realization; its output is therefore a conditional commitment,
+not an executed transfer. After demand and due arrivals, a physical executor
+revalidates donor stock and receiver capacity and records actual dispatches
+separately from promises. This manuscript specifies the GP representation,
+agent--skill relationship, fixed negotiation, and simulator-grounded evaluation.
+The fixed gain is a forecast-based heuristic, not a calibrated value function
+or a guarantee of optimality. Comparative performance and industrial
+generalization remain empirical questions.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Genetic programming, multi-agent coordination, inventory control, lateral
+transshipment, interpretable decision rules.
+\end{IEEEkeywords}
+
+\section{Introduction}
+Multi-location inventory systems couple decisions that appear local:
+an order changes future availability, and a transfer improves one site's
+position while consuming another site's stock. Classical inventory policies
+provide important interpretable baselines \cite{zipkin2000foundations,axsater2015inventory},
+while lateral transshipment introduces interactions among inventory positions,
+costs, and service requirements \cite{paterson2011lateral}.
+The present setting concerns sites belonging to one enterprise. They share a
+system-cost objective but retain local information, inventory responsibilities,
+and service targets. No monetary bargaining between independent firms is
+assumed.
+
+GP searches executable symbolic policies rather than prescribing their final
+algebraic structure \cite{koza1992genetic,poligp2008fieldguide}.
+However, directly returning one signed quantity for every site pair does not
+by itself define a decentralized coordination process. Simultaneous pairwise
+decisions may compete for the same stock; an accepted proposal may also become
+infeasible when demand is realized before dispatch.
+These issues motivate an explicit separation of policy representation,
+agent authority, and protocol execution.
+
+We study three-tree GP with fixed peer negotiation. Each site executes the
+same evolved policy on its own observation. Replenishment, request, and offer
+skills use distinct GP trees, whereas routing, partner confirmation,
+reservations, and feasibility checks are fixed mechanisms. Offline team
+evaluation can be centralized without making online decisions centralized:
+agents exchange only specified summaries, and no agent commands another
+site's transfer.
+
+The method is intended to support three investigations:
+\begin{enumerate}
+    \item whether a request--offer representation with explicit commitments
+    improves coordination relative to independent pairwise transfer rules;
+    \item whether GP can discover useful local replenishment, request, and
+    offer expressions under the same fixed negotiation protocol;
+    \item how finite communication rounds, topology, and conditional execution
+    affect cost and site-level service.
+\end{enumerate}
+These are testable questions, not claims of established superiority.
+The implementation and editable diagrams accompany this methods draft.
+
+\section{Background and Scope}
+Inventory rules, simulation optimization, and symbolic policy search are
+complementary. Classical policies expose understandable stock targets;
+simulation can represent stochastic transitions and operational constraints
+\cite{amaran2016simulation}; GP can search nonlinear expressions without a
+differentiable simulator. A GP tree is a decision expression, not an autonomous
+agent. Autonomy additionally requires an observation boundary, memory,
+permitted messages, and authority over local actions.
+
+Likewise, peer agreement is not synonymous with numerical consensus in
+networked control \cite{olfati2007consensus}. Here agreement means that two
+endpoints confirm the same conditional transfer within a finite-round
+protocol. We make no asymptotic convergence, strategy-proofness, privacy, or
+globally optimal matching claim. A skill is a callable decision module with
+preconditions, output bounds, and execution feedback; it is not necessarily a
+temporally extended reinforcement-learning option.
+
+\section{Problem and Information Structure}
+\label{sec:problem}
+Consider $N\geq 2$ inventory sites on a configured undirected graph
+$\mathcal G=(\mathcal V,\mathcal E)$. At the start of period $t$, site $i$
+observes its on-hand inventory $I_i$, outstanding order pipeline $P_i$,
+forecast vector $\hat{\mathbf d}_i$, storage capacity $Cap_i$, and operating
+cost parameters. It also maintains current-period commitments and an
+execution history. Let $h_i$, $b_i$, $a_i$, and $k_i$ denote holding,
+lost-sales, unit-order, and fixed-order costs. A dispatched transfer incurs
+unit cost $c^{tr}$ and fixed cost $K^{tr}$.
+
+An agent cannot inspect another site's simulator object, current realized
+demand, future realized demand, or a full-network inventory aggregate.
+Neighbor communication exposes only the specified request/offer summaries,
+cost coefficients, and commitment updates. Such summaries are not a formal
+privacy mechanism.
+
+\subsection{Decision and Execution Timing}
+The timing is intentionally retained from the replenish-and-transship
+benchmark: agents choose orders and negotiate before observing current
+realized demand. The environment subsequently applies due arrivals and
+demand, revalidates transfers, charges costs, and advances the pipeline.
+Consequently, a promised quantity is not automatically deliverable.
+
+Let $A_i(t)$ be due arrivals and $D_i(t)$ realized demand. Before physical
+transfers,
+\begin{equation}
+    z_i(t)=\min\{Cap_i,I_i(t)+A_i(t)\}-D_i(t).
+\end{equation}
+For a directed commitment $i\rightarrow j$ with planned quantity $q^p$,
+the executor can dispatch no more than
+\begin{equation}
+    q^e=\min\{q^p,\max(0,z_i),\max(0,Cap_j-z_j)\},
+    \label{eq:execution}
+\end{equation}
+with $z_i,z_j$ updated after preceding dispatches. The implementation uses a
+documented deterministic dispatch order. This introduces an execution-order
+effect when resources change after commitment; it is not claimed to remove
+all allocation bias. Zero, partial, and full dispatches are distinguished.
+
+After transfers, negative inventory is charged as unmet demand and reset to
+zero. Positive inventory incurs holding cost. Order decisions enter the
+pipeline according to the benchmark lead-time convention. Receiver capacity
+is enforced at physical dispatch, not merely at proposal generation.
+The complete observable pipeline has $L_o$ slots: its head arrives in the
+current period, then the pipeline shifts and the new order is appended.
+Thus an order chosen in period $t$ arrives in period $t+L_o$; with
+$L_o=2$, the first order arrives in period 3. This is physically equivalent
+to the inherited simulator's shorter queue plus separately staged action.
+The new policy interface explicitly exposes all outstanding orders, so
+baseline comparisons must align pipeline information as well as dynamics.
+Overflow at a capped arrival is discarded and measured.
+
+\subsection{Objective and Measurements}
+The period cost is
+\begin{align}
+ C_t={}&\sum_{i\rightarrow j}
+ \left(c^{tr}q^e_{ij}+K^{tr}\mathbb I[q^e_{ij}>0]\right) \nonumber\\
+ &+\sum_i\left(h_i\max(z_i,0)+b_i\max(-z_i,0)\right) \nonumber\\
+ &+\sum_i\left(a_i x_i+k_i\mathbb I[x_i>0]\right).
+\end{align}
+The episode objective is realized cost divided by the actual number of
+simulated periods. Service is measured using unmet demand units and demand
+fill rate, not a count of zero ending inventories.
+
+Synthetic demand uses stochastic Poisson realizations conditional on the
+benchmark's exposed demand means. These mean forecasts are privileged model
+information and should not be interpreted as evidence of real forecasting
+accuracy. Historical records copied into future forecast slots constitute
+an oracle setting; they must be explicitly marked or rejected, rather than
+silently presented as causal forecasting.
+Synthetic episodes retain the inherited reset convention: the stream seed
+is the supplied episode seed plus 1000. Shortened execution horizons do not
+regenerate a different demand table.
+
+\input{method}
+
+\section{Evaluation Protocol}
+\label{sec:evaluation}
+This manuscript supplies an executable methods prototype, not a completed
+comparative study. Training uses common scenario/seed batches across
+competing individuals. Validation selects among candidate policies; final
+test trajectories do not participate in selection. Demand repetitions
+measure a frozen policy's variability and must not be counted as independent
+GP search runs.
+
+Required baselines include tuned local inventory rules, no lateral
+transshipment, the copied two-tree replenish/transship GP, and the same
+three-tree representation with independent pairwise acceptance instead of
+mutual matching. A fixed hand-written request/offer policy isolates the
+benefit of GP search from the benefit of the protocol. Information, timing,
+action bounds/precision, scenario distribution, and simulation budgets must
+be aligned. The new skill wrappers do not apply the legacy logistic action
+map or its two-decimal rounding.
+
+Ablations should vary negotiation rounds, graph connectivity, request/offer
+evolution, and reservation handling. An unconstrained oracle-information
+controller may be used as a reference, but is not automatically an optimal
+bound. Stress tests should include multiple receivers competing for one
+donor, asymmetric costs, demand shocks, and larger networks.
+
+Report average cost and its components, per-site fill rate, unmet units,
+planned and executed transfer quantities, full/partial/cancelled commitment
+counts, and protocol communication. Report search wall time, episode
+evaluations, tree sizes, independent search seeds, and paired test uncertainty.
+Small smoke runs validate execution and reproducibility only; they cannot
+establish an algorithmic advantage.
+
+\section{Limitations and Conclusions}
+Three-tree GP replaces a general code generator with a restricted symbolic
+search space. The fixed protocol intentionally remains outside evolution,
+which improves attribution but limits what coordination patterns can be
+discovered. The gain proxy ignores much of the multi-period stochastic
+problem; positive predicted gain is not a guarantee of positive realized
+benefit. Shared rules do not establish performance with arbitrary
+heterogeneous partners. Finite mutual matching need not solve the global
+allocation problem, and conditional commitments can fail after demand.
+
+The resulting research object is nevertheless precise: local inventory
+agents use GP-parameterized skills to produce requests and offers; a fixed
+peer protocol converts compatible choices into conditional commitments; a
+separate executor enforces physical limits and records realized outcomes.
+The next empirical task is to test whether this separation yields useful
+cost--service tradeoffs under equal information and evaluation budgets.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\end{document}

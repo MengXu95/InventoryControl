@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ConsensusCode-Evolve Method Pipeline Figure</title>
+<style>
+  :root {
+    --ink: #1f2933;
+    --muted: #52606d;
+    --line: #52606d;
+    --soft-line: #9aa5b1;
+    --input: #eaf4ff;
+    --input-border: #2f6f9f;
+    --code: #eef8f1;
+    --code-border: #3f8f5f;
+    --check: #fff7e6;
+    --check-border: #b87900;
+    --archive: #f4f1fb;
+    --archive-border: #6f5aa8;
+    --sim: #f8fafc;
+  }
+
+  body {
+    margin: 0;
+    background: #ffffff;
+    color: var(--ink);
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  .page {
+    max-width: 1220px;
+    margin: 18px auto;
+    padding: 10px;
+    background: #ffffff;
+  }
+
+  svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: #ffffff;
+  }
+
+  .title {
+    font-size: 23px;
+    font-weight: 700;
+    fill: var(--ink);
+  }
+
+  .subtitle {
+    font-size: 14px;
+    fill: var(--muted);
+  }
+
+  .box-title {
+    font-size: 15.5px;
+    font-weight: 700;
+    fill: var(--ink);
+  }
+
+  .label {
+    font-size: 12.5px;
+    fill: var(--ink);
+  }
+
+  .small {
+    font-size: 11.5px;
+    fill: var(--muted);
+  }
+
+  .tiny {
+    font-size: 10.5px;
+    fill: var(--muted);
+  }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: 700;
+    fill: var(--muted);
+  }
+
+  .input-box {
+    fill: var(--input);
+    stroke: var(--input-border);
+    stroke-width: 1.4;
+    rx: 7;
+  }
+
+  .code-box {
+    fill: var(--code);
+    stroke: var(--code-border);
+    stroke-width: 1.4;
+    rx: 7;
+  }
+
+  .check-box {
+    fill: var(--check);
+    stroke: var(--check-border);
+    stroke-width: 1.3;
+    rx: 7;
+  }
+
+  .archive-box {
+    fill: var(--archive);
+    stroke: var(--archive-border);
+    stroke-width: 1.3;
+    rx: 7;
+  }
+
+  .sim-box {
+    fill: var(--sim);
+    stroke: var(--line);
+    stroke-width: 1.3;
+    rx: 7;
+  }
+
+  .stage-box {
+    fill: #ffffff;
+    stroke: var(--soft-line);
+    stroke-width: 1.1;
+    rx: 8;
+  }
+
+  .arrow {
+    stroke: var(--line);
+    stroke-width: 1.7;
+    fill: none;
+    marker-end: url(#arrowHead);
+  }
+
+  .soft-arrow {
+    stroke: var(--soft-line);
+    stroke-width: 1.4;
+    fill: none;
+    marker-end: url(#softArrowHead);
+  }
+
+  .dashed {
+    stroke-dasharray: 6 5;
+  }
+
+  .flow-label {
+    font-size: 11px;
+    fill: var(--muted);
+    paint-order: stroke;
+    stroke: #ffffff;
+    stroke-width: 4px;
+    stroke-linejoin: round;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+<svg id="proposed-method-pipeline" viewBox="0 0 1200 760" role="img" aria-labelledby="pipeline-title pipeline-desc">
+  <title id="pipeline-title">ConsensusCode-Evolve pipeline</title>
+  <desc id="pipeline-desc">Editable SVG figure showing the input state representation, LLM code mutation loop, safety validation, simulator evaluation, archive selection, and final executable inventory policy deployment.</desc>
+
+  <defs>
+    <marker id="arrowHead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M 0 0 L 10 4 L 0 8 z" fill="#52606d"></path>
+    </marker>
+    <marker id="softArrowHead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M 0 0 L 10 4 L 0 8 z" fill="#9aa5b1"></path>
+    </marker>
+  </defs>
+
+  <!-- Figure title -->
+  <text id="main-title" x="600" y="34" text-anchor="middle" class="title">ConsensusCode-Evolve: Offline Policy-Code Search</text>
+  <text id="main-subtitle" x="600" y="58" text-anchor="middle" class="subtitle">Candidate Python policies are generated offline, checked, evaluated in the simulator, and deployed without online LLM calls.</text>
+
+  <!-- Design-time stage boundary -->
+  <rect id="design-time-stage" class="stage-box" x="35" y="92" width="1130" height="465"></rect>
+  <text x="60" y="120" class="section-title">Design-time search loop</text>
+
+  <!-- Inputs -->
+  <rect id="input-state" class="input-box" x="70" y="160" width="190" height="145"></rect>
+  <text x="165" y="190" text-anchor="middle" class="box-title">State interface</text>
+  <text x="92" y="220" class="small">Site inventory I_i(t)</text>
+  <text x="92" y="241" class="small">Pipeline P_i(t)</text>
+  <text x="92" y="262" class="small">Costs, capacity, period</text>
+  <text x="92" y="283" class="small">Agent/site identifiers</text>
+
+  <rect id="forecast-input" class="input-box" x="70" y="335" width="190" height="110"></rect>
+  <text x="165" y="365" text-anchor="middle" class="box-title">Forecast vector</text>
+  <text x="92" y="395" class="small">dhat_i,t = [dhat_i,t^(1),</text>
+  <text x="92" y="416" class="small">..., dhat_i,t^(K)]</text>
+  <text x="92" y="437" class="small">Current experiments: K = 2</text>
+
+  <!-- Prompt and code generation -->
+  <rect id="prompt-api" class="code-box" x="310" y="190" width="200" height="160"></rect>
+  <text x="410" y="220" text-anchor="middle" class="box-title">Prompt and API rules</text>
+  <text x="332" y="250" class="small">Allowed functions</text>
+  <text x="332" y="271" class="small">State keys and metrics</text>
+  <text x="332" y="292" class="small">Top archived policies</text>
+  <text x="332" y="313" class="small">Safety instructions</text>
+  <text x="332" y="334" class="small">Compact feedback</text>
+
+  <rect id="llm-mutation" class="code-box" x="560" y="190" width="200" height="160"></rect>
+  <text x="660" y="220" text-anchor="middle" class="box-title">LLM mutation step</text>
+  <text x="582" y="250" class="small">Generate candidate files</text>
+  <text x="582" y="271" class="small">Use previous metrics</text>
+  <text x="582" y="292" class="small">Propose code edits</text>
+  <text x="582" y="313" class="small">No online control action</text>
+
+  <rect id="candidate-programs" class="code-box" x="810" y="150" width="250" height="210"></rect>
+  <text x="935" y="180" text-anchor="middle" class="box-title">Candidate policy programs</text>
+  <rect x="835" y="204" width="200" height="31" rx="5" fill="#ffffff" stroke="#9aa5b1"></rect>
+  <text x="935" y="225" text-anchor="middle" class="small">replenishment_policy(...)</text>
+  <rect x="835" y="249" width="200" height="31" rx="5" fill="#ffffff" stroke="#9aa5b1"></rect>
+  <text x="935" y="270" text-anchor="middle" class="small">transshipment_proposal(...)</text>
+  <rect x="835" y="294" width="200" height="31" rx="5" fill="#ffffff" stroke="#9aa5b1"></rect>
+  <text x="935" y="315" text-anchor="middle" class="small">consensus_gate(...)</text>
+  <text x="835" y="345" class="tiny">Small deterministic Python subset</text>
+
+  <!-- Validation, evaluation, archive -->
+  <rect id="ast-validation" class="check-box" x="355" y="410" width="180" height="105"></rect>
+  <text x="445" y="440" text-anchor="middle" class="box-title">AST safety check</text>
+  <text x="378" y="470" class="small">Reject unsafe code</text>
+  <text x="378" y="491" class="small">Keep valid functions</text>
+
+  <rect id="sim-evaluation" class="sim-box" x="590" y="410" width="190" height="105"></rect>
+  <text x="685" y="440" text-anchor="middle" class="box-title">Simulator evaluation</text>
+  <text x="612" y="470" class="small">Cost and service metrics</text>
+  <text x="612" y="491" class="small">Transfer and fairness metrics</text>
+
+  <rect id="archive-selection" class="archive-box" x="835" y="410" width="205" height="105"></rect>
+  <text x="937" y="440" text-anchor="middle" class="box-title">Archive and selection</text>
+  <text x="858" y="470" class="small">Rank candidates by fitness</text>
+  <text x="858" y="491" class="small">Store source and metrics</text>
+
+  <!-- Arrows in design loop -->
+  <path id="input-to-prompt" class="arrow" d="M 260 236 L 310 250"></path>
+  <path id="forecast-to-prompt" class="arrow" d="M 260 386 L 310 310"></path>
+  <text x="272" y="225" class="flow-label">state keys</text>
+
+  <path id="prompt-to-llm" class="arrow" d="M 510 270 L 560 270"></path>
+  <text x="524" y="255" class="flow-label">prompt</text>
+
+  <path id="llm-to-candidates" class="arrow" d="M 760 270 L 810 258"></path>
+  <text x="770" y="250" class="flow-label">code</text>
+
+  <path id="candidates-to-check" class="arrow" d="M 890 360 C 780 390, 640 402, 535 443"></path>
+  <text x="712" y="394" class="flow-label">candidate files</text>
+
+  <path id="check-to-eval" class="arrow" d="M 535 462 L 590 462"></path>
+  <path id="eval-to-archive" class="arrow" d="M 780 462 L 835 462"></path>
+
+  <path id="archive-to-prompt" class="soft-arrow dashed" d="M 938 410 C 930 86, 420 92, 410 190"></path>
+  <text x="650" y="103" text-anchor="middle" class="flow-label">top policies, metrics, and selected source code</text>
+
+  <!-- Deployment stage -->
+  <rect id="deployment-stage" class="stage-box" x="35" y="590" width="1130" height="120"></rect>
+  <text x="60" y="618" class="section-title">Deployment-time use</text>
+
+  <rect id="final-policy" class="code-box" x="245" y="632" width="220" height="54"></rect>
+  <text x="355" y="665" text-anchor="middle" class="box-title">Selected executable policy</text>
+
+  <rect id="deployed-simulator" class="sim-box" x="585" y="632" width="250" height="54"></rect>
+  <text x="710" y="665" text-anchor="middle" class="box-title">Multi-site inventory simulator</text>
+
+  <rect id="actions-output" class="archive-box" x="915" y="632" width="200" height="54"></rect>
+  <text x="1015" y="654" text-anchor="middle" class="box-title">Orders and transfers</text>
+  <text x="1015" y="676" text-anchor="middle" class="small">x_i(t), q_ij(t)</text>
+
+  <path id="archive-to-final" class="arrow" d="M 937 515 C 890 596, 552 660, 465 660"></path>
+  <text x="705" y="609" text-anchor="middle" class="flow-label">choose final policy</text>
+
+  <path id="final-to-simulator" class="arrow" d="M 465 660 L 585 660"></path>
+  <path id="simulator-to-actions" class="arrow" d="M 835 660 L 915 660"></path>
+
+  <text id="bottom-note" x="600" y="735" text-anchor="middle" class="tiny">The LLM is used during search only; deployed inventory decisions are made by the selected Python policy functions.</text>
+</svg>
+</div>
+</body>
+</html>
