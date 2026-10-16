@@ -1,4 +1,4 @@
-"""Small, explicit serial GP search with fixed common random numbers and splits."""
+"""PACT-GP serial search with fixed common random numbers and disjoint splits."""
 
 import copy
 import importlib.metadata
@@ -20,8 +20,8 @@ EXPERIMENT_SCHEMA = "peer-experiment-v2"
 @dataclass(frozen=True)
 class Search:
     seed: int = 0
-    population: int = 20
-    generations: int = 5
+    population: int = 200
+    generations: int = 50
     crossover_probability: float = 0.8
     mutation_probability: float = 0.15
     tournament: int = 3

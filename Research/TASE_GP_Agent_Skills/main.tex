@@ -10,7 +10,7 @@
 \usepackage{algorithmic}
 \usepackage{array}
 
-\title{Three-Tree Genetic Programming for Skill-Based Peer Coordination in Multi-Site Inventory Control}
+\title{PACT-GP: Genetic Programming for Skill-Based Agent Coordination in Multi-Site Inventory Control}
 \author{Author~Name}
 
 \begin{document}
@@ -21,8 +21,9 @@ Multi-site inventory control requires local replenishment decisions and
 coordinated lateral transfers under uncertain demand. Treating every transfer
 pair independently can allocate the same donor stock more than once, while
 giving a central policy unrestricted access to all site states obscures the
-information requirements of coordination. This paper develops a reproducible
-method in which each site is a peer inventory agent with local observations,
+information requirements of coordination. This paper introduces \emph{PACT-GP}
+(Peer-Agent Coordination with Three-tree Genetic Programming), a reproducible
+framework in which each site is a peer inventory agent with local observations,
 explicit decision skills, and a reservation ledger. An offline genetic
 programming (GP) search evolves a shared individual with exactly three
 expression trees: replenishment, support request, and support offer. Fixed skill
@@ -30,7 +31,7 @@ wrappers interpret these expressions as bounded quantities. A non-evolved
 protocol exchanges forecast-slack summaries, evaluates candidate quantities,
 confirms mutually preferred partners over a finite number of rounds, and
 reserves quantities without a central matching optimizer. Negotiation precedes
-current demand realization; its output is therefore a conditional commitment,
+current demand realization; its output is therefore a \emph{conditional commitment},
 not an executed transfer. After demand and due arrivals, a physical executor
 revalidates donor stock and receiver capacity and records actual dispatches
 separately from promises. This manuscript specifies the GP representation,
@@ -66,13 +67,17 @@ infeasible when demand is realized before dispatch.
 These issues motivate an explicit separation of policy representation,
 agent authority, and protocol execution.
 
-We study three-tree GP with fixed peer negotiation. Each site executes the
-same evolved policy on its own observation. Replenishment, request, and offer
+We introduce \emph{PACT-GP}, short for \emph{Peer-Agent Coordination with
+Three-tree Genetic Programming}. The name emphasizes a pact among peers
+rather than a central agent issuing transfer commands. Each site executes the
+same evolved policy on its own \emph{local observation}. Replenishment, request, and offer
 skills use distinct GP trees, whereas routing, partner confirmation,
 reservations, and feasibility checks are fixed mechanisms. Offline team
 evaluation can be centralized without making online decisions centralized:
 agents exchange only specified summaries, and no agent commands another
 site's transfer.
+The \emph{key design principle} is to separate \emph{evolved decision skills}
+from the \emph{fixed coordination protocol}.
 
 The method is intended to support three investigations:
 \begin{enumerate}
@@ -122,8 +127,8 @@ privacy mechanism.
 
 \subsection{Decision and Execution Timing}
 The timing is intentionally retained from the replenish-and-transship
-benchmark: agents choose orders and negotiate before observing current
-realized demand. The environment subsequently applies due arrivals and
+benchmark: agents choose orders and negotiate \emph{before observing current
+realized demand}. The environment subsequently applies due arrivals and
 demand, revalidates transfers, charges costs, and advances the pipeline.
 Consequently, a promised quantity is not automatically deliverable.
 
@@ -183,7 +188,10 @@ regenerate a different demand table.
 \section{Evaluation Protocol}
 \label{sec:evaluation}
 This manuscript supplies an executable methods prototype, not a completed
-comparative study. Training uses common scenario/seed batches across
+comparative study. Formal PACT-GP comparisons use \emph{at least 200 individuals
+and 50 replacement generations}, excluding generation 0; larger budgets must
+be reported explicitly. Small smoke runs are reserved for functional
+verification and do not satisfy this study budget. Training uses common scenario/seed batches across
 competing individuals. Validation selects among candidate policies; final
 test trajectories do not participate in selection. Demand repetitions
 measure a frozen policy's variability and must not be counted as independent

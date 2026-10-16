@@ -1,4 +1,10 @@
-# Three-tree GP + fixed peer negotiation
+# PACT-GP: Three-Tree GP + Fixed Peer Negotiation
+
+**PACT-GP** means **Peer-Agent Coordination with Three-tree Genetic
+Programming**. The name evokes a pact between peer sites: GP evolves their
+local decision skills, while a fixed protocol confirms conditional support
+commitments. The paper title is **PACT-GP: Genetic Programming for Skill-Based
+Agent Coordination in Multi-Site Inventory Control**.
 
 Independent executable research variant, **not** an alias for the original
 `MTGP_niching_replenish_transship` two-tree joint-state policy. The original
@@ -28,11 +34,11 @@ $py = 'C:\Users\xumen\AppData\Local\Programs\Python\Python311\python.exe'
   --config MTGP_Agent_Skills/outputs/site_service_seed0/config.json `
   --seeds 2001,2002 --output-dir MTGP_Agent_Skills/outputs/site_service_replay_seed0
 
-# Explicitly larger search, still serial. Set all three seed batches explicitly.
+# Study-budget search, still serial. Set all three seed batches explicitly.
 & $py -m MTGP_Agent_Skills train --scenario sN2h_1_5b2 --seed 17 `
-  --population 40 --generations 10 --train-seeds 11,12,13 `
+  --population 200 --generations 50 --train-seeds 11,12,13 `
   --validation-seeds 1001,1002,1003 --test-seeds 2001,2002,2003 `
-  --output-dir MTGP_Agent_Skills/outputs/train_seed17
+  --output-dir MTGP_Agent_Skills\outputs\pact_gp_train_seed17
 
 # Generic N and an undirected path; default topology is complete.
 & $py -m MTGP_Agent_Skills smoke --scenario sN5h_1_2_3_4_5b2 `
@@ -68,8 +74,8 @@ saved settings and are recorded in the new output config.
 | `--allow-oracle-forecasts` | all | false |
 | `--no-trace` | all | false (traces enabled) |
 | `--seed S` | train/smoke | 0; search RNG, not an episode seed |
-| `--population P` | train/smoke | 20 / 6 |
-| `--generations G` | train/smoke | 5 / 1; excludes generation 0 |
+| `--population P` | train/smoke | 200 / 6 |
+| `--generations G` | train/smoke | 50 / 1; excludes generation 0 |
 | `--train-seeds a,b,...` | train/smoke | 11,12 |
 | `--validation-seeds a,b,...` | train/smoke | 1001,1002 |
 | `--test-seeds a,b,...` | train/smoke | 2001,2002 |
@@ -274,9 +280,13 @@ The +/-1e6 saturation belongs only to GP arithmetic/terminal inputs. Physical
 stocks, forecasts, slack calculations, skill caps, messages and proxy gains use
 their original finite values; they are not normalized or saturated by that bound.
 
-Default search (`train`): population 20, 5 replacement generations plus generation
+Default search (`train`): population 200, 50 replacement generations plus generation
 0, tournament size 3 with replacement, 1 elite, mutually exclusive crossover .8,
-mutation .15, reproduction .05. `smoke`: population 6, 1 generation.
+mutation .15, reproduction .05. Formal study runs should use **at least 200
+individuals and 50 replacement generations**; larger budgets can be configured.
+Smaller explicit budgets remain available for debugging and tests.
+`smoke` deliberately retains population 6 and 1 generation for functional
+verification only; its output is not a formal study result.
 Random trees use DEAP half-and-half depths 0–2. Mutation replaces one subtree
 with grow depth 0–2. Crossover exchanges subtrees of **one homologous module**,
 never order↔request↔offer. A one-node tree cannot cross under DEAP's operator.
@@ -415,7 +425,7 @@ stream provenance, LT/horizon/denominator, historical oracle opt-in, three-tree
 operators/bloat, canonical loading/rejection, seed repeatability, disjoint splits,
 constraint-first ranking and training→reload→CLI evaluation equality.
 
-The strengthened 26-test suite additionally verifies all 64 steps of the
+The 27-test suite additionally verifies all 64 steps of the
 unmodified `sN2h_1_5b2` scenario for **each** default training, validation and
 held-out seed. It compares demands/forecasts against the shared generator after
 its original reset and compares varying-order arrivals, complete pipelines,
@@ -431,10 +441,13 @@ zero-demand sites and an all-zero-demand episode, and two episodes where the
 maximum **sum** of site shortfalls differs from their mean, the worst single
 site, and the sum of per-site maxima across episodes. Config compatibility tests
 prevent accidental reuse of old network-service experiment evidence.
+The study-budget regression verifies matching Python-API and CLI defaults of
+200 individuals / 50 generations, while retaining the 6/1 smoke configuration.
+Checking these defaults does not imply that a full study run has completed.
 
 ### Fresh site-service validation results
 
-Verified after the site-level correction: **26 tests passed**, `compileall`
+The earlier site-level validation recorded **26 tests passed**, `compileall`
 passed, and a new 64-period smoke plus canonical-policy reload completed.
 Artifacts are in:
 

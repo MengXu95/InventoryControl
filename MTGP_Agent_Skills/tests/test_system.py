@@ -572,6 +572,16 @@ class PolicyAndSearchTests(unittest.TestCase):
         self.assertEqual(args.population, 6)
         self.assertEqual(args.generations, 1)
 
+    def test_study_budget_defaults(self):
+        defaults = Search()
+        args = parser().parse_args(["train"])
+        self.assertEqual((defaults.population, defaults.generations), (200, 50))
+        self.assertEqual((args.population, args.generations),
+                         (defaults.population, defaults.generations))
+        self.assertGreaterEqual(args.population, 200)
+        self.assertGreaterEqual(args.generations, 50)
+        self.assertIn("PACT-GP", parser().format_help())
+
     def test_cli_rejects_old_or_incompatible_service_config(self):
         with tempfile.TemporaryDirectory() as temp:
             policy_path = Path(temp) / "policy.json"

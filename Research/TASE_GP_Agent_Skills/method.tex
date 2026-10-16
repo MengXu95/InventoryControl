@@ -1,7 +1,55 @@
-\section{Three-Tree GP with Fixed Peer Negotiation}
+\section{PACT-GP: Three-Tree GP with Fixed Peer Negotiation}
 \label{sec:method}
 
+\subsection{Overall Framework}
+\label{subsec:overview}
+PACT-GP combines an \emph{offline evolutionary design loop} with an
+\emph{online peer-coordination loop}, as shown in
+Fig.~\ref{fig:architecture}. Its key components are a shared three-tree
+policy, site agents with bounded skills, a fixed negotiation protocol, and
+a physical executor. The loops interact during training because evaluating
+one GP individual requires simulating the complete online behavior of all
+agents; after selection, deployment uses frozen expressions without evolution.
+
+The overall information flow has four stages:
+\begin{enumerate}
+    \item \emph{Evolve the shared policy.} GP creates and varies the
+    replenishment, request, and offer trees. Complete episodes provide
+    site-service and system-cost feedback for selection.
+    \item \emph{Execute local skills.} Every site instantiates an agent using
+    the same individual but different local observations and execution
+    memory. Fixed skill wrappers turn its tree outputs into bounded orders,
+    requests, and offers.
+    \item \emph{Form peer commitments.} Agents exchange neighbor summaries,
+    rank feasible proposals, confirm mutual partner choices, and reserve
+    quantities over a bounded number of rounds. This protocol is not evolved.
+    \item \emph{Dispatch and close the loop.} After arrivals and current
+    demand, the executor rechecks physical feasibility, records actual
+    dispatches and costs, and updates local memory for the next period.
+    Training aggregates these outcomes to evaluate the individual.
+\end{enumerate}
+The \emph{key boundary} is that GP learns decision expressions, not resource
+conservation or the meaning of agreement. A reservation is a
+\emph{conditional promise}, whereas a dispatch is an \emph{actual movement}.
+Centralized offline fitness evaluation therefore does not grant any online
+agent unrestricted access to the network state.
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.96\textwidth]{figures/gp_agent_skills/architecture.pdf}
+    \caption{Overall PACT-GP framework: offline evolution of a shared
+    three-tree individual and online coordination by local site agents.
+    Fixed protocol and physical execution mechanisms remain outside the
+    evolved representation.}
+    \label{fig:architecture}
+\end{figure*}
+
+The following subsections define the agent/skill/policy relationship and
+local interface, then detail expression representation, fixed evaluation,
+peer matching, physical execution, and finally the GP search procedure.
+
 \subsection{GP, Agent, and Skill Are Different Objects}
+\label{subsec:agent-skill}
 An \emph{agent} is the persistent site-level decision entity: it owns local
 observations, inventory responsibilities, neighbor interfaces, reservations,
 and execution memory. A \emph{skill} is a bounded callable module within that
@@ -16,16 +64,7 @@ The population individual is the ordered tuple
 \end{equation}
 containing exactly three trees. The same $\Theta$ is deployed at every site,
 but each invocation receives a different local observation. This is shared
-parameterization, not shared access to site states.
-
-\begin{figure*}[t]
-    \centering
-    \includegraphics[width=0.96\textwidth]{figures/gp_agent_skills/architecture.pdf}
-    \caption{Relationship between offline GP, the shared three-tree individual,
-    site agents, and their decision skills. Fixed protocol and physical
-    execution mechanisms are outside the evolved representation.}
-    \label{fig:architecture}
-\end{figure*}
+parameterization, \emph{not shared access to site states}.
 
 Table~\ref{tab:boundaries} separates evolved and fixed responsibilities.
 \begin{table}[t]
@@ -94,7 +133,7 @@ outputs to bounded quantities:
     s_i &= \operatorname{clip}(T^{off}(f_i),0,U_i^{off}).
     \label{eq:skill-outputs}
 \end{align}
-The bounds are derived from the configured benchmark and current role;
+The bounds are \emph{fixed}, derived from the configured benchmark and current role;
 they are not additional learned trees. Orders are capped by storage
 capacity per order, not by currently empty storage space. A supply bound at
 negotiation time is not a guarantee of available stock after demand.
@@ -177,7 +216,7 @@ For a candidate quantity $q$ from donor $i$ to receiver $j$,
               -K^{tr}\mathbb I[q>0].
  \label{eq:gain}
 \end{align}
-The gain is a deterministic forecast-slack heuristic. It is not an unbiased
+The gain is a deterministic forecast-slack \emph{heuristic}. It is not an unbiased
 estimate of future cost, a donor-shortage probability, or an incentive
 compatibility condition. Its fixed definition deliberately isolates the
 contribution of evolving the three quantity trees.
@@ -315,6 +354,7 @@ does not incur a fictitious physical transfer cost.
 \end{figure*}
 
 \subsection{Offline GP Search and Fitness}
+\label{subsec:gp-search}
 Initialization creates valid three-tree individuals, including interpretable
 seed rules. The supplied seed consists of
 \texttt{maximum(0.0, sub(F, add(I, PIPE)))},
@@ -347,20 +387,20 @@ With a common configured site service target $\tau$, exact batch fitness is
 \end{align}
 There is no division of cost by site count. Smaller lexicographic values
 are preferred; exact ties use canonical tree-string tuples. The service
-constraint is site-wise, so a neglected site cannot be hidden by a high
+constraint is \emph{site-wise}, so a neglected site cannot be hidden by a high
 network-aggregated fill rate. This remains empirical constraint handling,
 not a statistical safety certificate.
 
 \begin{table}[t]
 \centering
-\caption{Implemented search defaults}
+\caption{PACT-GP study-training defaults}
 \label{tab:search-defaults}
 \footnotesize
 \begin{tabular}{p{0.58\linewidth}p{0.32\linewidth}}
 \toprule
 Setting & Default \\
 \midrule
-Population / replacement generations & 20 / 5 \\
+Population / replacement generations & 200 / 50 \\
 Tournament size / elites & 3 / 1 \\
 Crossover / mutation / reproduction & 0.80 / 0.15 / 0.05 \\
 Initial half-and-half depth & 0--2 \\
@@ -376,11 +416,14 @@ Held-out seeds & 2001, 2002 \\
 Variation selects one homologous module. Structurally excessive children
 revert to their corresponding parent. Search is serial; the smoke command
 uses population six and one replacement generation without shortening the
-default 64-period scenario. These are prototype defaults, not tuned
-experimental budgets.
+default 64-period scenario. This small \emph{smoke budget} is used only for
+implementation checks. Formal comparisons use \emph{at least 200 individuals
+and 50 replacement generations}; the default study budget is 200/50, and
+larger budgets must be reported. These settings have not yet established
+comparative performance.
 
 \begin{algorithm}[t]
-\caption{Three-tree GP policy search}
+\caption{PACT-GP policy search}
 \label{alg:gp}
 \begin{algorithmic}[1]
 \STATE Initialize population of $(T^{ord},T^{req},T^{off})$.

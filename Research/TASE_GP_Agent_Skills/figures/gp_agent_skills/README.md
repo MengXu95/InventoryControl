@@ -1,7 +1,8 @@
 # Editable GP / Agent / Skill figures
 
-Paper: **Three-Tree Genetic Programming for Skill-Based Peer Coordination in
-Multi-Site Inventory Control**. This title is also embedded in the PPTX and all
+Paper: **PACT-GP: Genetic Programming for Skill-Based Agent Coordination in
+Multi-Site Inventory Control**. PACT-GP means Peer-Agent Coordination with
+Three-tree Genetic Programming. This title is also embedded in the PPTX and all
 six PDF metadata records.
 
 `gp_agent_skills_figures.pptx` is the master deliverable. All rectangles, tree
@@ -14,7 +15,7 @@ embedded figure screenshots, SVG pictures, or external assets.
 | --- | --- | --- |
 | 1 | `architecture.pdf` | Offline GP individual → identical local policy copies → deterministic Agent Skills → peer messages |
 | 2 | `negotiation.pdf` | Three-site, two-round competition; conditional reservations of 8 and 2 |
-| 3 | `gp_search.pdf` | Three-tree GP initialization, seeded evaluation, constrained selection, genetic variation, validation and frozen test |
+| 3 | `gp_search.pdf` | PACT-GP initialization, study budget of at least 200 individuals / 50 generations, seeded evaluation, constrained selection, genetic variation, validation and frozen test |
 | 4 | `gp_individual.pdf` | Three illustrative valid expressions, not initialized seed or trained optimum |
 | 5 | `timing.pdf` | Pre-demand negotiation versus full / partial / cancelled post-demand execution |
 | 6 | `fixed_evaluator.pdf` | Forecast-slack gain proxy, candidate quantity grid and illustrative local message schema |

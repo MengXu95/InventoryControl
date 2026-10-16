@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parent
 DECK = ROOT / "gp_agent_skills_figures.pptx"
 WIDTH, HEIGHT = 16.0, 9.0
 PAPER_WIDTH = 7.125
-PAPER_TITLE = ("Three-Tree Genetic Programming for Skill-Based Peer Coordination "
+PAPER_TITLE = ("PACT-GP: Genetic Programming for Skill-Based Agent Coordination "
                "in Multi-Site Inventory Control")
 FONT = "Arial"
 INK = "203047"
@@ -106,7 +106,7 @@ class Figure:
 
 
 def architecture():
-    f = Figure("architecture", "One shared GP policy, many local peer agents",
+    f = Figure("architecture", "PACT-GP: one shared policy, many local peer agents",
                "Offline evolution changes expression trees. Online Skills apply the frozen "
                "trees to different private local inputs.",
                ["OFFLINE", "ONLINE", "Same frozen individual",
@@ -215,7 +215,7 @@ def negotiation():
 
 
 def gp_search():
-    f = Figure("gp_search", "Offline GP search and leakage-free policy selection",
+    f = Figure("gp_search", "PACT-GP: offline search and leakage-free policy selection",
                "The genotype is a three-tree individual. The entire fixed online protocol "
                "is executed inside every seeded training episode.",
                ["Initialize population", "Common seeded episodes", "Site service constraints",
@@ -261,7 +261,7 @@ def gp_search():
           17, AGENT_BG, AGENT, bold=True)
     f.line(9.85, 6.80, 11.05, 6.80, AGENT)
     f.text(6.16, 1.99, 4.18, .88,
-           "Central simulation: offline only.\nDisjoint train / validation / test.\nNo LLM in either phase.",
+           "Study budget: P >= 200; G >= 50.\nDisjoint train / validation / test.\nNo LLM in either phase.",
            16, MUTED)
     f.box(.60, 7.76, 14.80, .49,
           "Only the three GP trees evolve; roles, bounds, gain evaluation, matching, "
@@ -527,9 +527,9 @@ def write_deck(items):
     deck = Presentation()
     deck.slide_width, deck.slide_height = Inches(WIDTH), Inches(HEIGHT)
     deck.core_properties.title = PAPER_TITLE
-    deck.core_properties.subject = "Decentralized peer negotiation with a shared three-tree GP policy"
+    deck.core_properties.subject = "PACT-GP: peer-agent coordination with a shared three-tree policy"
     deck.core_properties.author = "InventoryControl research"
-    deck.core_properties.keywords = "GP, site agent, deterministic skill, peer negotiation"
+    deck.core_properties.keywords = "PACT-GP, genetic programming, agent, skill, peer negotiation"
     for figure in items:
         slide = deck.slides.add_slide(deck.slide_layouts[6])
         slide.name = figure.name

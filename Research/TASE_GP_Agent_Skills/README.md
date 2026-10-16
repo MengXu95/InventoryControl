@@ -1,4 +1,10 @@
-# Three-Tree GP / Agent / Skill Methods Draft
+# PACT-GP Methods Draft
+
+**Title:** PACT-GP: Genetic Programming for Skill-Based Agent Coordination in
+Multi-Site Inventory Control.
+
+**PACT-GP** expands to **Peer-Agent Coordination with Three-tree Genetic
+Programming**; the name emphasizes conditional agreements between peer sites.
 
 This is an independent research branch of the earlier ConsensusCode-Evolve
 draft. The active manuscript studies **three-tree GP with fixed peer
@@ -8,7 +14,7 @@ negotiation**, not LLM policy generation.
 
 - `main.tex`: active article, problem definition, timing, evaluation protocol,
   and explicit limitations.
-- `method.tex`: GP / Agent / Skill relationship, three-tree representation,
+- `method.tex`: overall framework first, GP / Agent / Skill relationship, three-tree representation,
   local information boundary, fixed gain, mutual matching, reservations,
   conditional dispatch, and offline GP search.
 - `references.bib`: bibliography copied from the earlier manuscript.
@@ -62,8 +68,9 @@ python -m MTGP_Agent_Skills evaluate --policy MTGP_Agent_Skills\outputs\my_smoke
 
 Output directories must be new or empty. `smoke` still uses the complete
 64-period scenario, but only six individuals and one replacement
-generation. Full `train` defaults to 20 individuals and five replacement
-generations. There are exactly three expressions; the evaluator and
+generation. Full `train` defaults to **200 individuals and 50 replacement
+generations**, excluding generation 0. Formal study runs use at least this
+budget; smoke results are not formal experiments. There are exactly three expressions; the evaluator and
 matching protocol are not additional evolved trees.
 
 ## Build the manuscript
@@ -89,8 +96,10 @@ The build uses the installed IEEEtran class and standard algorithm packages.
 
 ## Interpretation of results
 
-Unit tests and a small GP smoke run establish implementation behavior, not a
-publishable comparison. Full independent search repetitions, matched-budget
+The revised 200/50 configuration specifies a study budget, not a claim that
+those experiments have already been completed. Unit tests and a small GP
+smoke run establish implementation behavior, not a publishable comparison.
+Full independent search repetitions, matched-budget
 baselines, and industrial calibration remain future experiments. Future
 actual demand copied into historical forecast slots must be identified as
 oracle information, never silently reported as a causal forecast.

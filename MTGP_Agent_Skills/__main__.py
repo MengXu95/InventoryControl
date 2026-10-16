@@ -33,7 +33,9 @@ def topology(value):
 
 
 def parser():
-    result = argparse.ArgumentParser(description="Three-tree GP + fixed peer negotiation")
+    defaults = Search()
+    result = argparse.ArgumentParser(
+        description="PACT-GP: three-tree genetic programming for peer-agent coordination")
     sub = result.add_subparsers(dest="command", required=True)
     for name in ("train", "smoke", "evaluate"):
         command = sub.add_parser(name)
@@ -54,8 +56,10 @@ def parser():
             command.add_argument("--seeds", type=seed_list, default=(2001, 2002))
         else:
             command.add_argument("--seed", type=int, default=0, help="DEAP search seed")
-            command.add_argument("--population", type=int, default=6 if name == "smoke" else 20)
-            command.add_argument("--generations", type=int, default=1 if name == "smoke" else 5)
+            command.add_argument("--population", type=int,
+                                 default=6 if name == "smoke" else defaults.population)
+            command.add_argument("--generations", type=int,
+                                 default=1 if name == "smoke" else defaults.generations)
             command.add_argument("--train-seeds", type=seed_list, default=(11, 12))
             command.add_argument("--validation-seeds", type=seed_list, default=(1001, 1002))
             command.add_argument("--test-seeds", type=seed_list, default=(2001, 2002))
